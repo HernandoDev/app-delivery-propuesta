@@ -1,0 +1,960 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Modelo de datos — SuperApp Logística Local</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+  :root {
+    --bg-primary: #0a0f1c;
+    --bg-card: #111827;
+    --bg-card-hover: #141c2f;
+    --bg-field: #0d1321;
+    --border-subtle: #1e293b;
+    --border-medium: #334155;
+    --text-primary: #f1f5f9;
+    --text-secondary: #94a3b8;
+    --text-muted: #64748b;
+    --accent-indigo: #6366f1;
+    --accent-indigo-dim: rgba(99,102,241,.15);
+    --accent-emerald: #10b981;
+    --accent-emerald-dim: rgba(16,185,129,.15);
+    --accent-amber: #f59e0b;
+    --accent-amber-dim: rgba(245,158,11,.15);
+    --accent-rose: #f43f5e;
+    --accent-rose-dim: rgba(244,63,94,.15);
+    --accent-sky: #0ea5e9;
+    --accent-sky-dim: rgba(14,165,233,.15);
+    --accent-violet: #8b5cf6;
+    --accent-violet-dim: rgba(139,92,246,.15);
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    margin: 0;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* ── Tab navigation ── */
+  .tab-btn.active {
+    background: var(--accent-indigo);
+    color: #fff;
+    box-shadow: 0 4px 12px rgba(79,70,229,.4);
+  }
+  .tab-btn:not(a):hover { background: #334155; color: #fff; }
+
+  .tab-content { display: none; animation: fade .3s ease; }
+  .tab-content.active { display: block; }
+  @keyframes fade { from{opacity:0;transform:translateY(4px);} to{opacity:1;transform:translateY(0);} }
+
+  /* ── Section header ── */
+  .section-header {
+    position: relative;
+    margin-bottom: 2rem;
+  }
+  .section-header::after {
+    content: '';
+    position: absolute;
+    bottom: -12px;
+    left: 0;
+    width: 60px;
+    height: 3px;
+    border-radius: 2px;
+    background: linear-gradient(90deg, var(--accent-indigo), var(--accent-violet));
+  }
+
+  /* ── Cards ── */
+  .card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-subtle);
+    border-radius: 14px;
+    transition: all .25s cubic-bezier(.4,0,.2,1);
+    position: relative;
+    overflow: hidden;
+  }
+  .card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--accent-indigo), transparent);
+    opacity: 0;
+    transition: opacity .25s;
+  }
+  .card:hover {
+    background: var(--bg-card-hover);
+    border-color: var(--border-medium);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 30px rgba(0,0,0,.3), 0 0 0 1px rgba(99,102,241,.1);
+  }
+  .card:hover::before { opacity: 1; }
+
+  /* ── Chip badges ── */
+  .chip {
+    background: #1e293b;
+    color: #cbd5e1;
+    border: 1px solid #334155;
+    padding: 2px 9px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 500;
+  }
+
+  /* ── Status badges ── */
+  .badge-done { background: #064e3b; color:#6ee7b7; border:1px solid #047857; padding:2px 8px; border-radius:6px; font-size:10px; font-weight:600;}
+  .badge-wip { background: #4c1d95; color:#c4b5fd; border:1px solid #6d28d9; padding:2px 8px; border-radius:6px; font-size:10px; font-weight:600;}
+  .badge-todo { background: #1f2937; color:#94a3b8; border:1px solid #374151; padding:2px 8px; border-radius:6px; font-size:10px; font-weight:600;}
+  .badge-warn { background: #78350f; color:#fcd34d; border:1px solid #a16207; padding:2px 8px; border-radius:6px; font-size:10px; font-weight:600;}
+
+  /* ── Field rows ── */
+  .field-row {
+    display: grid;
+    grid-template-columns: 1fr 140px 90px 36px;
+    gap: 8px;
+    align-items: center;
+    padding: 6px 10px;
+    border-radius: 6px;
+    transition: background .15s;
+    font-size: 12.5px;
+  }
+  .field-row:hover { background: rgba(255,255,255,.03); }
+  .field-row:last-child { border-bottom: none; }
+
+  .field-name {
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 500;
+    color: #e2e8f0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .field-name.pk { color: #fbbf24; }
+  .field-name.fk { color: #60a5fa; }
+
+  .field-type {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--text-muted);
+    text-align: right;
+  }
+
+  .field-desc {
+    font-size: 11px;
+    color: var(--text-muted);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .field-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 700;
+  }
+  .icon-pk { background: var(--accent-amber-dim); color: var(--accent-amber); }
+  .icon-fk { background: var(--accent-sky-dim); color: var(--accent-sky); }
+  .icon-col { background: var(--bg-field); color: var(--text-muted); }
+
+  /* ── Table wrapper ── */
+  .table-body {
+    max-height: 320px;
+    overflow-y: auto;
+    margin: 0 -10px;
+    padding: 0 10px;
+  }
+  .table-body::-webkit-scrollbar { width: 4px; }
+  .table-body::-webkit-scrollbar-track { background: transparent; }
+  .table-body::-webkit-scrollbar-thumb { background: var(--border-medium); border-radius: 2px; }
+
+  .field-header {
+    display: grid;
+    grid-template-columns: 1fr 140px 90px 36px;
+    gap: 8px;
+    padding: 8px 10px 6px;
+    border-bottom: 1px solid var(--border-subtle);
+    margin-bottom: 4px;
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text-muted);
+  }
+
+  /* ── Table meta bar ── */
+  .table-meta {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .field-count {
+    font-size: 10px;
+    color: var(--text-muted);
+    background: var(--bg-field);
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-weight: 500;
+  }
+
+  /* ── Relationship connector badges ── */
+  .rel-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 10px;
+    padding: 2px 7px;
+    border-radius: 4px;
+    font-weight: 500;
+  }
+  .rel-fk { background: var(--accent-sky-dim); color: #7dd3fc; }
+  .rel-pk { background: var(--accent-amber-dim); color: #fde68a; }
+
+  /* ── Stats bar ── */
+  .stats-bar {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 12px 16px;
+    background: linear-gradient(135deg, rgba(99,102,241,.08), rgba(139,92,246,.06));
+    border: 1px solid rgba(99,102,241,.15);
+    border-radius: 10px;
+    margin-bottom: 1.5rem;
+  }
+  .stat-item {
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+  }
+  .stat-value {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--text-primary);
+  }
+  .stat-label {
+    font-size: 11px;
+    color: var(--text-muted);
+    font-weight: 500;
+  }
+  .stat-divider {
+    width: 1px;
+    height: 24px;
+    background: var(--border-subtle);
+  }
+
+  /* ── Legend ── */
+  .legend {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+    margin-top: 1.5rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border-subtle);
+  }
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    color: var(--text-secondary);
+  }
+  .legend-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  /* ── Scrollbar global ── */
+  .scrollbar-thin::-webkit-scrollbar { width: 6px; height: 6px; }
+  .scrollbar-thin::-webkit-scrollbar-thumb { background: #334155; border-radius: 3px; }
+
+  /* ── Misc ── */
+  code {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.85em;
+    background: #1e293b;
+    padding: 2px 6px;
+    border-radius: 4px;
+    color: #c4b5fd;
+  }
+
+  details > summary { cursor: pointer; list-style: none; }
+  details > summary::-webkit-details-marker { display: none; }
+  details[open] .summary-icon { transform: rotate(90deg); }
+  .summary-icon { display: inline-block; transition: transform .2s; }
+
+  /* ── Responsive ── */
+  @media (max-width: 768px) {
+    .field-row, .field-header {
+      grid-template-columns: 1fr 100px 36px;
+    }
+    .field-desc { display: none; }
+    .stats-bar { flex-wrap: wrap; gap: 12px; }
+  }
+</style>
+</head>
+<body class="min-h-screen">
+
+<header class="border-b border-slate-800 bg-gradient-to-br from-slate-900 via-slate-950 to-indigo-950/30">
+  <div class="max-w-7xl mx-auto px-6 py-12">
+    <div class="flex items-center gap-2 mb-3 flex-wrap">
+      <span class="chip">Propuesta Técnica</span>
+      <span class="chip">v1.2</span>
+      <span class="chip">Septiembre 2026</span>
+      <span class="badge-wip">MVP 1 · 85% completado</span>
+    </div>
+    <h1 class="text-4xl md:text-5xl font-bold text-white tracking-tight">
+      SuperApp Logística Local
+    </h1>
+    <p class="text-slate-400 mt-3 max-w-3xl">
+      Propuesta integral de ingeniería. Documento para el equipo de desarrollo y stakeholders técnicos.
+    </p>
+
+    <div class="mt-8 grid grid-cols-2 md:grid-cols-5 gap-3">
+      <div class="bg-slate-900/60 border border-slate-800 rounded-lg p-3">
+        <div class="text-xs text-slate-500">Móvil</div>
+        <div class="text-white font-semibold text-sm">React Native</div>
+      </div>
+      <div class="bg-slate-900/60 border border-slate-800 rounded-lg p-3">
+        <div class="text-xs text-slate-500">Backend</div>
+        <div class="text-white font-semibold text-sm">FastAPI · Python</div>
+      </div>
+      <div class="bg-slate-900/60 border border-slate-800 rounded-lg p-3">
+        <div class="text-xs text-slate-500">Datos</div>
+        <div class="text-white font-semibold text-sm">PostgreSQL + PostGIS</div>
+      </div>
+      <div class="bg-slate-900/60 border border-slate-800 rounded-lg p-3">
+        <div class="text-xs text-slate-500">Realtime</div>
+        <div class="text-white font-semibold text-sm">Socket.io</div>
+      </div>
+      <div class="bg-slate-900/60 border border-slate-800 rounded-lg p-3">
+        <div class="text-xs text-slate-500">Deploy</div>
+        <div class="text-white font-semibold text-sm">Docker · Git local</div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<nav class="sticky top-0 z-40 bg-slate-950/95 backdrop-blur border-b border-slate-800">
+  <div class="max-w-7xl mx-auto px-4 py-2 flex gap-1 overflow-x-auto scrollbar-thin">
+    <button class="tab-btn active whitespace-nowrap px-3 py-1.5 rounded-md text-xs font-medium bg-slate-800 text-slate-300" data-tab="resumen">Resumen</button>
+    <button class="tab-btn whitespace-nowrap px-3 py-1.5 rounded-md text-xs font-medium bg-slate-800 text-slate-300" data-tab="estado">Estado actual</button>
+    <button class="tab-btn whitespace-nowrap px-3 py-1.5 rounded-md text-xs font-medium bg-slate-800 text-slate-300" data-tab="arquitectura">Arquitectura</button>
+    <button class="tab-btn whitespace-nowrap px-3 py-1.5 rounded-md text-xs font-medium bg-slate-800 text-slate-300" data-tab="stack">Stack</button>
+    <button class="tab-btn whitespace-nowrap px-3 py-1.5 rounded-md text-xs font-medium bg-slate-800 text-slate-300" data-tab="modulos">Módulos</button>
+    <button class="tab-btn whitespace-nowrap px-3 py-1.5 rounded-md text-xs font-medium bg-slate-800 text-slate-300" data-tab="flujos">Flujos de usuario</button>
+    <button class="tab-btn active whitespace-nowrap px-3 py-1.5 rounded-md text-xs font-medium bg-slate-800 text-slate-300" data-tab="datos">Modelo de datos</button>
+    <button class="tab-btn whitespace-nowrap px-3 py-1.5 rounded-md text-xs font-medium bg-slate-800 text-slate-300" data-tab="api">API</button>
+    <button class="tab-btn whitespace-nowrap px-3 py-1.5 rounded-md text-xs font-medium bg-slate-800 text-slate-300" data-tab="seguridad">Seguridad</button>
+    <button class="tab-btn whitespace-nowrap px-3 py-1.5 rounded-md text-xs font-medium bg-slate-800 text-slate-300" data-tab="roadmap">Roadmap</button>
+    <button class="tab-btn whitespace-nowrap px-3 py-1.5 rounded-md text-xs font-medium bg-slate-800 text-slate-300" data-tab="entregables">Entregables</button>
+    <button class="tab-btn whitespace-nowrap px-3 py-1.5 rounded-md text-xs font-medium bg-slate-800 text-slate-300" data-tab="decisiones">Decisiones técnicas</button>
+  </div>
+</nav>
+
+<main class="max-w-7xl mx-auto px-6 py-8">
+<section class="tab-content active" id="datos">
+
+    <div class="section-header">
+      <h2 class="text-2xl font-bold text-white tracking-tight">Modelo de datos</h2>
+      <p class="text-sm text-slate-400 mt-1">Entidades núcleo y sus relaciones · Todas las claves foráneas son UUID</p>
+    </div>
+
+    <!-- Stats bar -->
+    <div class="stats-bar">
+      <div class="stat-item">
+        <span class="stat-value">18</span>
+        <span class="stat-label">tablas</span>
+      </div>
+      <div class="stat-divider"></div>
+      <div class="stat-item">
+        <span class="stat-value">6</span>
+        <span class="stat-label">módulos</span>
+      </div>
+      <div class="stat-divider"></div>
+      <div class="stat-item">
+        <span class="stat-value">90+</span>
+        <span class="stat-label">columnas</span>
+      </div>
+      <div class="stat-divider"></div>
+      <div class="stat-item">
+        <span class="stat-value">PostGIS</span>
+        <span class="stat-label">geoespacial</span>
+      </div>
+    </div>
+
+    <div class="grid md:grid-cols-2 gap-4">
+
+      <!-- users -->
+      <div class="card">
+        <div class="p-4 pb-0">
+          <div class="flex items-center justify-between mb-1">
+            <h3 class="font-bold text-white text-sm tracking-wide">users</h3>
+            <span class="chip" style="background:var(--accent-indigo-dim);color:#a5b4fc;border-color:rgba(99,102,241,.25);">Auth</span>
+          </div>
+          <div class="field-header">
+            <span>campo</span><span>tipo</span><span>nota</span><span></span>
+          </div>
+        </div>
+        <div class="table-body px-4 pb-4">
+          <div class="field-row"><span class="field-name pk">id</span><span class="field-type">UUID</span><span class="field-desc">PK</span><span class="field-icon icon-pk">PK</span></div>
+          <div class="field-row"><span class="field-name">tipo_usuario</span><span class="field-type">ENUM</span><span class="field-desc">client, merchant, courier, admin</span><span class="field-icon icon-col">·</span></div>
+          <div class="field-row"><span class="field-name">nombre</span><span class="field-type">VARCHAR(255)</span><span class="field-desc">-</span><span class="field-icon icon-col">·</span></div>
+          <div class="field-row"><span class="field-name">email</span><span class="field-type">VARCHAR(255)</span><span class="field-desc">UNIQUE</span><span class="field-icon icon-col">·</span></div>
+          <div class="field-row"><span class="field-name">telefono</span><span class="field-type">VARCHAR(20)</span><span class="field-desc">UNIQUE</span><span class="field-icon icon-col">·</span></div>
+          <div class="field-row"><span class="field-name">password_hash</span><span class="field-type">VARCHAR(255)</span><span class="field-desc">-</span><span class="field-icon icon-col">·</span></div>
+          <div class="field-row"><span class="field-name">estado</span><span class="field-type">ENUM</span><span class="field-desc">active, suspended, banned</span><span class="field-icon icon-col">·</span></div>
+          <div class="field-row"><span class="field-name">created_at</span><span class="field-type">TIMESTAMP</span><span class="field-desc">-</span><span class="field-icon icon-col">·</span></div>
+          <div class="field-row"><span class="field-name">updated_at</span><span class="field-type">TIMESTAMP</span><span class="field-desc">-</span><span class="field-icon icon-col">·</span></div>
+        </div>
+        <div class="px-4 pb-3 pt-1 flex items-center gap-2">
+          <span class="field-count">9 campos</span>
+        </div>
+      </div>
+
+      <!-- merchants -->
+      <div class="card">
+        <div class="p-4 pb-0">
+          <div class="flex items-center justify-between mb-1">
+            <h3 class="font-bold text-white text-sm tracking-wide">merchants</h3>
+            <span class="chip" style="background:var(--accent-emerald-dim);color:#6ee7b7;border-color:rgba(16,185,129,.25);">Core</span>
+          </div>
+          <div class="field-header">
+            <span>campo</span><span>tipo</span><span>nota</span><span></span>
+          </div>
+        </div>
+        <div class="table-body px-4 pb-4">
+          <div class="field-row"><span class="field-name pk">id</span><span class="field-type">UUID</span><span class="field-desc">PK</span><span class="field-icon icon-pk">PK</span></div>
+          <div class="field-row"><span class="field-name fk">user_id</span><span class="field-type">UUID</span><span class="field-desc">FK(users) UNIQUE</span><span class="field-icon icon-fk">FK</span></div>
+          <div class="field-row"><span class="field-name">nombre_comercial</span><span class="field-type">VARCHAR(255)</span><span class="field-desc">-</span><span class="field-icon icon-col">·</span></div>
+          <div class="field-row"><span class="field-name">tipo_comercio</span><span class="field-type">ENUM</span><span class="field-desc">-</span><span class="field-icon icon-col">·</span></div>
+          <div class="field-row"><span class="field-name">modalidad_venta</span><span class="field-type">ENUM</span><span class="field-desc">-</span><span class="field-icon icon-col">·</span></div>
+          <div class="field-row"><span class="field-name">descripcion</span><span class="field-type">TEXT</span><span class="field-desc">-</span><span class="field-icon icon-col">·</span></div>
+          <div class="field-row"><span class="field-name">lat</span><span class="field-type">DECIMAL(10,8)</span><span class="field-desc">-</span><span class="field-icon icon-col">·</span></div>
+          <div class="field-row"><span class="field-name">lng</span><span class="field-type">DECIMAL(11,8)</span><span class="field-desc">-</span><span class="field-icon icon-col">·</span></div>
+          <div class="field-row"><span class="field-name">direccion</span><span class="field-type">TEXT</span><span class="field-desc">-</span><span class="field-icon icon-col">·</span></div>
+          <div class="field-row"><span class="field-name fk">zona_cobertura_id</span><span class="field-type">UUID</span><span class="field-desc">FK(coverage_zones)</span><span class="field-icon icon-fk">FK</span></div>
+          <div class="field-row"><span class="field-name">horario_json</span><span class="field-type">JSONB</span><span class="field-desc">-</span><span class="field-icon icon-col">·</span></div>
+          <div class="field-row"><span class="field-name">rating_promedio</span><span class="field-type">DECIMAL(3,2)</span><span class="field-desc">DEFAULT 0</span><span class="field-icon icon-col">·</span></div>
+          <div class="field-row"><span class="field-name">total_calificaciones</span><span class="field-type">INTEGER</span><span class="field-desc">DEFAULT 0</span><span class="field-icon icon-col">·</span></div>
+          <div class="field-row"><span class="field-name">estado</span><span class="field-type">ENUM</span><span class="field-desc">pending, active, suspended</span><span class="field-icon icon-col">·</span></div>
+          <div class="field-row"><span class="field-name">created_at</span><span class="field-type">TIMESTAMP</span><span class="field-desc">-</span><span class="field-icon icon-col">·</span></div>
+        </div>
+        <div class="px-4 pb-3 pt-1 flex items-center gap-2">
+          <span class="field-count">15 campos</span>
+          <span class="rel-badge rel-fk">→ users</span>
+          <span class="rel-badge rel-fk">→ coverage_zones</span>
+        </div>
+      </div>
+
+      <!-- merchant_contracts -->
+      <div class="card">
+        <div class="p-4 pb-0">
+          <div class="flex items-center justify-between mb-1">
+            <h3 class="font-bold text-white text-sm tracking-wide">merchant_contracts</h3>
+            <span class="chip" style="background:var(--accent-amber-dim);color:#fde68a;border-color:rgba(245,158,11,.25);">Comisiones</span>
+          </div>
+          <div class="field-header">
+            <span>campo</span><span>tipo</span><span>nota</span><span></span>
+          </div>
+        </div>
+        <div class="table-body px-4 pb-4">
+          <div class="field-row"><span class="field-name pk">id</span><span class="field-type">UUID</span><span class="field-desc">PK</span><span class="field-icon icon-pk">PK</span></div>
+          <div class="field-row"><span class="field-name fk">merchant_id</span><span class="field-type">UUID</span><span class="field-desc">FK</span><span class="field-icon icon-fk">FK</span></div>
+          <div class="field-row"><span class="field-name fk">schema_id</span><span class="field-type">UUID</span><span class="field-desc">FK(commission_schemas)</span><span class="field-icon icon-fk">FK</span></div>
+          <div class="field-row"><span class="field-name">fecha_inicio_vigencia</span><span class="field-type">TIMESTAMP</span><span class="field-desc">-</span><span class="field-icon icon-col">·</span></div>
+          <div class="field-row"><span class="field-name">fecha_fin_vigencia</span><span class="field-type">TIMESTAMP</span><span class="field-desc">-</span><span class="field-icon icon-col">·</span></div>
+          <div class="field-row"><span class="field-name">estado</span><span class="field-type">ENUM</span><span class="field-desc">promocional, activo, vencido</span><span class="field-icon icon-col">·</span></div>
+          <div class="field-row"><span class="field-name">version_terminos</span><span class="field-type">INTEGER</span><span class="field-desc">-</span><span class="field-icon icon-col">·</span></div>
+          <div class="field-row"><span class="field-name">ip_firma</span><span class="field-type">VARCHAR(45)</span><span class="field-desc">-</span><span class="field-icon icon-col">·</span></div>
+          <div class="field-row"><span class="field-name">user_agent</span><span class="field-type">TEXT</span><span class="field-desc">-</span><span class="field-icon icon-col">·</span></div>
+          <div class="field-row"><span class="field-name">created_at</span><span class="field-type">TIMESTAMP</span><span class="field-desc">-</span><span class="field-icon icon-col">·</span></div>
+        </div>
+        <div class="px-4 pb-3 pt-1 flex items-center gap-2">
+          <span class="field-count">10 campos</span>
+          <span class="rel-badge rel-fk">→ merchants</span>
+          <span class="rel-badge rel-fk">→ commission_schemas</span>
+        </div>
+      </div>
+
+      <!-- commission_schemas -->
+      <div class="card">
+        <div class="p-4 pb-0">
+          <div class="flex items-center justify-between mb-1">
+            <h3 class="font-bold text-white text-sm tracking-wide">commission_schemas</h3>
+            <span class="chip" style="background:var(--accent-amber-dim);color:#fde68a;border-color:rgba(245,158,11,.25);">Comisiones</span>
+          </div>
+          <div class="field-header">
+            <span>campo</span><span>tipo</span><span>nota</span><span></span>
+          </div>
+        </div>
+        <div class="table-body px-4 pb-4">
+          <div class="field-row"><span class="field-name pk">id</span><span class="field-type">UUID</span><span class="field-desc">PK</span><span class="field-icon icon-pk">PK</span></div>
+          <div class="field-row"><span class="field-name">nombre</span><span class="field-type">VARCHAR(100)</span><span class="field-desc">-</span><span class="field-icon icon-col">·</span></div>
+          <div class="field-row"><span class="field-name">tipo</span><span class="field-type">ENUM</span><span class="field-desc">porcentaje, tarifa_fija, suscripcion, ninguno</span><span class="field-icon icon-col">·</span></div>
+          <div class="field-row"><span class="field-name">valor</span><span class="field-type">DECIMAL(10,4)</span><span class="field-desc">DEFAULT 0</span><span class="field-icon icon-col">·</span></div>
+          <div class="field-row"><span class="field-name">descripcion</span><span class="field-type">TEXT</span><span class="field-desc">-</span><span class="field-icon icon-col">·</span></div>
+          <div class="field-row"><span class="field-name">activo</span><span class="field-type">BOOLEAN</span><span class="field-desc">DEFAULT TRUE</span><span class="field-icon icon-col">·</span></div>
+          <div class="field-row"><span class="field-name fk">created_by</span><span class="field-type">UUID</span><span class="field-desc">FK(users)</span><span class="field-icon icon-fk">FK</span></div>
+          <div class="field-row"><span class="field-name">created_at</span><span class="field-type">TIMESTAMP</span><span class="field-desc">-</span><span class="field-icon icon-col">·</span></div>
+        </div>
+        <div class="px-4 pb-3 pt-1 flex items-center gap-2">
+          <span class="field-count">8 campos</span>
+          <span class="rel-badge rel-fk">→ users</span>
+        </div>
+      </div>
+
+      <!-- couriers -->
+      <div class="card">
+        <div class="p-4 pb-0">
+          <div class="flex items-center justify-between mb-1">
+            <h3 class="font-bold text-white text-sm tracking-wide">couriers</h3>
+            <span class="chip" style="background:var(--accent-emerald-dim);color:#6ee7b7;border-color:rgba(16,185,129,.25);">Core</span>
+          </div>
+          <div class="field-header">
+            <span>campo</span><span>tipo</span><span>nota</span><span></span>
+          </div>
+        </div>
+        <div class="table-body px-4 pb-4">
+          <div class="field-row"><span class="field-name pk">id</span><span class="field-type">UUID</span><span class="field-desc">PK</span><span class="field-icon icon-pk">PK</span></div>
+          <div class="field-row"><span class="field-name fk">user_id</span><span class="field-type">UUID</span><span class="field-desc">FK · UNIQUE</span><span class="field-icon icon-fk">FK</span></div>
+          <div class="field-row"><span class="field-name">vehiculo_tipo</span><span class="field-type">ENUM</span><span class="field-desc">moto, bici, auto, a_pie</span><span class="field-icon icon-col">·</span></div>
+          <div class="field-row"><span class="field-name">documentos_verificados</span><span class="field-type">BOOLEAN</span><span class="field-desc">DEFAULT FALSE</span><span class="field-icon icon-col">·</span></div>
+          <div class="field-row"><span class="field-name">estado_disponibilidad</span><span class="field-type">ENUM</span><span class="field-desc">online, offline, en_pedido</span><span class="field-icon icon-col">·</span></div>
+          <div class="field-row"><span class="field-name">ultima_lat</span><span class="field-type">DECIMAL(10,8)</span><span class="field-desc">-</span><span class="field-icon icon-col">·</span></div>
+          <div class="field-row"><span class="field-name">ultima_lng</span><span class="field-type">DECIMAL(11,8)</span><span class="field-desc">-</span><span class="field-icon icon-col">·</span></div>
+          <div class="field-row"><span class="field-name">ultima_ubicacion_at</span><span class="field-type">TIMESTAMP</span><span class="field-desc">-</span><span class="field-icon icon-col">·</span></div>
+          <div class="field-row"><span class="field-name">rating_promedio</span><span class="field-type">DECIMAL(3,2)</span><span class="field-desc">DEFAULT 0</span><span class="field-icon icon-col">·</span></div>
+          <div class="field-row"><span class="field-name">total_entregas</span><span class="field-type">INTEGER</span><span class="field-desc">DEFAULT 0</span><span class="field-icon icon-col">·</span></div>
+          <div class="field-row"><span class="field-name">estado</span><span class="field-type">ENUM</span><span class="field-desc">pending, active, suspended</span><span class="field-icon icon-col">·</span></div>
+          <div class="field-row"><span class="field-name">created_at</span><span class="field-type">TIMESTAMP</span><span class="field-desc">-</span><span class="field-icon icon-col">·</span></div>
+        </div>
+        <div class="px-4 pb-3 pt-1 flex items-center gap-2">
+          <span class="field-count">12 campos</span>
+          <span class="rel-badge rel-fk">→ users</span>
+        </div>
+      </div>
+
+      <!-- courier_contracts -->
+      <div class="card">
+        <div class="p-4 pb-0">
+          <div class="flex items-center justify-between mb-1">
+            <h3 class="font-bold text-white text-sm tracking-wide">courier_contracts</h3>
+            <span class="chip" style="background:var(--accent-amber-dim);color:#fde68a;border-color:rgba(245,158,11,.25);">Comisiones</span>
+          </div>
+          <div class="field-header">
+            <span>campo</span><span>tipo</span><span>nota</span><span></span>
+          </div>
+        </div>
+        <div class="table-body px-4 pb-4">
+          <div class="field-row"><span class="field-name pk">id</span><span class="field-type">UUID</span><span class="field-desc">PK</span><span class="field-icon icon-pk">PK</span></div>
+          <div class="field-row"><span class="field-name fk">courier_id</span><span class="field-type">UUID</span><span class="field-desc">FK</span><span class="field-icon icon-fk">FK</span></div>
+          <div class="field-row"><span class="field-name fk">schema_id</span><span class="field-type">UUID</span><span class="field-desc">FK(commission_schemas)</span><span class="field-icon icon-fk">FK</span></div>
+          <div class="field-row"><span class="field-name">fecha_inicio_vigencia</span><span class="field-type">TIMESTAMP</span><span class="field-desc">-</span><span class="field-icon icon-col">·</span></div>
+          <div class="field-row"><span class="field-name">fecha_fin_vigencia</span><span class="field-type">TIMESTAMP</span><span class="field-desc">-</span><span class="field-icon icon-col">·</span></div>
+          <div class="field-row"><span class="field-name">estado</span><span class="field-type">ENUM</span><span class="field-desc">promocional, activo, vencido</span><span class="field-icon icon-col">·</span></div>
+          <div class="field-row"><span class="field-name">version_terminos</span><span class="field-type">INTEGER</span><span class="field-desc">-</span><span class="field-icon icon-col">·</span></div>
+          <div class="field-row"><span class="field-name">created_at</span><span class="field-type">TIMESTAMP</span><span class="field-desc">-</span><span class="field-icon icon-col">·</span></div>
+        </div>
+        <div class="px-4 pb-3 pt-1 flex items-center gap-2">
+          <span class="field-count">8 campos</span>
+          <span class="rel-badge rel-fk">→ couriers</span>
+          <span class="rel-badge rel-fk">→ commission_schemas</span>
+        </div>
+      </div>
+
+      <!-- categories -->
+      <div class="card">
+        <div class="p-4 pb-0">
+          <div class="flex items-center justify-between mb-1">
+            <h3 class="font-bold text-white text-sm tracking-wide">categories</h3>
+            <span class="chip" style="background:var(--accent-violet-dim);color:#c4b5fd;border-color:rgba(139,92,246,.25);">Catálogo</span>
+          </div>
+          <div class="field-header">
+            <span>campo</span><span>tipo</span><span>nota</span><span></span>
+          </div>
+        </div>
+        <div class="table-body px-4 pb-4">
+          <div class="field-row"><span class="field-name pk">id</span><span class="field-type">UUID</span><span class="field-desc">PK</span><span class="field-icon icon-pk">PK</span></div>
+          <div class="field-row"><span class="field-name">nombre</span><span class="field-type">VARCHAR(100)</span><span class="field-desc">-</span><span class="field-icon icon-col">·</span></div>
+          <div class="field-row"><span class="field-name fk">categoria_padre_id</span><span class="field-type">UUID</span><span class="field-desc">FK(self) NULL</span><span class="field-icon icon-fk">FK</span></div>
+          <div class="field-row"><span class="field-name">nivel</span><span class="field-type">INTEGER</span><span class="field-desc">-</span><span class="field-icon icon-col">·</span></div>
+          <div class="field-row"><span class="field-name">slug</span><span class="field-type">VARCHAR(100)</span><span class="field-desc">UNIQUE</span><span class="field-icon icon-col">·</span></div>
+          <div class="field-row"><span class="field-name">activo</span><span class="field-type">BOOLEAN</span><span class="field-desc">DEFAULT TRUE</span><span class="field-icon icon-col">·</span></div>
+          <div class="field-row"><span class="field-name">orden</span><span class="field-type">INTEGER</span><span class="field-desc">DEFAULT 0</span><span class="field-icon icon-col">·</span></div>
+          <div class="field-row"><span class="field-name">created_at</span><span class="field-type">TIMESTAMP</span><span class="field-desc">-</span><span class="field-icon icon-col">·</span></div>
+        </div>
+        <div class="px-4 pb-3 pt-1 flex items-center gap-2">
+          <span class="field-count">8 campos</span>
+          <span class="rel-badge rel-fk">→ self (padre)</span>
+        </div>
+      </div>
+
+      <!-- products -->
+      <div class="card">
+        <div class="p-4 pb-0">
+          <div class="flex items-center justify-between mb-1">
+            <h3 class="font-bold text-white text-sm tracking-wide">products</h3>
+            <span class="chip" style="background:var(--accent-violet-dim);color:#c4b5fd;border-color:rgba(139,92,246,.25);">Catálogo</span>
+          </div>
+          <div class="field-header">
+            <span>campo</span><span>tipo</span><span>nota</span><span></span>
+          </div>
+        </div>
+        <div class="table-body px-4 pb-4">
+          <div class="field-row"><span class="field-name pk">id</span><span class="field-type">UUID</span><span class="field-desc">PK</span><span class="field-icon icon-pk">PK</span></div>
+          <div class="field-row"><span class="field-name fk">merchant_id</span><span class="field-type">UUID</span><span class="field-desc">FK</span><span class="field-icon icon-fk">FK</span></div>
+          <div class="field-row"><span class="field-name fk">categoria_id</span><span class="field-type">UUID</span><span class="field-desc">FK</span><span class="field-icon icon-fk">FK</span></div>
+          <div class="field-row"><span class="field-name">nombre</span><span class="field-type">VARCHAR(255)</span><span class="field-desc">-</span><span class="field-icon icon-col">·</span></div>
+          <div class="field-row"><span class="field-name">descripcion</span><span class="field-type">TEXT</span><span class="field-desc">-</span><span class="field-icon icon-col">·</span></div>
+          <div class="field-row"><span class="field-name">precio</span><span class="field-type">DECIMAL(10,2)</span><span class="field-desc">-</span><span class="field-icon icon-col">·</span></div>
+          <div class="field-row"><span class="field-name">stock_disponible</span><span class="field-type">BOOLEAN</span><span class="field-desc">DEFAULT TRUE</span><span class="field-icon icon-col">·</span></div>
+          <div class="field-row"><span class="field-name">modalidad_venta</span><span class="field-type">ENUM</span><span class="field-desc">unitaria, mayorista, mixta</span><span class="field-icon icon-col">·</span></div>
+          <div class="field-row"><span class="field-name">cantidad_minima_pedido</span><span class="field-type">INTEGER</span><span class="field-desc">DEFAULT 1</span><span class="field-icon icon-col">·</span></div>
+          <div class="field-row"><span class="field-name">price_tiers_json</span><span class="field-type">JSONB</span><span class="field-desc">-</span><span class="field-icon icon-col">·</span></div>
+          <div class="field-row"><span class="field-name">imagenes</span><span class="field-type">JSONB</span><span class="field-desc">-</span><span class="field-icon icon-col">·</span></div>
+          <div class="field-row"><span class="field-name">search_vector</span><span class="field-type">TSVECTOR</span><span class="field-desc">GIN index</span><span class="field-icon icon-col">·</span></div>
+          <div class="field-row"><span class="field-name">activo</span><span class="field-type">BOOLEAN</span><span class="field-desc">DEFAULT TRUE</span><span class="field-icon icon-col">·</span></div>
+          <div class="field-row"><span class="field-name">created_at</span><span class="field-type">TIMESTAMP</span><span class="field-desc">-</span><span class="field-icon icon-col">·</span></div>
+        </div>
+        <div class="px-4 pb-3 pt-1 flex items-center gap-2">
+          <span class="field-count">14 campos</span>
+          <span class="rel-badge rel-fk">→ merchants</span>
+          <span class="rel-badge rel-fk">→ categories</span>
+        </div>
+      </div>
+
+      <!-- product_variants -->
+      <div class="card">
+        <div class="p-4 pb-0">
+          <div class="flex items-center justify-between mb-1">
+            <h3 class="font-bold text-white text-sm tracking-wide">product_variants</h3>
+            <span class="chip" style="background:var(--accent-violet-dim);color:#c4b5fd;border-color:rgba(139,92,246,.25);">Catálogo</span>
+          </div>
+          <div class="field-header">
+            <span>campo</span><span>tipo</span><span>nota</span><span></span>
+          </div>
+        </div>
+        <div class="table-body px-4 pb-4">
+          <div class="field-row"><span class="field-name pk">id</span><span class="field-type">UUID</span><span class="field-desc">PK</span><span class="field-icon icon-pk">PK</span></div>
+          <div class="field-row"><span class="field-name fk">product_id</span><span class="field-type">UUID</span><span class="field-desc">FK</span><span class="field-icon icon-fk">FK</span></div>
+          <div class="field-row"><span class="field-name">nombre</span><span class="field-type">VARCHAR(100)</span><span class="field-desc">"Talla M", "Rojo"</span><span class="field-icon icon-col">·</span></div>
+          <div class="field-row"><span class="field-name">precio_adicional</span><span class="field-type">DECIMAL(10,2)</span><span class="field-desc">DEFAULT 0</span><span class="field-icon icon-col">·</span></div>
+          <div class="field-row"><span class="field-name">stock_disponible</span><span class="field-type">BOOLEAN</span><span class="field-desc">DEFAULT TRUE</span><span class="field-icon icon-col">·</span></div>
+          <div class="field-row"><span class="field-name">sku</span><span class="field-type">VARCHAR(50)</span><span class="field-desc">UNIQUE</span><span class="field-icon icon-col">·</span></div>
+        </div>
+        <div class="px-4 pb-3 pt-1 flex items-center gap-2">
+          <span class="field-count">6 campos</span>
+          <span class="rel-badge rel-fk">→ products</span>
+        </div>
+      </div>
+
+      <!-- orders -->
+      <div class="card">
+        <div class="p-4 pb-0">
+          <div class="flex items-center justify-between mb-1">
+            <h3 class="font-bold text-white text-sm tracking-wide">orders</h3>
+            <span class="chip" style="background:var(--accent-rose-dim);color:#fda4af;border-color:rgba(244,63,94,.25);">Pedidos</span>
+          </div>
+          <div class="field-header">
+            <span>campo</span><span>tipo</span><span>nota</span><span></span>
+          </div>
+        </div>
+        <div class="table-body px-4 pb-4">
+          <div class="field-row"><span class="field-name pk">id</span><span class="field-type">UUID</span><span class="field-desc">PK</span><span class="field-icon icon-pk">PK</span></div>
+          <div class="field-row"><span class="field-name">codigo_pedido</span><span class="field-type">VARCHAR(20)</span><span class="field-desc">UNIQUE · PED-2026-000123</span><span class="field-icon icon-col">·</span></div>
+          <div class="field-row"><span class="field-name fk">cliente_id</span><span class="field-type">UUID</span><span class="field-desc">FK(users)</span><span class="field-icon icon-fk">FK</span></div>
+          <div class="field-row"><span class="field-name fk">merchant_id</span><span class="field-type">UUID</span><span class="field-desc">FK</span><span class="field-icon icon-fk">FK</span></div>
+          <div class="field-row"><span class="field-name fk">courier_id</span><span class="field-type">UUID</span><span class="field-desc">FK NULL</span><span class="field-icon icon-fk">FK</span></div>
+          <div class="field-row"><span class="field-name">estado</span><span class="field-type">ENUM</span><span class="field-desc">creado → entregado / cancelado</span><span class="field-icon icon-col">·</span></div>
+          <div class="field-row"><span class="field-name">subtotal</span><span class="field-type">DECIMAL(10,2)</span><span class="field-desc">-</span><span class="field-icon icon-col">·</span></div>
+          <div class="field-row"><span class="field-name">costo_envio</span><span class="field-type">DECIMAL(10,2)</span><span class="field-desc">-</span><span class="field-icon icon-col">·</span></div>
+          <div class="field-row"><span class="field-name">comision_aplicada</span><span class="field-type">DECIMAL(10,2)</span><span class="field-desc">-</span><span class="field-icon icon-col">·</span></div>
+          <div class="field-row"><span class="field-name">propina</span><span class="field-type">DECIMAL(10,2)</span><span class="field-desc">DEFAULT 0</span><span class="field-icon icon-col">·</span></div>
+          <div class="field-row"><span class="field-name">total</span><span class="field-type">DECIMAL(10,2)</span><span class="field-desc">-</span><span class="field-icon icon-col">·</span></div>
+          <div class="field-row"><span class="field-name">direccion_entrega</span><span class="field-type">TEXT</span><span class="field-desc">-</span><span class="field-icon icon-col">·</span></div>
+          <div class="field-row"><span class="field-name">lat_entrega</span><span class="field-type">DECIMAL(10,8)</span><span class="field-desc">-</span><span class="field-icon icon-col">·</span></div>
+          <div class="field-row"><span class="field-name">lng_entrega</span><span class="field-type">DECIMAL(11,8)</span><span class="field-desc">-</span><span class="field-icon icon-col">·</span></div>
+          <div class="field-row"><span class="field-name">notas_cliente</span><span class="field-type">TEXT</span><span class="field-desc">-</span><span class="field-icon icon-col">·</span></div>
+          <div class="field-row"><span class="field-name">metodo_pago</span><span class="field-type">ENUM</span><span class="field-desc">tarjeta, efectivo, wallet</span><span class="field-icon icon-col">·</span></div>
+          <div class="field-row"><span class="field-name">payment_gateway_reference</span><span class="field-type">VARCHAR(255)</span><span class="field-desc">-</span><span class="field-icon icon-col">·</span></div>
+          <div class="field-row"><span class="field-name">tiempo_estimado_min</span><span class="field-type">INTEGER</span><span class="field-desc">-</span><span class="field-icon icon-col">·</span></div>
+          <div class="field-row"><span class="field-name">created_at</span><span class="field-type">TIMESTAMP</span><span class="field-desc">-</span><span class="field-icon icon-col">·</span></div>
+          <div class="field-row"><span class="field-name">confirmed_at</span><span class="field-type">TIMESTAMP</span><span class="field-desc">NULL</span><span class="field-icon icon-col">·</span></div>
+          <div class="field-row"><span class="field-name">delivered_at</span><span class="field-type">TIMESTAMP</span><span class="field-desc">NULL</span><span class="field-icon icon-col">·</span></div>
+          <div class="field-row"><span class="field-name">cancel_reason</span><span class="field-type">TEXT</span><span class="field-desc">NULL</span><span class="field-icon icon-col">·</span></div>
+        </div>
+        <div class="px-4 pb-3 pt-1 flex items-center gap-2">
+          <span class="field-count">22 campos</span>
+          <span class="rel-badge rel-fk">→ users</span>
+          <span class="rel-badge rel-fk">→ merchants</span>
+          <span class="rel-badge rel-fk">→ couriers</span>
+        </div>
+      </div>
+
+      <!-- order_items -->
+      <div class="card">
+        <div class="p-4 pb-0">
+          <div class="flex items-center justify-between mb-1">
+            <h3 class="font-bold text-white text-sm tracking-wide">order_items</h3>
+            <span class="chip" style="background:var(--accent-rose-dim);color:#fda4af;border-color:rgba(244,63,94,.25);">Pedidos</span>
+          </div>
+          <div class="field-header">
+            <span>campo</span><span>tipo</span><span>nota</span><span></span>
+          </div>
+        </div>
+        <div class="table-body px-4 pb-4">
+          <div class="field-row"><span class="field-name pk">id</span><span class="field-type">UUID</span><span class="field-desc">PK</span><span class="field-icon icon-pk">PK</span></div>
+          <div class="field-row"><span class="field-name fk">order_id</span><span class="field-type">UUID</span><span class="field-desc">FK</span><span class="field-icon icon-fk">FK</span></div>
+          <div class="field-row"><span class="field-name fk">product_id</span><span class="field-type">UUID</span><span class="field-desc">FK</span><span class="field-icon icon-fk">FK</span></div>
+          <div class="field-row"><span class="field-name fk">variant_id</span><span class="field-type">UUID</span><span class="field-desc">FK NULL</span><span class="field-icon icon-fk">FK</span></div>
+          <div class="field-row"><span class="field-name">cantidad</span><span class="field-type">INTEGER</span><span class="field-desc">-</span><span class="field-icon icon-col">·</span></div>
+          <div class="field-row"><span class="field-name">precio_unitario</span><span class="field-type">DECIMAL(10,2)</span><span class="field-desc">-</span><span class="field-icon icon-col">·</span></div>
+          <div class="field-row"><span class="field-name">subtotal</span><span class="field-type">DECIMAL(10,2)</span><span class="field-desc">-</span><span class="field-icon icon-col">·</span></div>
+          <div class="field-row"><span class="field-name">notas</span><span class="field-type">TEXT</span><span class="field-desc">NULL</span><span class="field-icon icon-col">·</span></div>
+        </div>
+        <div class="px-4 pb-3 pt-1 flex items-center gap-2">
+          <span class="field-count">8 campos</span>
+          <span class="rel-badge rel-fk">→ orders</span>
+          <span class="rel-badge rel-fk">→ products</span>
+          <span class="rel-badge rel-fk">→ product_variants</span>
+        </div>
+      </div>
+
+      <!-- payments -->
+      <div class="card">
+        <div class="p-4 pb-0">
+          <div class="flex items-center justify-between mb-1">
+            <h3 class="font-bold text-white text-sm tracking-wide">payments</h3>
+            <span class="chip" style="background:var(--accent-emerald-dim);color:#6ee7b7;border-color:rgba(16,185,129,.25);">Pagos</span>
+          </div>
+          <div class="field-header">
+            <span>campo</span><span>tipo</span><span>nota</span><span></span>
+          </div>
+        </div>
+        <div class="table-body px-4 pb-4">
+          <div class="field-row"><span class="field-name pk">id</span><span class="field-type">UUID</span><span class="field-desc">PK</span><span class="field-icon icon-pk">PK</span></div>
+          <div class="field-row"><span class="field-name fk">order_id</span><span class="field-type">UUID</span><span class="field-desc">FK UNIQUE</span><span class="field-icon icon-fk">FK</span></div>
+          <div class="field-row"><span class="field-name">metodo</span><span class="field-type">ENUM</span><span class="field-desc">tarjeta, efectivo, wallet</span><span class="field-icon icon-col">·</span></div>
+          <div class="field-row"><span class="field-name">estado</span><span class="field-type">ENUM</span><span class="field-desc">pending, authorized, captured, refunded, failed</span><span class="field-icon icon-col">·</span></div>
+          <div class="field-row"><span class="field-name">monto</span><span class="field-type">DECIMAL(10,2)</span><span class="field-desc">-</span><span class="field-icon icon-col">·</span></div>
+          <div class="field-row"><span class="field-name">gateway_reference</span><span class="field-type">VARCHAR(255)</span><span class="field-desc">-</span><span class="field-icon icon-col">·</span></div>
+          <div class="field-row"><span class="field-name">idempotency_key</span><span class="field-type">VARCHAR(64)</span><span class="field-desc">UNIQUE</span><span class="field-icon icon-col">·</span></div>
+          <div class="field-row"><span class="field-name">metadata</span><span class="field-type">JSONB</span><span class="field-desc">-</span><span class="field-icon icon-col">·</span></div>
+          <div class="field-row"><span class="field-name">created_at</span><span class="field-type">TIMESTAMP</span><span class="field-desc">-</span><span class="field-icon icon-col">·</span></div>
+        </div>
+        <div class="px-4 pb-3 pt-1 flex items-center gap-2">
+          <span class="field-count">9 campos</span>
+          <span class="rel-badge rel-fk">→ orders</span>
+        </div>
+      </div>
+
+      <!-- courier_locations -->
+      <div class="card">
+        <div class="p-4 pb-0">
+          <div class="flex items-center justify-between mb-1">
+            <h3 class="font-bold text-white text-sm tracking-wide">courier_locations</h3>
+            <span class="chip" style="background:var(--accent-sky-dim);color:#7dd3fc;border-color:rgba(14,165,233,.25);">Geo · PostGIS</span>
+          </div>
+          <div class="field-header">
+            <span>campo</span><span>tipo</span><span>nota</span><span></span>
+          </div>
+        </div>
+        <div class="table-body px-4 pb-4">
+          <div class="field-row"><span class="field-name pk">id</span><span class="field-type">UUID</span><span class="field-desc">PK</span><span class="field-icon icon-pk">PK</span></div>
+          <div class="field-row"><span class="field-name fk">courier_id</span><span class="field-type">UUID</span><span class="field-desc">FK</span><span class="field-icon icon-fk">FK</span></div>
+          <div class="field-row"><span class="field-name">location</span><span class="field-type">GEOGRAPHY(Point)</span><span class="field-desc">SRID 4326 · GIST</span><span class="field-icon icon-col">·</span></div>
+          <div class="field-row"><span class="field-name">velocidad</span><span class="field-type">DECIMAL(5,2)</span><span class="field-desc">-</span><span class="field-icon icon-col">·</span></div>
+          <div class="field-row"><span class="field-name">precision_metros</span><span class="field-type">INTEGER</span><span class="field-desc">-</span><span class="field-icon icon-col">·</span></div>
+          <div class="field-row"><span class="field-name">battery_level</span><span class="field-type">INTEGER</span><span class="field-desc">-</span><span class="field-icon icon-col">·</span></div>
+          <div class="field-row"><span class="field-name">timestamp</span><span class="field-type">TIMESTAMP</span><span class="field-desc">-</span><span class="field-icon icon-col">·</span></div>
+        </div>
+        <div class="px-4 pb-3 pt-1 flex items-center gap-2">
+          <span class="field-count">7 campos</span>
+          <span class="rel-badge rel-fk">→ couriers</span>
+          <span class="rel-badge" style="background:var(--accent-sky-dim);color:#7dd3fc;">GIST(location)</span>
+        </div>
+      </div>
+
+      <!-- coverage_zones -->
+      <div class="card">
+        <div class="p-4 pb-0">
+          <div class="flex items-center justify-between mb-1">
+            <h3 class="font-bold text-white text-sm tracking-wide">coverage_zones</h3>
+            <span class="chip" style="background:var(--accent-sky-dim);color:#7dd3fc;border-color:rgba(14,165,233,.25);">Geo</span>
+          </div>
+          <div class="field-header">
+            <span>campo</span><span>tipo</span><span>nota</span><span></span>
+          </div>
+        </div>
+        <div class="table-body px-4 pb-4">
+          <div class="field-row"><span class="field-name pk">id</span><span class="field-type">UUID</span><span class="field-desc">PK</span><span class="field-icon icon-pk">PK</span></div>
+          <div class="field-row"><span class="field-name">nombre</span><span class="field-type">VARCHAR(100)</span><span class="field-desc">-</span><span class="field-icon icon-col">·</span></div>
+          <div class="field-row"><span class="field-name">poligono</span><span class="field-type">GEOGRAPHY(MultiPolygon)</span><span class="field-desc">SRID 4326 · GIST</span><span class="field-icon icon-col">·</span></div>
+          <div class="field-row"><span class="field-name">tarifa_base_envio</span><span class="field-type">DECIMAL(10,2)</span><span class="field-desc">-</span><span class="field-icon icon-col">·</span></div>
+          <div class="field-row"><span class="field-name">activa</span><span class="field-type">BOOLEAN</span><span class="field-desc">DEFAULT TRUE</span><span class="field-icon icon-col">·</span></div>
+        </div>
+        <div class="px-4 pb-3 pt-1 flex items-center gap-2">
+          <span class="field-count">5 campos</span>
+          <span class="rel-badge" style="background:var(--accent-sky-dim);color:#7dd3fc;">GIST(poligono)</span>
+        </div>
+      </div>
+
+      <!-- ratings -->
+      <div class="card">
+        <div class="p-4 pb-0">
+          <div class="flex items-center justify-between mb-1">
+            <h3 class="font-bold text-white text-sm tracking-wide">ratings</h3>
+            <span class="chip" style="background:var(--accent-amber-dim);color:#fde68a;border-color:rgba(245,158,11,.25);">Calificaciones</span>
+          </div>
+          <div class="field-header">
+            <span>campo</span><span>tipo</span><span>nota</span><span></span>
+          </div>
+        </div>
+        <div class="table-body px-4 pb-4">
+          <div class="field-row"><span class="field-name pk">id</span><span class="field-type">UUID</span><span class="field-desc">PK</span><span class="field-icon icon-pk">PK</span></div>
+          <div class="field-row"><span class="field-name fk">order_id</span><span class="field-type">UUID</span><span class="field-desc">FK · UNIQUE(order_id, tipo)</span><span class="field-icon icon-fk">FK</span></div>
+          <div class="field-row"><span class="field-name">tipo</span><span class="field-type">ENUM</span><span class="field-desc">comercio, repartidor</span><span class="field-icon icon-col">·</span></div>
+          <div class="field-row"><span class="field-name">target_id</span><span class="field-type">UUID</span><span class="field-desc">merchant o courier</span><span class="field-icon icon-col">·</span></div>
+          <div class="field-row"><span class="field-name fk">calificador_id</span><span class="field-type">UUID</span><span class="field-desc">FK(users)</span><span class="field-icon icon-fk">FK</span></div>
+          <div class="field-row"><span class="field-name">puntaje</span><span class="field-type">INTEGER</span><span class="field-desc">CHECK 1-5</span><span class="field-icon icon-col">·</span></div>
+          <div class="field-row"><span class="field-name">comentario</span><span class="field-type">TEXT</span><span class="field-desc">-</span><span class="field-icon icon-col">·</span></div>
+          <div class="field-row"><span class="field-name">created_at</span><span class="field-type">TIMESTAMP</span><span class="field-desc">-</span><span class="field-icon icon-col">·</span></div>
+        </div>
+        <div class="px-4 pb-3 pt-1 flex items-center gap-2">
+          <span class="field-count">8 campos</span>
+          <span class="rel-badge rel-fk">→ orders</span>
+          <span class="rel-badge rel-fk">→ users</span>
+        </div>
+      </div>
+
+      <!-- feature_flags -->
+      <div class="card">
+        <div class="p-4 pb-0">
+          <div class="flex items-center justify-between mb-1">
+            <h3 class="font-bold text-white text-sm tracking-wide">feature_flags</h3>
+            <span class="chip" style="background:rgba(100,116,139,.15);color:#94a3b8;border-color:rgba(100,116,139,.25);">Config</span>
+          </div>
+          <div class="field-header">
+            <span>campo</span><span>tipo</span><span>nota</span><span></span>
+          </div>
+        </div>
+        <div class="table-body px-4 pb-4">
+          <div class="field-row"><span class="field-name pk">id</span><span class="field-type">UUID</span><span class="field-desc">PK</span><span class="field-icon icon-pk">PK</span></div>
+          <div class="field-row"><span class="field-name">nombre</span><span class="field-type">VARCHAR(100)</span><span class="field-desc">UNIQUE</span><span class="field-icon icon-col">·</span></div>
+          <div class="field-row"><span class="field-name">activo</span><span class="field-type">BOOLEAN</span><span class="field-desc">DEFAULT FALSE</span><span class="field-icon icon-col">·</span></div>
+          <div class="field-row"><span class="field-name">descripcion</span><span class="field-type">TEXT</span><span class="field-desc">-</span><span class="field-icon icon-col">·</span></div>
+          <div class="field-row"><span class="field-name">created_at</span><span class="field-type">TIMESTAMP</span><span class="field-desc">-</span><span class="field-icon icon-col">·</span></div>
+        </div>
+        <div class="px-4 pb-3 pt-1 flex items-center gap-2">
+          <span class="field-count">5 campos</span>
+        </div>
+      </div>
+
+      <!-- audit_logs -->
+      <div class="card">
+        <div class="p-4 pb-0">
+          <div class="flex items-center justify-between mb-1">
+            <h3 class="font-bold text-white text-sm tracking-wide">audit_logs</h3>
+            <span class="chip" style="background:var(--accent-rose-dim);color:#fda4af;border-color:rgba(244,63,94,.25);">Auditoría</span>
+          </div>
+          <div class="field-header">
+            <span>campo</span><span>tipo</span><span>nota</span><span></span>
+          </div>
+        </div>
+        <div class="table-body px-4 pb-4">
+          <div class="field-row"><span class="field-name pk">id</span><span class="field-type">BIGSERIAL</span><span class="field-desc">PK auto</span><span class="field-icon icon-pk">PK</span></div>
+          <div class="field-row"><span class="field-name fk">actor_id</span><span class="field-type">UUID</span><span class="field-desc">FK(users)</span><span class="field-icon icon-fk">FK</span></div>
+          <div class="field-row"><span class="field-name">accion</span><span class="field-type">VARCHAR(100)</span><span class="field-desc">-</span><span class="field-icon icon-col">·</span></div>
+          <div class="field-row"><span class="field-name">entidad</span><span class="field-type">VARCHAR(50)</span><span class="field-desc">-</span><span class="field-icon icon-col">·</span></div>
+          <div class="field-row"><span class="field-name">entidad_id</span><span class="field-type">UUID</span><span class="field-desc">-</span><span class="field-icon icon-col">·</span></div>
+          <div class="field-row"><span class="field-name">before_json</span><span class="field-type">JSONB</span><span class="field-desc">-</span><span class="field-icon icon-col">·</span></div>
+          <div class="field-row"><span class="field-name">after_json</span><span class="field-type">JSONB</span><span class="field-desc">-</span><span class="field-icon icon-col">·</span></div>
+          <div class="field-row"><span class="field-name">ip_address</span><span class="field-type">VARCHAR(45)</span><span class="field-desc">-</span><span class="field-icon icon-col">·</span></div>
+          <div class="field-row"><span class="field-name">user_agent</span><span class="field-type">TEXT</span><span class="field-desc">-</span><span class="field-icon icon-col">·</span></div>
+          <div class="field-row"><span class="field-name">created_at</span><span class="field-type">TIMESTAMP</span><span class="field-desc">-</span><span class="field-icon icon-col">·</span></div>
+        </div>
+        <div class="px-4 pb-3 pt-1 flex items-center gap-2">
+          <span class="field-count">10 campos</span>
+          <span class="rel-badge rel-fk">→ users</span>
+          <span class="rel-badge" style="background:var(--accent-rose-dim);color:#fda4af;">Append-only</span>
+        </div>
+      </div>
+
+      <!-- notifications_log -->
+      <div class="card">
+        <div class="p-4 pb-0">
+          <div class="flex items-center justify-between mb-1">
+            <h3 class="font-bold text-white text-sm tracking-wide">notifications_log</h3>
+            <span class="chip" style="background:var(--accent-violet-dim);color:#c4b5fd;border-color:rgba(139,92,246,.25);">Notificaciones</span>
+          </div>
+          <div class="field-header">
+            <span>campo</span><span>tipo</span><span>nota</span><span></span>
+          </div>
+        </div>
+        <div class="table-body px-4 pb-4">
+          <div class="field-row"><span class="field-name pk">id</span><span class="field-type">UUID</span><span class="field-desc">PK</span><span class="field-icon icon-pk">PK</span></div>
+          <div class="field-row"><span class="field-name fk">user_id</span><span class="field-type">UUID</span><span class="field-desc">FK</span><span class="field-icon icon-fk">FK</span></div>
+          <div class="field-row"><span class="field-name">tipo</span><span class="field-type">ENUM</span><span class="field-desc">push, email, ws</span><span class="field-icon icon-col">·</span></div>
+          <div class="field-row"><span class="field-name">titulo</span><span class="field-type">VARCHAR(255)</span><span class="field-desc">-</span><span class="field-icon icon-col">·</span></div>
+          <div class="field-row"><span class="field-name">cuerpo</span><span class="field-type">TEXT</span><span class="field-desc">-</span><span class="field-icon icon-col">·</span></div>
+          <div class="field-row"><span class="field-name">estado</span><span class="field-type">ENUM</span><span class="field-desc">pending, sent, failed</span><span class="field-icon icon-col">·</span></div>
+          <div class="field-row"><span class="field-name">retry_count</span><span class="field-type">INTEGER</span><span class="field-desc">DEFAULT 0</span><span class="field-icon icon-col">·</span></div>
+          <div class="field-row"><span class="field-name">sent_at</span><span class="field-type">TIMESTAMP</span><span class="field-desc">NULL</span><span class="field-icon icon-col">·</span></div>
+          <div class="field-row"><span class="field-name">created_at</span><span class="field-type">TIMESTAMP</span><span class="field-desc">-</span><span class="field-icon icon-col">·</span></div>
+        </div>
+        <div class="px-4 pb-3 pt-1 flex items-center gap-2">
+          <span class="field-count">9 campos</span>
+          <span class="rel-badge rel-fk">→ users</span>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Legend -->
+    <div class="legend">
+      <span class="legend-item"><span class="legend-dot" style="background:var(--accent-amber);"></span> Primary Key (PK)</span>
+      <span class="legend-item"><span class="legend-dot" style="background:var(--accent-sky);"></span> Foreign Key (FK)</span>
+      <span class="legend-item"><span class="legend-dot" style="background:var(--text-muted);"></span> Columna regular</span>
+      <span class="legend-item" style="opacity:.6;">Las tablas se agrupan por módulo (colores del chip)</span>
+    </div>
+
+  </section>
+</main>
+
+<footer class="border-t border-slate-800 mt-8">
+  <div class="max-w-7xl mx-auto px-6 py-6 text-center text-xs text-slate-500">
+    Propuesta técnica v1.2 · Septiembre 2026 · Documento de trabajo para equipo de desarrollo y stakeholders técnicos.
+  </div>
+</footer>
+
+<script>
+  document.querySelectorAll('.tab-btn').forEach(function(btn) {
+    var tab = btn.getAttribute('data-tab');
+    if (tab && tab !== 'datos') {
+      var link = document.createElement('a');
+      link.href = tab + '.html';
+      link.className = 'tab-btn whitespace-nowrap px-3 py-1.5 rounded-md text-xs font-medium bg-slate-800 text-slate-300 hover:bg-slate-700 transition-colors';
+      link.textContent = btn.textContent;
+      btn.parentNode.replaceChild(link, btn);
+    }
+  });
+</script>
+
+</body>
+</html>

@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Seguridad — SuperApp Logística Local</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+  body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; background: #0a0f1c; color: #e5e7eb; }
+  .tab-btn.active { background: #4f46e5; color: #fff; box-shadow: 0 4px 12px rgba(79,70,229,.4);}
+  .tab-content { display: none; animation: fade .3s ease;}
+  .tab-content.active { display: block;}
+  @keyframes fade { from{opacity:0;transform:translateY(4px);} to{opacity:1;transform:translateY(0);} }
+  .card { background: #111827; border:1px solid #1f2937; border-radius:12px;}
+  .chip { background: #1e293b; color:#cbd5e1; border:1px solid #334155; padding:2px 9px; border-radius:6px; font-size:11px; font-weight:500;}
+  .badge-done { background: #064e3b; color:#6ee7b7; border:1px solid #047857; padding:2px 8px; border-radius:6px; font-size:10px; font-weight:600;}
+  .badge-wip { background: #4c1d95; color:#c4b5fd; border:1px solid #6d28d9; padding:2px 8px; border-radius:6px; font-size:10px; font-weight:600;}
+  .badge-todo { background: #1f2937; color:#94a3b8; border:1px solid #374151; padding:2px 8px; border-radius:6px; font-size:10px; font-weight:600;}
+  .badge-warn { background: #78350f; color:#fcd34d; border:1px solid #a16207; padding:2px 8px; border-radius:6px; font-size:10px; font-weight:600;}
+  .progress-bar { height: 6px; background: #1f2937; border-radius: 4px; overflow: hidden;}
+  .progress-fill { height: 100%; background: linear-gradient(90deg,#6366f1,#8b5cf6);}
+  .timeline-dot { width: 14px; height: 14px; border-radius: 50%; flex-shrink:0;}
+  .timeline-line { width: 2px; background: #1f2937; margin-left: 6px;}
+  pre { font-family: 'JetBrains Mono', 'Courier New', monospace;}
+  .scrollbar-thin::-webkit-scrollbar { width: 6px; height: 6px; }
+  .scrollbar-thin::-webkit-scrollbar-thumb { background: #334155; border-radius: 3px; }
+  table { border-collapse: collapse; }
+  th { font-weight: 600; color: #94a3b8; font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em;}
+  td, th { padding: 10px 12px; border-bottom: 1px solid #1f2937; text-align: left;}
+  tr:last-child td { border-bottom: none;}
+  tr:hover { background: #0f172a;}
+  code { font-family: 'JetBrains Mono', monospace; font-size: 0.85em; background: #1e293b; padding: 2px 6px; border-radius: 4px; color: #c4b5fd;}
+  .flow-node { position: relative; }
+  .actor-client { background: #1e3a8a; border-color: #3b82f6;}
+  .actor-merchant { background: #064e3b; border-color: #10b981;}
+  .actor-courier { background: #4c1d95; border-color: #8b5cf6;}
+  .actor-admin { background: #7f1d1d; border-color: #ef4444;}
+  .actor-system { background: #1f2937; border-color: #6b7280;}
+  .flow-container { display: flex; gap: 8px; flex-wrap: nowrap; align-items: stretch; padding: 8px 0;}
+  .flow-container .arrow { display: flex; align-items: center; color: #64748b; font-size: 18px; font-weight: 700;}
+  .layer-box { border: 2px solid #334155; border-radius: 12px; padding: 16px; background: #0f172a;}
+  .module-box { border: 1px solid #334155; border-radius: 8px; padding: 10px; background: #1e293b;}
+  .endpoint-row { display: grid; grid-template-columns: 70px 1fr 2fr auto; gap: 10px; padding: 8px 0; border-bottom: 1px solid #1f2937; align-items: start;}
+  .method { font-family: monospace; font-weight: 700; font-size: 11px; padding: 2px 6px; border-radius: 4px; text-align: center;}
+  .m-get { background: #064e3b; color: #6ee7b7;}
+  .m-post { background: #1e3a8a; color: #93c5fd;}
+  .m-put { background: #78350f; color: #fcd34d;}
+  .m-patch { background: #78350f; color: #fcd34d;}
+  .m-delete { background: #7f1d1d; color: #fca5a5;}
+  details > summary { cursor: pointer; list-style: none;}
+  details > summary::-webkit-details-marker { display: none;}
+  details[open] .summary-icon { transform: rotate(90deg);}
+  .summary-icon { display: inline-block; transition: transform .2s;}
+</style>
+</head>
+<body class="min-h-screen">
+
+<header class="border-b border-slate-800 bg-gradient-to-br from-slate-900 via-slate-950 to-indigo-950/30">
+  <div class="max-w-7xl mx-auto px-6 py-12">
+    <div class="flex items-center gap-2 mb-3 flex-wrap">
+      <span class="chip">Propuesta Técnica</span>
+      <span class="chip">v1.2</span>
+      <span class="chip">Septiembre 2026</span>
+      <span class="badge-wip">MVP 1 · 85% completado</span>
+    </div>
+    <h1 class="text-4xl md:text-5xl font-bold text-white tracking-tight">
+      SuperApp Logística Local
+    </h1>
+    <p class="text-slate-400 mt-3 max-w-3xl">
+      Propuesta integral de ingeniería. Documento para el equipo de desarrollo y stakeholders técnicos.
+    </p>
+
+    <div class="mt-8 grid grid-cols-2 md:grid-cols-5 gap-3">
+      <div class="bg-slate-900/60 border border-slate-800 rounded-lg p-3">
+        <div class="text-xs text-slate-500">Móvil</div>
+        <div class="text-white font-semibold text-sm">React Native</div>
+      </div>
+      <div class="bg-slate-900/60 border border-slate-800 rounded-lg p-3">
+        <div class="text-xs text-slate-500">Backend</div>
+        <div class="text-white font-semibold text-sm">FastAPI · Python</div>
+      </div>
+      <div class="bg-slate-900/60 border border-slate-800 rounded-lg p-3">
+        <div class="text-xs text-slate-500">Datos</div>
+        <div class="text-white font-semibold text-sm">PostgreSQL + PostGIS</div>
+      </div>
+      <div class="bg-slate-900/60 border border-slate-800 rounded-lg p-3">
+        <div class="text-xs text-slate-500">Realtime</div>
+        <div class="text-white font-semibold text-sm">Socket.io</div>
+      </div>
+      <div class="bg-slate-900/60 border border-slate-800 rounded-lg p-3">
+        <div class="text-xs text-slate-500">Deploy</div>
+        <div class="text-white font-semibold text-sm">Docker · Git local</div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<nav class="sticky top-0 z-40 bg-slate-950/95 backdrop-blur border-b border-slate-800">
+  <div class="max-w-7xl mx-auto px-4 py-2 flex gap-1 overflow-x-auto scrollbar-thin">
+    <button class="tab-btn active whitespace-nowrap px-3 py-1.5 rounded-md text-xs font-medium bg-slate-800 text-slate-300" data-tab="resumen">Resumen</button>
+    <button class="tab-btn whitespace-nowrap px-3 py-1.5 rounded-md text-xs font-medium bg-slate-800 text-slate-300" data-tab="estado">Estado actual</button>
+    <button class="tab-btn whitespace-nowrap px-3 py-1.5 rounded-md text-xs font-medium bg-slate-800 text-slate-300" data-tab="arquitectura">Arquitectura</button>
+    <button class="tab-btn whitespace-nowrap px-3 py-1.5 rounded-md text-xs font-medium bg-slate-800 text-slate-300" data-tab="stack">Stack</button>
+    <button class="tab-btn whitespace-nowrap px-3 py-1.5 rounded-md text-xs font-medium bg-slate-800 text-slate-300" data-tab="modulos">Módulos</button>
+    <button class="tab-btn whitespace-nowrap px-3 py-1.5 rounded-md text-xs font-medium bg-slate-800 text-slate-300" data-tab="flujos">Flujos de usuario</button>
+    <button class="tab-btn whitespace-nowrap px-3 py-1.5 rounded-md text-xs font-medium bg-slate-800 text-slate-300" data-tab="datos">Modelo de datos</button>
+    <button class="tab-btn whitespace-nowrap px-3 py-1.5 rounded-md text-xs font-medium bg-slate-800 text-slate-300" data-tab="api">API</button>
+    <button class="tab-btn active whitespace-nowrap px-3 py-1.5 rounded-md text-xs font-medium bg-slate-800 text-slate-300" data-tab="seguridad">Seguridad</button>
+    <button class="tab-btn whitespace-nowrap px-3 py-1.5 rounded-md text-xs font-medium bg-slate-800 text-slate-300" data-tab="roadmap">Roadmap</button>
+    <button class="tab-btn whitespace-nowrap px-3 py-1.5 rounded-md text-xs font-medium bg-slate-800 text-slate-300" data-tab="entregables">Entregables</button>
+    <button class="tab-btn whitespace-nowrap px-3 py-1.5 rounded-md text-xs font-medium bg-slate-800 text-slate-300" data-tab="decisiones">Decisiones técnicas</button>
+  </div>
+</nav>
+
+<main class="max-w-7xl mx-auto px-6 py-8">
+<section class="tab-content active" id="seguridad">
+    <h2 class="text-xl font-semibold text-white mb-2">Seguridad</h2>
+    <p class="text-sm text-slate-400 mb-6">Estrategia de seguridad siguiendo OWASP Top 10 y mejores prácticas.</p>
+
+    <div class="grid md:grid-cols-2 gap-4 mb-4">
+      <div class="card p-5">
+        <h3 class="font-semibold text-white mb-3">🔐 Autenticación</h3>
+        <ul class="text-sm text-slate-300 space-y-2">
+          <li><strong class="text-white">JWT con dos tokens.</strong> Access (15min, en memoria) + Refresh (7 días, httpOnly cookie o secure storage).</li>
+          <li><strong class="text-white">Refresh rotation.</strong> Cada uso de refresh genera uno nuevo y revoca el anterior. Prevención de reutilización.</li>
+          <li><strong class="text-white">Algoritmo RS256.</strong> Clave privada firma, pública verifica. Permite verificación sin contactar al backend.</li>
+          <li><strong class="text-white">Revocación.</strong> Lista negra en Redis para logout activo (futuro).</li>
+          <li><strong class="text-white">Passwords.</strong> bcrypt con cost factor 12, mínimo 8 caracteres + validación zxcvbn.</li>
+        </ul>
+      </div>
+
+      <div class="card p-5">
+        <h3 class="font-semibold text-white mb-3">🔒 Autorización</h3>
+        <ul class="text-sm text-slate-300 space-y-2">
+          <li><strong class="text-white">RBAC estricto.</strong> Dependencia <code>Depends(require_role("admin"))</code> en cada endpoint protegido.</li>
+          <li><strong class="text-white">Ownership check.</strong> Usuarios solo acceden a sus recursos. Validación en service layer.</li>
+          <li><strong class="text-white">Permisos granulares.</strong> Ej: merchant puede modificar solo su catálogo, no el de otros.</li>
+          <li><strong class="text-white">Multi-tenant lógico.</strong> Filtros automáticos por <code>merchant_id</code> en queries sensibles.</li>
+        </ul>
+      </div>
+
+      <div class="card p-5">
+        <h3 class="font-semibold text-white mb-3">🛡️ Protección de endpoints</h3>
+        <ul class="text-sm text-slate-300 space-y-2">
+          <li><strong class="text-white">Rate limiting.</strong> Middleware SlowAPI: 60 req/min por IP general, 5 req/min en login, 100 req/min en tracking.</li>
+          <li><strong class="text-white">CORS whitelist.</strong> Solo dominios conocidos en producción, <code>*</code> solo en desarrollo.</li>
+          <li><strong class="text-white">Validación Pydantic estricta.</strong> Rechazo automático de tipos erróneos, XSS, inyecciones.</li>
+          <li><strong class="text-white">SQL injection.</strong> Impossible vía SQLAlchemy ORM. Solo queries raw auditadas manualmente.</li>
+          <li><strong class="text-white">CSRF.</strong> Tokens en endpoints de estado (POST/PATCH/DELETE) vía cookies httpOnly.</li>
+        </ul>
+      </div>
+
+      <div class="card p-5">
+        <h3 class="font-semibold text-white mb-3">📦 Datos sensibles</h3>
+        <ul class="text-sm text-slate-300 space-y-2">
+          <li><strong class="text-white">TLS 1.3 obligatorio.</strong> HSTS header en producción. Redirect HTTP→HTTPS.</li>
+          <li><strong class="text-white">Encriptación en reposo.</strong> PostgreSQL con TDE a nivel cloud provider.</li>
+          <li><strong class="text-white">Secrets.</strong> Variables de entorno vía <code>pydantic-settings</code>. Nunca hardcodeadas. Rotación periódica.</li>
+          <li><strong class="text-white">Datos de pago.</strong> Nunca almacenamos PAN. Solo reference_id del gateway.</li>
+          <li><strong class="text-white">PII.</strong> Campos como email/teléfono con acceso auditado. Retención GDPR-compliant.</li>
+        </ul>
+      </div>
+
+      <div class="card p-5">
+        <h3 class="font-semibold text-white mb-3">📋 Auditoría</h3>
+        <ul class="text-sm text-slate-300 space-y-2">
+          <li><strong class="text-white">Logs estructurados.</strong> <code>structlog</code> con JSON, request_id por traza, user_id cuando aplica.</li>
+          <li><strong class="text-white">Tabla append-only.</strong> <code>audit_logs</code> sin UPDATE/DELETE. Trigger de BD garantiza inmutabilidad.</li>
+          <li><strong class="text-white">Eventos críticos auditados.</strong> Firma de contratos, cambios de comisión, suspensiones, reembolsos, cambios de rol.</li>
+          <li><strong class="text-white">Retención.</strong> Logs: 1 año. Datos de tracking: 90 días. Pedidos: 2 años. Contratos: 7 años.</li>
+        </ul>
+      </div>
+
+      <div class="card p-5">
+        <h3 class="font-semibold text-white mb-3">🔍 Testing de seguridad</h3>
+        <ul class="text-sm text-slate-300 space-y-2">
+          <li><strong class="text-white">Dependencias.</strong> <code>safety</code> + <code>pip-audit</code> en CI para CVEs.</li>
+          <li><strong class="text-white">SAST.</strong> <code>bandit</code> para análisis estático de Python.</li>
+          <li><strong class="text-white">Secrets.</strong> <code>detect-secrets</code> pre-commit hook.</li>
+          <li><strong class="text-white">DAST.</strong> <code>OWASP ZAP</code> contra staging mensualmente.</li>
+          <li><strong class="text-white">Container scanning.</strong> <code>trivy</code> en imágenes Docker.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="border-t border-slate-800 mt-8">
+  <div class="max-w-7xl mx-auto px-6 py-6 text-center text-xs text-slate-500">
+    Propuesta técnica v1.2 · Septiembre 2026 · Documento de trabajo para equipo de desarrollo y stakeholders técnicos.
+  </div>
+</footer>
+
+<script>
+  document.querySelectorAll('.tab-btn').forEach(function(btn) {
+    var tab = btn.getAttribute('data-tab');
+    if (tab && tab !== 'seguridad') {
+      var link = document.createElement('a');
+      link.href = tab + '.html';
+      link.className = 'tab-btn whitespace-nowrap px-3 py-1.5 rounded-md text-xs font-medium bg-slate-800 text-slate-300 hover:bg-slate-700 transition-colors';
+      link.textContent = btn.textContent;
+      btn.parentNode.replaceChild(link, btn);
+    }
+  });
+</script>
+
+</body>
+</html>

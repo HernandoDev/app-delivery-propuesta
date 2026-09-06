@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Módulos — SuperApp Logística Local</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+  body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; background: #0a0f1c; color: #e5e7eb; }
+  .tab-btn.active { background: #4f46e5; color: #fff; box-shadow: 0 4px 12px rgba(79,70,229,.4);}
+  .tab-content { display: none; animation: fade .3s ease;}
+  .tab-content.active { display: block;}
+  @keyframes fade { from{opacity:0;transform:translateY(4px);} to{opacity:1;transform:translateY(0);} }
+  .card { background: #111827; border:1px solid #1f2937; border-radius:12px;}
+  .chip { background: #1e293b; color:#cbd5e1; border:1px solid #334155; padding:2px 9px; border-radius:6px; font-size:11px; font-weight:500;}
+  .badge-done { background: #064e3b; color:#6ee7b7; border:1px solid #047857; padding:2px 8px; border-radius:6px; font-size:10px; font-weight:600;}
+  .badge-wip { background: #4c1d95; color:#c4b5fd; border:1px solid #6d28d9; padding:2px 8px; border-radius:6px; font-size:10px; font-weight:600;}
+  .badge-todo { background: #1f2937; color:#94a3b8; border:1px solid #374151; padding:2px 8px; border-radius:6px; font-size:10px; font-weight:600;}
+  .badge-warn { background: #78350f; color:#fcd34d; border:1px solid #a16207; padding:2px 8px; border-radius:6px; font-size:10px; font-weight:600;}
+  .progress-bar { height: 6px; background: #1f2937; border-radius: 4px; overflow: hidden;}
+  .progress-fill { height: 100%; background: linear-gradient(90deg,#6366f1,#8b5cf6);}
+  .timeline-dot { width: 14px; height: 14px; border-radius: 50%; flex-shrink:0;}
+  .timeline-line { width: 2px; background: #1f2937; margin-left: 6px;}
+  pre { font-family: 'JetBrains Mono', 'Courier New', monospace;}
+  .scrollbar-thin::-webkit-scrollbar { width: 6px; height: 6px; }
+  .scrollbar-thin::-webkit-scrollbar-thumb { background: #334155; border-radius: 3px; }
+  table { border-collapse: collapse; }
+  th { font-weight: 600; color: #94a3b8; font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em;}
+  td, th { padding: 10px 12px; border-bottom: 1px solid #1f2937; text-align: left;}
+  tr:last-child td { border-bottom: none;}
+  tr:hover { background: #0f172a;}
+  code { font-family: 'JetBrains Mono', monospace; font-size: 0.85em; background: #1e293b; padding: 2px 6px; border-radius: 4px; color: #c4b5fd;}
+  .flow-node { position: relative; }
+  .actor-client { background: #1e3a8a; border-color: #3b82f6;}
+  .actor-merchant { background: #064e3b; border-color: #10b981;}
+  .actor-courier { background: #4c1d95; border-color: #8b5cf6;}
+  .actor-admin { background: #7f1d1d; border-color: #ef4444;}
+  .actor-system { background: #1f2937; border-color: #6b7280;}
+  .flow-container { display: flex; gap: 8px; flex-wrap: nowrap; align-items: stretch; padding: 8px 0;}
+  .flow-container .arrow { display: flex; align-items: center; color: #64748b; font-size: 18px; font-weight: 700;}
+  .layer-box { border: 2px solid #334155; border-radius: 12px; padding: 16px; background: #0f172a;}
+  .module-box { border: 1px solid #334155; border-radius: 8px; padding: 10px; background: #1e293b;}
+  .endpoint-row { display: grid; grid-template-columns: 70px 1fr 2fr auto; gap: 10px; padding: 8px 0; border-bottom: 1px solid #1f2937; align-items: start;}
+  .method { font-family: monospace; font-weight: 700; font-size: 11px; padding: 2px 6px; border-radius: 4px; text-align: center;}
+  .m-get { background: #064e3b; color: #6ee7b7;}
+  .m-post { background: #1e3a8a; color: #93c5fd;}
+  .m-put { background: #78350f; color: #fcd34d;}
+  .m-patch { background: #78350f; color: #fcd34d;}
+  .m-delete { background: #7f1d1d; color: #fca5a5;}
+  details > summary { cursor: pointer; list-style: none;}
+  details > summary::-webkit-details-marker { display: none;}
+  details[open] .summary-icon { transform: rotate(90deg);}
+  .summary-icon { display: inline-block; transition: transform .2s;}
+</style>
+</head>
+<body class="min-h-screen">
+
+<header class="border-b border-slate-800 bg-gradient-to-br from-slate-900 via-slate-950 to-indigo-950/30">
+  <div class="max-w-7xl mx-auto px-6 py-12">
+    <div class="flex items-center gap-2 mb-3 flex-wrap">
+      <span class="chip">Propuesta Técnica</span>
+      <span class="chip">v1.2</span>
+      <span class="chip">Septiembre 2026</span>
+      <span class="badge-wip">MVP 1 · 85% completado</span>
+    </div>
+    <h1 class="text-4xl md:text-5xl font-bold text-white tracking-tight">
+      SuperApp Logística Local
+    </h1>
+    <p class="text-slate-400 mt-3 max-w-3xl">
+      Propuesta integral de ingeniería. Documento para el equipo de desarrollo y stakeholders técnicos.
+    </p>
+
+    <div class="mt-8 grid grid-cols-2 md:grid-cols-5 gap-3">
+      <div class="bg-slate-900/60 border border-slate-800 rounded-lg p-3">
+        <div class="text-xs text-slate-500">Móvil</div>
+        <div class="text-white font-semibold text-sm">React Native</div>
+      </div>
+      <div class="bg-slate-900/60 border border-slate-800 rounded-lg p-3">
+        <div class="text-xs text-slate-500">Backend</div>
+        <div class="text-white font-semibold text-sm">FastAPI · Python</div>
+      </div>
+      <div class="bg-slate-900/60 border border-slate-800 rounded-lg p-3">
+        <div class="text-xs text-slate-500">Datos</div>
+        <div class="text-white font-semibold text-sm">PostgreSQL + PostGIS</div>
+      </div>
+      <div class="bg-slate-900/60 border border-slate-800 rounded-lg p-3">
+        <div class="text-xs text-slate-500">Realtime</div>
+        <div class="text-white font-semibold text-sm">Socket.io</div>
+      </div>
+      <div class="bg-slate-900/60 border border-slate-800 rounded-lg p-3">
+        <div class="text-xs text-slate-500">Deploy</div>
+        <div class="text-white font-semibold text-sm">Docker · Git local</div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<nav class="sticky top-0 z-40 bg-slate-950/95 backdrop-blur border-b border-slate-800">
+  <div class="max-w-7xl mx-auto px-4 py-2 flex gap-1 overflow-x-auto scrollbar-thin">
+    <button class="tab-btn active whitespace-nowrap px-3 py-1.5 rounded-md text-xs font-medium bg-slate-800 text-slate-300" data-tab="resumen">Resumen</button>
+    <button class="tab-btn whitespace-nowrap px-3 py-1.5 rounded-md text-xs font-medium bg-slate-800 text-slate-300" data-tab="estado">Estado actual</button>
+    <button class="tab-btn whitespace-nowrap px-3 py-1.5 rounded-md text-xs font-medium bg-slate-800 text-slate-300" data-tab="arquitectura">Arquitectura</button>
+    <button class="tab-btn whitespace-nowrap px-3 py-1.5 rounded-md text-xs font-medium bg-slate-800 text-slate-300" data-tab="stack">Stack</button>
+    <button class="tab-btn active whitespace-nowrap px-3 py-1.5 rounded-md text-xs font-medium bg-slate-800 text-slate-300" data-tab="modulos">Módulos</button>
+    <button class="tab-btn whitespace-nowrap px-3 py-1.5 rounded-md text-xs font-medium bg-slate-800 text-slate-300" data-tab="flujos">Flujos de usuario</button>
+    <button class="tab-btn whitespace-nowrap px-3 py-1.5 rounded-md text-xs font-medium bg-slate-800 text-slate-300" data-tab="datos">Modelo de datos</button>
+    <button class="tab-btn whitespace-nowrap px-3 py-1.5 rounded-md text-xs font-medium bg-slate-800 text-slate-300" data-tab="api">API</button>
+    <button class="tab-btn whitespace-nowrap px-3 py-1.5 rounded-md text-xs font-medium bg-slate-800 text-slate-300" data-tab="seguridad">Seguridad</button>
+    <button class="tab-btn whitespace-nowrap px-3 py-1.5 rounded-md text-xs font-medium bg-slate-800 text-slate-300" data-tab="roadmap">Roadmap</button>
+    <button class="tab-btn whitespace-nowrap px-3 py-1.5 rounded-md text-xs font-medium bg-slate-800 text-slate-300" data-tab="entregables">Entregables</button>
+    <button class="tab-btn whitespace-nowrap px-3 py-1.5 rounded-md text-xs font-medium bg-slate-800 text-slate-300" data-tab="decisiones">Decisiones técnicas</button>
+  </div>
+</nav>
+
+<main class="max-w-7xl mx-auto px-6 py-8">
+<section class="tab-content active" id="modulos">
+    <h2 class="text-xl font-semibold text-white mb-2">Módulos funcionales</h2>
+    <p class="text-sm text-slate-400 mb-6">Desglose por dominio. Cada módulo es un paquete Python autocontenido.</p>
+
+    <div class="grid md:grid-cols-2 gap-4">
+      <div class="card p-5">
+        <div class="flex items-center justify-between mb-2">
+          <h3 class="font-semibold text-white">🔐 Auth</h3>
+          <span class="badge-done">MVP 1</span>
+        </div>
+        <ul class="text-xs text-slate-400 space-y-1">
+          <li>• Registro con email + teléfono</li>
+          <li>• Login con JWT (access 15min, refresh 7 días)</li>
+          <li>• Recuperación de contraseña por email</li>
+          <li>• Roles: client, merchant, courier, admin</li>
+          <li>• Refresh token rotation (revocación)</li>
+          <li>• <strong>Futuro:</strong> OTP, 2FA, social login</li>
+        </ul>
+      </div>
+
+      <div class="card p-5">
+        <div class="flex items-center justify-between mb-2">
+          <h3 class="font-semibold text-white">👥 Users</h3>
+          <span class="badge-done">MVP 2</span>
+        </div>
+        <ul class="text-xs text-slate-400 space-y-1">
+          <li>• CRUD de usuarios</li>
+          <li>• Perfiles extendidos por tipo</li>
+          <li>• Gestión de direcciones guardadas (cliente)</li>
+          <li>• Suspensión / baneo por admin</li>
+          <li>• Soft delete con marca temporal</li>
+        </ul>
+      </div>
+
+      <div class="card p-5">
+        <div class="flex items-center justify-between mb-2">
+          <h3 class="font-semibold text-white">🏪 Merchants</h3>
+          <span class="badge-wip">MVP 3</span>
+        </div>
+        <ul class="text-xs text-slate-400 space-y-1">
+          <li>• Onboarding multi-paso</li>
+          <li>• Firma digital contrato adhesión</li>
+          <li>• Tipos: tienda_barrio, puesto_mercado, supermercado, mayorista</li>
+          <li>• Modalidades: unitaria, mayorista, mixta</li>
+          <li>• Configuración de horarios (JSONB)</li>
+          <li>• Zona de cobertura (polígono GeoJSON)</li>
+          <li>• Aprobación manual por admin</li>
+        </ul>
+      </div>
+
+      <div class="card p-5">
+        <div class="flex items-center justify-between mb-2">
+          <h3 class="font-semibold text-white">🛵 Couriers</h3>
+          <span class="badge-wip">MVP 3</span>
+        </div>
+        <ul class="text-xs text-slate-400 space-y-1">
+          <li>• Onboarding + carga documentos (DNI, licencia, seguro)</li>
+          <li>• Verificación manual por admin</li>
+          <li>• Tipo vehículo: moto, bici, auto, a pie</li>
+          <li>• Toggle disponibilidad (online/offline/en_pedido)</li>
+          <li>• Última ubicación conocida</li>
+          <li>• Rating y estadísticas operativas</li>
+        </ul>
+      </div>
+
+      <div class="card p-5">
+        <div class="flex items-center justify-between mb-2">
+          <h3 class="font-semibold text-white">📦 Catalog</h3>
+          <span class="badge-todo">MVP 4</span>
+        </div>
+        <ul class="text-xs text-slate-400 space-y-1">
+          <li>• Categorías jerárquicas (padre/hijo)</li>
+          <li>• Productos con nombre, descripción, precio, stock</li>
+          <li>• Variantes (talla, color, tamaño) con precio adicional</li>
+          <li>• Carga individual y masiva (CSV)</li>
+          <li>• Imágenes (S3/MinIO)</li>
+          <li>• Estados: activo, agotado, descontinuado</li>
+          <li>• <code>price_tiers</code> JSONB para precios escalonados (mayorista futuro)</li>
+        </ul>
+      </div>
+
+      <div class="card p-5">
+        <div class="flex items-center justify-between mb-2">
+          <h3 class="font-semibold text-white">🛒 Orders</h3>
+          <span class="badge-todo">MVP 4</span>
+        </div>
+        <ul class="text-xs text-slate-400 space-y-1">
+          <li>• Máquina de estados: creado → confirmado → preparando → listo → asignado → en_camino → entregado</li>
+          <li>• Items con referencia a productos y variantes</li>
+          <li>• Cálculo de totales (subtotal, envío, comisión, propina)</li>
+          <li>• Cancelación con motivo</li>
+          <li>• Tiempos estimados de entrega</li>
+          <li>• Notas al comercio y al repartidor</li>
+          <li>• Timeout de confirmación (configurable)</li>
+        </ul>
+      </div>
+
+      <div class="card p-5">
+        <div class="flex items-center justify-between mb-2">
+          <h3 class="font-semibold text-white">📍 Geo</h3>
+          <span class="badge-wip">MVP 2</span>
+        </div>
+        <ul class="text-xs text-slate-400 space-y-1">
+          <li>• Tabla <code>courier_locations</code> con PostGIS Point</li>
+          <li>• Inserción optimizada (batch)</li>
+          <li>• Índices GIST para queries de proximidad</li>
+          <li>• Zonas de cobertura (MultiPolygon)</li>
+          <li>• Query: "repartidores en radio N km"</li>
+          <li>• Streaming por WebSocket en tiempo real</li>
+          <li>• Retención: 90 días con purgado automático</li>
+        </ul>
+      </div>
+
+      <div class="card p-5">
+        <div class="flex items-center justify-between mb-2">
+          <h3 class="font-semibold text-white">💰 Commissions</h3>
+          <span class="badge-todo">MVP 5</span>
+        </div>
+        <ul class="text-xs text-slate-400 space-y-1">
+          <li>• Motor paramétrico por entidad</li>
+          <li>• Tipos: porcentaje, tarifa_fija, suscripción, ninguno</li>
+          <li>• Vigencia (inicio/fin)</li>
+          <li>• Job diario: detecta vencidos → notifica → espera aceptación</li>
+          <li>• Log inmutable de cambios (append-only)</li>
+          <li>• Versionado de términos de contrato</li>
+          <li>• Editable desde backoffice sin deploy</li>
+        </ul>
+      </div>
+
+      <div class="card p-5">
+        <div class="flex items-center justify-between mb-2">
+          <h3 class="font-semibold text-white">💳 Payments</h3>
+          <span class="badge-todo">MVP 4</span>
+        </div>
+        <ul class="text-xs text-slate-400 space-y-1">
+          <li>• Adapter pattern para múltiples gateways</li>
+          <li>• Métodos: tarjeta, efectivo, wallet interna</li>
+          <li>• Webhooks para confirmaciones asíncronas</li>
+          <li>• Idempotencia (clave por pedido)</li>
+          <li>• Conciliación diaria</li>
+          <li>• Reembolsos parciales/totales</li>
+        </ul>
+      </div>
+
+      <div class="card p-5">
+        <div class="flex items-center justify-between mb-2">
+          <h3 class="font-semibold text-white">🔔 Notifications</h3>
+          <span class="badge-todo">MVP 3</span>
+        </div>
+        <ul class="text-xs text-slate-400 space-y-1">
+          <li>• Push móvil (FCM)</li>
+          <li>• Email transaccional (SMTP)</li>
+          <li>• WebSockets para estado en vivo</li>
+          <li>• Templates versionados</li>
+          <li>• Preferencias por usuario (opt-out)</li>
+          <li>• Cola interna para retries</li>
+        </ul>
+      </div>
+
+      <div class="card p-5">
+        <div class="flex items-center justify-between mb-2">
+          <h3 class="font-semibold text-white">⭐ Ratings</h3>
+          <span class="badge-todo">MVP 5</span>
+        </div>
+        <ul class="text-xs text-slate-400 space-y-1">
+          <li>• Calificación 1-5 de comercio y repartidor</li>
+          <li>• Comentarios con moderación</li>
+          <li>• Cálculo de rating promedio con fórmula de Bayes</li>
+          <li>• Solo permitido a clientes que completaron pedido</li>
+          <li>• Ventana de 7 días post-entrega</li>
+        </ul>
+      </div>
+
+      <div class="card p-5">
+        <div class="flex items-center justify-between mb-2">
+          <h3 class="font-semibold text-white">🎯 Assignment</h3>
+          <span class="badge-todo">MVP 5</span>
+        </div>
+        <ul class="text-xs text-slate-400 space-y-1">
+          <li>• Selección de repartidor disponible más cercano</li>
+          <li>• Filtros: radio máximo, tipo vehículo, rating mínimo</li>
+          <li>• Timeout de aceptación (30s)</li>
+          <li>• Reasignación automática si rechaza</li>
+          <li>• Fallback a asignación manual tras N intentos</li>
+          <li>• <strong>Futuro:</strong> scoring ML con historial</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="border-t border-slate-800 mt-8">
+  <div class="max-w-7xl mx-auto px-6 py-6 text-center text-xs text-slate-500">
+    Propuesta técnica v1.2 · Septiembre 2026 · Documento de trabajo para equipo de desarrollo y stakeholders técnicos.
+  </div>
+</footer>
+
+<script>
+  document.querySelectorAll('.tab-btn').forEach(function(btn) {
+    var tab = btn.getAttribute('data-tab');
+    if (tab && tab !== 'modulos') {
+      var link = document.createElement('a');
+      link.href = tab + '.html';
+      link.className = 'tab-btn whitespace-nowrap px-3 py-1.5 rounded-md text-xs font-medium bg-slate-800 text-slate-300 hover:bg-slate-700 transition-colors';
+      link.textContent = btn.textContent;
+      btn.parentNode.replaceChild(link, btn);
+    }
+  });
+</script>
+
+</body>
+</html>

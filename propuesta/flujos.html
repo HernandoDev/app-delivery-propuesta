@@ -1,0 +1,750 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Flujos de usuario — SuperApp Logística Local</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+  body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; background: #0a0f1c; color: #e5e7eb; }
+  .tab-btn.active { background: #4f46e5; color: #fff; box-shadow: 0 4px 12px rgba(79,70,229,.4);}
+  .tab-content { display: none; animation: fade .3s ease;}
+  .tab-content.active { display: block;}
+  @keyframes fade { from{opacity:0;transform:translateY(4px);} to{opacity:1;transform:translateY(0);} }
+  .card { background: #111827; border:1px solid #1f2937; border-radius:12px;}
+  .chip { background: #1e293b; color:#cbd5e1; border:1px solid #334155; padding:2px 9px; border-radius:6px; font-size:11px; font-weight:500;}
+  .badge-done { background: #064e3b; color:#6ee7b7; border:1px solid #047857; padding:2px 8px; border-radius:6px; font-size:10px; font-weight:600;}
+  .badge-wip { background: #4c1d95; color:#c4b5fd; border:1px solid #6d28d9; padding:2px 8px; border-radius:6px; font-size:10px; font-weight:600;}
+  .badge-todo { background: #1f2937; color:#94a3b8; border:1px solid #374151; padding:2px 8px; border-radius:6px; font-size:10px; font-weight:600;}
+  .badge-warn { background: #78350f; color:#fcd34d; border:1px solid #a16207; padding:2px 8px; border-radius:6px; font-size:10px; font-weight:600;}
+  .progress-bar { height: 6px; background: #1f2937; border-radius: 4px; overflow: hidden;}
+  .progress-fill { height: 100%; background: linear-gradient(90deg,#6366f1,#8b5cf6);}
+  .timeline-dot { width: 14px; height: 14px; border-radius: 50%; flex-shrink:0;}
+  .timeline-line { width: 2px; background: #1f2937; margin-left: 6px;}
+  pre { font-family: 'JetBrains Mono', 'Courier New', monospace;}
+  .scrollbar-thin::-webkit-scrollbar { width: 6px; height: 6px; }
+  .scrollbar-thin::-webkit-scrollbar-thumb { background: #334155; border-radius: 3px; }
+  table { border-collapse: collapse; }
+  th { font-weight: 600; color: #94a3b8; font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em;}
+  td, th { padding: 10px 12px; border-bottom: 1px solid #1f2937; text-align: left;}
+  tr:last-child td { border-bottom: none;}
+  tr:hover { background: #0f172a;}
+  code { font-family: 'JetBrains Mono', monospace; font-size: 0.85em; background: #1e293b; padding: 2px 6px; border-radius: 4px; color: #c4b5fd;}
+  .flow-node { position: relative; }
+  .actor-client { background: #1e3a8a; border-color: #3b82f6;}
+  .actor-merchant { background: #064e3b; border-color: #10b981;}
+  .actor-courier { background: #4c1d95; border-color: #8b5cf6;}
+  .actor-admin { background: #7f1d1d; border-color: #ef4444;}
+  .actor-system { background: #1f2937; border-color: #6b7280;}
+  .flow-container { display: flex; gap: 8px; flex-wrap: nowrap; align-items: stretch; padding: 8px 0;}
+  .flow-container .arrow { display: flex; align-items: center; color: #64748b; font-size: 18px; font-weight: 700;}
+  .layer-box { border: 2px solid #334155; border-radius: 12px; padding: 16px; background: #0f172a;}
+  .module-box { border: 1px solid #334155; border-radius: 8px; padding: 10px; background: #1e293b;}
+  .endpoint-row { display: grid; grid-template-columns: 70px 1fr 2fr auto; gap: 10px; padding: 8px 0; border-bottom: 1px solid #1f2937; align-items: start;}
+  .method { font-family: monospace; font-weight: 700; font-size: 11px; padding: 2px 6px; border-radius: 4px; text-align: center;}
+  .m-get { background: #064e3b; color: #6ee7b7;}
+  .m-post { background: #1e3a8a; color: #93c5fd;}
+  .m-put { background: #78350f; color: #fcd34d;}
+  .m-patch { background: #78350f; color: #fcd34d;}
+  .m-delete { background: #7f1d1d; color: #fca5a5;}
+  details > summary { cursor: pointer; list-style: none;}
+  details > summary::-webkit-details-marker { display: none;}
+  details[open] .summary-icon { transform: rotate(90deg);}
+  .summary-icon { display: inline-block; transition: transform .2s;}
+</style>
+</head>
+<body class="min-h-screen">
+
+<header class="border-b border-slate-800 bg-gradient-to-br from-slate-900 via-slate-950 to-indigo-950/30">
+  <div class="max-w-7xl mx-auto px-6 py-12">
+    <div class="flex items-center gap-2 mb-3 flex-wrap">
+      <span class="chip">Propuesta Técnica</span>
+      <span class="chip">v1.2</span>
+      <span class="chip">Septiembre 2026</span>
+      <span class="badge-wip">MVP 1 · 85% completado</span>
+    </div>
+    <h1 class="text-4xl md:text-5xl font-bold text-white tracking-tight">
+      SuperApp Logística Local
+    </h1>
+    <p class="text-slate-400 mt-3 max-w-3xl">
+      Propuesta integral de ingeniería. Documento para el equipo de desarrollo y stakeholders técnicos.
+    </p>
+
+    <div class="mt-8 grid grid-cols-2 md:grid-cols-5 gap-3">
+      <div class="bg-slate-900/60 border border-slate-800 rounded-lg p-3">
+        <div class="text-xs text-slate-500">Móvil</div>
+        <div class="text-white font-semibold text-sm">React Native</div>
+      </div>
+      <div class="bg-slate-900/60 border border-slate-800 rounded-lg p-3">
+        <div class="text-xs text-slate-500">Backend</div>
+        <div class="text-white font-semibold text-sm">FastAPI · Python</div>
+      </div>
+      <div class="bg-slate-900/60 border border-slate-800 rounded-lg p-3">
+        <div class="text-xs text-slate-500">Datos</div>
+        <div class="text-white font-semibold text-sm">PostgreSQL + PostGIS</div>
+      </div>
+      <div class="bg-slate-900/60 border border-slate-800 rounded-lg p-3">
+        <div class="text-xs text-slate-500">Realtime</div>
+        <div class="text-white font-semibold text-sm">Socket.io</div>
+      </div>
+      <div class="bg-slate-900/60 border border-slate-800 rounded-lg p-3">
+        <div class="text-xs text-slate-500">Deploy</div>
+        <div class="text-white font-semibold text-sm">Docker · Git local</div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<nav class="sticky top-0 z-40 bg-slate-950/95 backdrop-blur border-b border-slate-800">
+  <div class="max-w-7xl mx-auto px-4 py-2 flex gap-1 overflow-x-auto scrollbar-thin">
+    <button class="tab-btn active whitespace-nowrap px-3 py-1.5 rounded-md text-xs font-medium bg-slate-800 text-slate-300" data-tab="resumen">Resumen</button>
+    <button class="tab-btn whitespace-nowrap px-3 py-1.5 rounded-md text-xs font-medium bg-slate-800 text-slate-300" data-tab="estado">Estado actual</button>
+    <button class="tab-btn whitespace-nowrap px-3 py-1.5 rounded-md text-xs font-medium bg-slate-800 text-slate-300" data-tab="arquitectura">Arquitectura</button>
+    <button class="tab-btn whitespace-nowrap px-3 py-1.5 rounded-md text-xs font-medium bg-slate-800 text-slate-300" data-tab="stack">Stack</button>
+    <button class="tab-btn whitespace-nowrap px-3 py-1.5 rounded-md text-xs font-medium bg-slate-800 text-slate-300" data-tab="modulos">Módulos</button>
+    <button class="tab-btn active whitespace-nowrap px-3 py-1.5 rounded-md text-xs font-medium bg-slate-800 text-slate-300" data-tab="flujos">Flujos de usuario</button>
+    <button class="tab-btn whitespace-nowrap px-3 py-1.5 rounded-md text-xs font-medium bg-slate-800 text-slate-300" data-tab="datos">Modelo de datos</button>
+    <button class="tab-btn whitespace-nowrap px-3 py-1.5 rounded-md text-xs font-medium bg-slate-800 text-slate-300" data-tab="api">API</button>
+    <button class="tab-btn whitespace-nowrap px-3 py-1.5 rounded-md text-xs font-medium bg-slate-800 text-slate-300" data-tab="seguridad">Seguridad</button>
+    <button class="tab-btn whitespace-nowrap px-3 py-1.5 rounded-md text-xs font-medium bg-slate-800 text-slate-300" data-tab="roadmap">Roadmap</button>
+    <button class="tab-btn whitespace-nowrap px-3 py-1.5 rounded-md text-xs font-medium bg-slate-800 text-slate-300" data-tab="entregables">Entregables</button>
+    <button class="tab-btn whitespace-nowrap px-3 py-1.5 rounded-md text-xs font-medium bg-slate-800 text-slate-300" data-tab="decisiones">Decisiones técnicas</button>
+  </div>
+</nav>
+
+<main class="max-w-7xl mx-auto px-6 py-8">
+<section class="tab-content active" id="flujos">
+    <h2 class="text-xl font-semibold text-white mb-2">Flujos de usuario</h2>
+    <p class="text-sm text-slate-400 mb-4">Diagramas de flujo por caso de uso. Cada nodo indica el actor responsable de la acción.</p>
+
+    <div class="mb-3 flex gap-2 flex-wrap">
+      <span class="chip actor-client">👤 Cliente</span>
+      <span class="chip actor-merchant">🏪 Comercio</span>
+      <span class="chip actor-courier">🛵 Repartidor</span>
+      <span class="chip actor-admin">🛡️ Admin</span>
+      <span class="chip actor-system">⚙️ Sistema</span>
+    </div>
+
+    <div class="space-y-3">
+
+      <!-- CLIENTE: REGISTRO -->
+      <details class="card p-4" open>
+        <summary class="flex items-center gap-2">
+          <span class="summary-icon text-slate-500">▶</span>
+          <span class="font-semibold text-white">👤 Registro y autenticación del cliente</span>
+          <span class="badge-done ml-auto">MVP 1</span>
+        </summary>
+        <div class="mt-4 overflow-x-auto">
+          <div class="flow-container">
+            <div class="flow-node actor-client rounded-lg p-3 min-w-[140px]"><div class="text-xs text-blue-200">Cliente</div><div class="text-xs font-semibold mt-1">Ingresa email/teléfono</div></div>
+            <span class="arrow">→</span>
+            <div class="flow-node actor-system rounded-lg p-3 min-w-[140px]"><div class="text-xs text-slate-300">Sistema</div><div class="text-xs font-semibold mt-1">Envía OTP (futuro)</div></div>
+            <span class="arrow">→</span>
+            <div class="flow-node actor-client rounded-lg p-3 min-w-[140px]"><div class="text-xs text-blue-200">Cliente</div><div class="text-xs font-semibold mt-1">Define contraseña</div></div>
+            <span class="arrow">→</span>
+            <div class="flow-node actor-system rounded-lg p-3 min-w-[140px]"><div class="text-xs text-slate-300">Sistema</div><div class="text-xs font-semibold mt-1">Crea user + JWT</div></div>
+            <span class="arrow">→</span>
+            <div class="flow-node actor-client rounded-lg p-3 min-w-[140px]"><div class="text-xs text-blue-200">Cliente</div><div class="text-xs font-semibold mt-1">Home</div></div>
+          </div>
+        </div>
+      </details>
+
+      <!-- CLIENTE: LOGIN -->
+      <details class="card p-4">
+        <summary class="flex items-center gap-2">
+          <span class="summary-icon text-slate-500">▶</span>
+          <span class="font-semibold text-white">👤 Login y refresh de token</span>
+        </summary>
+        <div class="mt-4 overflow-x-auto">
+          <div class="flow-container">
+            <div class="flow-node actor-client rounded-lg p-3 min-w-[130px]"><div class="text-xs text-blue-200">Cliente</div><div class="text-xs font-semibold mt-1">POST /auth/login</div></div>
+            <span class="arrow">→</span>
+            <div class="flow-node actor-system rounded-lg p-3 min-w-[130px]"><div class="text-xs text-slate-300">Sistema</div><div class="text-xs font-semibold mt-1">Valida credenciales</div></div>
+            <span class="arrow">→</span>
+            <div class="flow-node actor-system rounded-lg p-3 min-w-[130px]"><div class="text-xs text-slate-300">Sistema</div><div class="text-xs font-semibold mt-1">Genera access+refresh</div></div>
+            <span class="arrow">→</span>
+            <div class="flow-node actor-client rounded-lg p-3 min-w-[130px]"><div class="text-xs text-blue-200">Cliente</div><div class="text-xs font-semibold mt-1">Almacena tokens</div></div>
+            <span class="arrow">→</span>
+            <div class="flow-node actor-client rounded-lg p-3 min-w-[130px]"><div class="text-xs text-blue-200">Cliente</div><div class="text-xs font-semibold mt-1">Al expirar: POST /auth/refresh</div></div>
+          </div>
+        </div>
+      </details>
+
+      <!-- CLIENTE: RECUPERAR CONTRASEÑA -->
+      <details class="card p-4">
+        <summary class="flex items-center gap-2">
+          <span class="summary-icon text-slate-500">▶</span>
+          <span class="font-semibold text-white">👤 Recuperación de contraseña</span>
+        </summary>
+        <div class="mt-4 overflow-x-auto">
+          <div class="flow-container">
+            <div class="flow-node actor-client rounded-lg p-3 min-w-[140px]"><div class="text-xs text-blue-200">Cliente</div><div class="text-xs font-semibold mt-1">POST /auth/forgot-password</div></div>
+            <span class="arrow">→</span>
+            <div class="flow-node actor-system rounded-lg p-3 min-w-[140px]"><div class="text-xs text-slate-300">Sistema</div><div class="text-xs font-semibold mt-1">Genera token 1h + envía email</div></div>
+            <span class="arrow">→</span>
+            <div class="flow-node actor-client rounded-lg p-3 min-w-[140px]"><div class="text-xs text-blue-200">Cliente</div><div class="text-xs font-semibold mt-1">Click en link email</div></div>
+            <span class="arrow">→</span>
+            <div class="flow-node actor-client rounded-lg p-3 min-w-[140px]"><div class="text-xs text-blue-200">Cliente</div><div class="text-xs font-semibold mt-1">Nueva contraseña</div></div>
+            <span class="arrow">→</span>
+            <div class="flow-node actor-system rounded-lg p-3 min-w-[140px]"><div class="text-xs text-slate-300">Sistema</div><div class="text-xs font-semibold mt-1">Invalida refresh tokens</div></div>
+          </div>
+        </div>
+      </details>
+
+      <!-- CLIENTE: BÚSQUEDA -->
+      <details class="card p-4">
+        <summary class="flex items-center gap-2">
+          <span class="summary-icon text-slate-500">▶</span>
+          <span class="font-semibold text-white">👤 Búsqueda y descubrimiento</span>
+        </summary>
+        <div class="mt-4 overflow-x-auto">
+          <div class="flow-container">
+            <div class="flow-node actor-client rounded-lg p-3 min-w-[130px]"><div class="text-xs text-blue-200">Cliente</div><div class="text-xs font-semibold mt-1">Permite GPS</div></div>
+            <span class="arrow">→</span>
+            <div class="flow-node actor-system rounded-lg p-3 min-w-[130px]"><div class="text-xs text-slate-300">Sistema</div><div class="text-xs font-semibold mt-1">GET /catalog/nearby</div></div>
+            <span class="arrow">→</span>
+            <div class="flow-node actor-client rounded-lg p-3 min-w-[130px]"><div class="text-xs text-blue-200">Cliente</div><div class="text-xs font-semibold mt-1">Aplica filtros</div></div>
+            <span class="arrow">→</span>
+            <div class="flow-node actor-system rounded-lg p-3 min-w-[130px]"><div class="text-xs text-slate-300">Sistema</div><div class="text-xs font-semibold mt-1">Full-text + geo filter</div></div>
+            <span class="arrow">→</span>
+            <div class="flow-node actor-client rounded-lg p-3 min-w-[130px]"><div class="text-xs text-blue-200">Cliente</div><div class="text-xs font-semibold mt-1">Ve ficha comercio/producto</div></div>
+          </div>
+        </div>
+      </details>
+
+      <!-- CLIENTE: FAVORITOS -->
+      <details class="card p-4">
+        <summary class="flex items-center gap-2">
+          <span class="summary-icon text-slate-500">▶</span>
+          <span class="font-semibold text-white">👤 Añadir a favoritos / reordenar</span>
+        </summary>
+        <div class="mt-4 overflow-x-auto">
+          <div class="flow-container">
+            <div class="flow-node actor-client rounded-lg p-3 min-w-[140px]"><div class="text-xs text-blue-200">Cliente</div><div class="text-xs font-semibold mt-1">POST /favorites</div></div>
+            <span class="arrow">→</span>
+            <div class="flow-node actor-system rounded-lg p-3 min-w-[140px]"><div class="text-xs text-slate-300">Sistema</div><div class="text-xs font-semibold mt-1">Guarda en user_favorites</div></div>
+            <span class="arrow">→</span>
+            <div class="flow-node actor-client rounded-lg p-3 min-w-[140px]"><div class="text-xs text-blue-200">Cliente</div><div class="text-xs font-semibold mt-1">GET /orders/history</div></div>
+            <span class="arrow">→</span>
+            <div class="flow-node actor-client rounded-lg p-3 min-w-[140px]"><div class="text-xs text-blue-200">Cliente</div><div class="text-xs font-semibold mt-1">Click "reordenar"</div></div>
+            <span class="arrow">→</span>
+            <div class="flow-node actor-system rounded-lg p-3 min-w-[140px]"><div class="text-xs text-slate-300">Sistema</div><div class="text-xs font-semibold mt-1">Valida stock actual</div></div>
+            <span class="arrow">→</span>
+            <div class="flow-node actor-client rounded-lg p-3 min-w-[140px]"><div class="text-xs text-blue-200">Cliente</div><div class="text-xs font-semibold mt-1">Carrito precargado</div></div>
+          </div>
+        </div>
+      </details>
+
+      <!-- CLIENTE: COMPRA COMPLETA -->
+      <details class="card p-4">
+        <summary class="flex items-center gap-2">
+          <span class="summary-icon text-slate-500">▶</span>
+          <span class="font-semibold text-white">👤 Flujo de compra completo</span>
+          <span class="badge-warn ml-auto">Crítico</span>
+        </summary>
+        <div class="mt-4 overflow-x-auto">
+          <div class="flow-container">
+            <div class="flow-node actor-client rounded-lg p-3 min-w-[130px]"><div class="text-xs text-blue-200">Cliente</div><div class="text-xs font-semibold mt-1">Agrega al carrito</div></div>
+            <span class="arrow">→</span>
+            <div class="flow-node actor-client rounded-lg p-3 min-w-[130px]"><div class="text-xs text-blue-200">Cliente</div><div class="text-xs font-semibold mt-1">Checkout + dirección</div></div>
+            <span class="arrow">→</span>
+            <div class="flow-node actor-system rounded-lg p-3 min-w-[130px]"><div class="text-xs text-slate-300">Sistema</div><div class="text-xs font-semibold mt-1">Calcula envío + total</div></div>
+            <span class="arrow">→</span>
+            <div class="flow-node actor-client rounded-lg p-3 min-w-[130px]"><div class="text-xs text-blue-200">Cliente</div><div class="text-xs font-semibold mt-1">Confirma pago</div></div>
+            <span class="arrow">→</span>
+            <div class="flow-node actor-system rounded-lg p-3 min-w-[130px]"><div class="text-xs text-slate-300">Sistema</div><div class="text-xs font-semibold mt-1">Crea order + push comercio</div></div>
+          </div>
+          <div class="flow-container">
+            <div class="flow-node actor-merchant rounded-lg p-3 min-w-[130px]"><div class="text-xs text-emerald-200">Comercio</div><div class="text-xs font-semibold mt-1">Confirma (≤5min)</div></div>
+            <span class="arrow">→</span>
+            <div class="flow-node actor-system rounded-lg p-3 min-w-[130px]"><div class="text-xs text-slate-300">Sistema</div><div class="text-xs font-semibold mt-1">Busca repartidor</div></div>
+            <span class="arrow">→</span>
+            <div class="flow-node actor-courier rounded-lg p-3 min-w-[130px]"><div class="text-xs text-purple-200">Repartidor</div><div class="text-xs font-semibold mt-1">Acepta pedido</div></div>
+            <span class="arrow">→</span>
+            <div class="flow-node actor-merchant rounded-lg p-3 min-w-[130px]"><div class="text-xs text-emerald-200">Comercio</div><div class="text-xs font-semibold mt-1">Marca "listo"</div></div>
+            <span class="arrow">→</span>
+            <div class="flow-node actor-courier rounded-lg p-3 min-w-[130px]"><div class="text-xs text-purple-200">Repartidor</div><div class="text-xs font-semibold mt-1">Retira + confirma</div></div>
+          </div>
+          <div class="flow-container">
+            <div class="flow-node actor-courier rounded-lg p-3 min-w-[130px]"><div class="text-xs text-purple-200">Repartidor</div><div class="text-xs font-semibold mt-1">Navega al cliente</div></div>
+            <span class="arrow">→</span>
+            <div class="flow-node actor-client rounded-lg p-3 min-w-[130px]"><div class="text-xs text-blue-200">Cliente</div><div class="text-xs font-semibold mt-1">Tracking en vivo</div></div>
+            <span class="arrow">→</span>
+            <div class="flow-node actor-courier rounded-lg p-3 min-w-[130px]"><div class="text-xs text-purple-200">Repartidor</div><div class="text-xs font-semibold mt-1">Entrega + evidencia</div></div>
+            <span class="arrow">→</span>
+            <div class="flow-node actor-client rounded-lg p-3 min-w-[130px]"><div class="text-xs text-blue-200">Cliente</div><div class="text-xs font-semibold mt-1">Confirma + califica</div></div>
+            <span class="arrow">→</span>
+            <div class="flow-node actor-system rounded-lg p-3 min-w-[130px]"><div class="text-xs text-slate-300">Sistema</div><div class="text-xs font-semibold mt-1">Cierra + liquida</div></div>
+          </div>
+        </div>
+      </details>
+
+      <!-- CLIENTE: CANCELACIÓN -->
+      <details class="card p-4">
+        <summary class="flex items-center gap-2">
+          <span class="summary-icon text-slate-500">▶</span>
+          <span class="font-semibold text-white">👤 Cancelación por cliente</span>
+        </summary>
+        <div class="mt-4 overflow-x-auto">
+          <div class="flow-container">
+            <div class="flow-node actor-client rounded-lg p-3 min-w-[140px]"><div class="text-xs text-blue-200">Cliente</div><div class="text-xs font-semibold mt-1">POST /orders/{id}/cancel</div></div>
+            <span class="arrow">→</span>
+            <div class="flow-node actor-system rounded-lg p-3 min-w-[140px]"><div class="text-xs text-slate-300">Sistema</div><div class="text-xs font-semibold mt-1">¿Permitido? (estado+tiempo)</div></div>
+            <span class="arrow">→</span>
+            <div class="flow-node actor-system rounded-lg p-3 min-w-[140px]"><div class="text-xs text-slate-300">Sistema</div><div class="text-xs font-semibold mt-1">Notifica a comercio+repartidor</div></div>
+            <span class="arrow">→</span>
+            <div class="flow-node actor-system rounded-lg p-3 min-w-[140px]"><div class="text-xs text-slate-300">Sistema</div><div class="text-xs font-semibold mt-1">Reembolso vía gateway</div></div>
+            <span class="arrow">→</span>
+            <div class="flow-node actor-client rounded-lg p-3 min-w-[140px]"><div class="text-xs text-blue-200">Cliente</div><div class="text-xs font-semibold mt-1">Confirmación</div></div>
+          </div>
+        </div>
+      </details>
+
+      <!-- CLIENTE: INCIDENCIA -->
+      <details class="card p-4">
+        <summary class="flex items-center gap-2">
+          <span class="summary-icon text-slate-500">▶</span>
+          <span class="font-semibold text-white">👤 Reporte de incidencia</span>
+        </summary>
+        <div class="mt-4 overflow-x-auto">
+          <div class="flow-container">
+            <div class="flow-node actor-client rounded-lg p-3 min-w-[140px]"><div class="text-xs text-blue-200">Cliente</div><div class="text-xs font-semibold mt-1">Reporta incidencia</div></div>
+            <span class="arrow">→</span>
+            <div class="flow-node actor-system rounded-lg p-3 min-w-[140px]"><div class="text-xs text-slate-300">Sistema</div><div class="text-xs font-semibold mt-1">Crea ticket + notifica admin</div></div>
+            <span class="arrow">→</span>
+            <div class="flow-node actor-admin rounded-lg p-3 min-w-[140px]"><div class="text-xs text-red-200">Admin</div><div class="text-xs font-semibold mt-1">Revisa evidencia</div></div>
+            <span class="arrow">→</span>
+            <div class="flow-node actor-admin rounded-lg p-3 min-w-[140px]"><div class="text-xs text-red-200">Admin</div><div class="text-xs font-semibold mt-1">Decide: reembolso/penalización</div></div>
+            <span class="arrow">→</span>
+            <div class="flow-node actor-system rounded-lg p-3 min-w-[140px]"><div class="text-xs text-slate-300">Sistema</div><div class="text-xs font-semibold mt-1">Ejecuta + notifica</div></div>
+          </div>
+        </div>
+      </details>
+
+      <!-- COMERCIOS -->
+      <details class="card p-4">
+        <summary class="flex items-center gap-2">
+          <span class="summary-icon text-slate-500">▶</span>
+          <span class="font-semibold text-white">🏪 Onboarding de comercio</span>
+          <span class="badge-wip ml-auto">MVP 3</span>
+        </summary>
+        <div class="mt-4 overflow-x-auto">
+          <div class="flow-container">
+            <div class="flow-node actor-merchant rounded-lg p-3 min-w-[130px]"><div class="text-xs text-emerald-200">Comercio</div><div class="text-xs font-semibold mt-1">Registro básico</div></div>
+            <span class="arrow">→</span>
+            <div class="flow-node actor-merchant rounded-lg p-3 min-w-[130px]"><div class="text-xs text-emerald-200">Comercio</div><div class="text-xs font-semibold mt-1">Datos fiscales</div></div>
+            <span class="arrow">→</span>
+            <div class="flow-node actor-merchant rounded-lg p-3 min-w-[130px]"><div class="text-xs text-emerald-200">Comercio</div><div class="text-xs font-semibold mt-1">Firma contrato adhesión</div></div>
+            <span class="arrow">→</span>
+            <div class="flow-node actor-system rounded-lg p-3 min-w-[130px]"><div class="text-xs text-slate-300">Sistema</div><div class="text-xs font-semibold mt-1">Estado: pendiente</div></div>
+            <span class="arrow">→</span>
+            <div class="flow-node actor-admin rounded-lg p-3 min-w-[130px]"><div class="text-xs text-red-200">Admin</div><div class="text-xs font-semibold mt-1">Revisa y aprueba</div></div>
+          </div>
+          <div class="flow-container">
+            <div class="flow-node actor-system rounded-lg p-3 min-w-[130px]"><div class="text-xs text-slate-300">Sistema</div><div class="text-xs font-semibold mt-1">Email bienvenida</div></div>
+            <span class="arrow">→</span>
+            <div class="flow-node actor-merchant rounded-lg p-3 min-w-[130px]"><div class="text-xs text-emerald-200">Comercio</div><div class="text-xs font-semibold mt-1">Configura horarios/zona</div></div>
+            <span class="arrow">→</span>
+            <div class="flow-node actor-merchant rounded-lg p-3 min-w-[130px]"><div class="text-xs text-emerald-200">Comercio</div><div class="text-xs font-semibold mt-1">Carga catálogo</div></div>
+            <span class="arrow">→</span>
+            <div class="flow-node actor-system rounded-lg p-3 min-w-[130px]"><div class="text-xs text-slate-300">Sistema</div><div class="text-xs font-semibold mt-1">Indexa en búsqueda</div></div>
+            <span class="arrow">→</span>
+            <div class="flow-node actor-merchant rounded-lg p-3 min-w-[130px]"><div class="text-xs text-emerald-200">Comercio</div><div class="text-xs font-semibold mt-1">Publicado en feed</div></div>
+          </div>
+        </div>
+      </details>
+
+      <details class="card p-4">
+        <summary class="flex items-center gap-2">
+          <span class="summary-icon text-slate-500">▶</span>
+          <span class="font-semibold text-white">🏪 Gestión de pedido (comercio)</span>
+        </summary>
+        <div class="mt-4 overflow-x-auto">
+          <div class="flow-container">
+            <div class="flow-node actor-system rounded-lg p-3 min-w-[130px]"><div class="text-xs text-slate-300">Sistema</div><div class="text-xs font-semibold mt-1">Push "nuevo pedido"</div></div>
+            <span class="arrow">→</span>
+            <div class="flow-node actor-merchant rounded-lg p-3 min-w-[130px]"><div class="text-xs text-emerald-200">Comercio</div><div class="text-xs font-semibold mt-1">Acepta/Rechaza (≤5min)</div></div>
+            <span class="arrow">→</span>
+            <div class="flow-node actor-merchant rounded-lg p-3 min-w-[130px]"><div class="text-xs text-emerald-200">Comercio</div><div class="text-xs font-semibold mt-1">Marca "en preparación"</div></div>
+            <span class="arrow">→</span>
+            <div class="flow-node actor-merchant rounded-lg p-3 min-w-[130px]"><div class="text-xs text-emerald-200">Comercio</div><div class="text-xs font-semibold mt-1">Marca "listo"</div></div>
+            <span class="arrow">→</span>
+            <div class="flow-node actor-system rounded-lg p-3 min-w-[130px]"><div class="text-xs text-slate-300">Sistema</div><div class="text-xs font-semibold mt-1">Notifica repartidor</div></div>
+            <span class="arrow">→</span>
+            <div class="flow-node actor-courier rounded-lg p-3 min-w-[130px]"><div class="text-xs text-purple-200">Repartidor</div><div class="text-xs font-semibold mt-1">Retira + confirma</div></div>
+          </div>
+        </div>
+      </details>
+
+      <details class="card p-4">
+        <summary class="flex items-center gap-2">
+          <span class="summary-icon text-slate-500">▶</span>
+          <span class="font-semibold text-white">🏪 Carga masiva de catálogo (CSV)</span>
+        </summary>
+        <div class="mt-4 overflow-x-auto">
+          <div class="flow-container">
+            <div class="flow-node actor-merchant rounded-lg p-3 min-w-[140px]"><div class="text-xs text-emerald-200">Comercio</div><div class="text-xs font-semibold mt-1">Descarga template</div></div>
+            <span class="arrow">→</span>
+            <div class="flow-node actor-merchant rounded-lg p-3 min-w-[140px]"><div class="text-xs text-emerald-200">Comercio</div><div class="text-xs font-semibold mt-1">Completa y sube CSV</div></div>
+            <span class="arrow">→</span>
+            <div class="flow-node actor-system rounded-lg p-3 min-w-[140px]"><div class="text-xs text-slate-300">Sistema</div><div class="text-xs font-semibold mt-1">Valida + crea job</div></div>
+            <span class="arrow">→</span>
+            <div class="flow-node actor-system rounded-lg p-3 min-w-[140px]"><div class="text-xs text-slate-300">Sistema</div><div class="text-xs font-semibold mt-1">Procesa async</div></div>
+            <span class="arrow">→</span>
+            <div class="flow-node actor-merchant rounded-lg p-3 min-w-[140px]"><div class="text-xs text-emerald-200">Comercio</div><div class="text-xs font-semibold mt-1">Ve resultado con errores</div></div>
+          </div>
+        </div>
+      </details>
+
+      <details class="card p-4">
+        <summary class="flex items-center gap-2">
+          <span class="summary-icon text-slate-500">▶</span>
+          <span class="font-semibold text-white">🏪 Reporte de producto agotado</span>
+        </summary>
+        <div class="mt-4 overflow-x-auto">
+          <div class="flow-container">
+            <div class="flow-node actor-merchant rounded-lg p-3 min-w-[140px]"><div class="text-xs text-emerald-200">Comercio</div><div class="text-xs font-semibold mt-1">Marca "agotado"</div></div>
+            <span class="arrow">→</span>
+            <div class="flow-node actor-system rounded-lg p-3 min-w-[140px]"><div class="text-xs text-slate-300">Sistema</div><div class="text-xs font-semibold mt-1">Actualiza stock + reindexa</div></div>
+            <span class="arrow">→</span>
+            <div class="flow-node actor-system rounded-lg p-3 min-w-[140px]"><div class="text-xs text-slate-300">Sistema</div><div class="text-xs font-semibold mt-1">Oculto en búsqueda</div></div>
+          </div>
+        </div>
+      </details>
+
+      <!-- REPARTIDORES -->
+      <details class="card p-4">
+        <summary class="flex items-center gap-2">
+          <span class="summary-icon text-slate-500">▶</span>
+          <span class="font-semibold text-white">🛵 Onboarding y verificación del repartidor</span>
+          <span class="badge-wip ml-auto">MVP 3</span>
+        </summary>
+        <div class="mt-4 overflow-x-auto">
+          <div class="flow-container">
+            <div class="flow-node actor-courier rounded-lg p-3 min-w-[130px]"><div class="text-xs text-purple-200">Repartidor</div><div class="text-xs font-semibold mt-1">Datos personales</div></div>
+            <span class="arrow">→</span>
+            <div class="flow-node actor-courier rounded-lg p-3 min-w-[130px]"><div class="text-xs text-purple-200">Repartidor</div><div class="text-xs font-semibold mt-1">Sube DNI + licencia</div></div>
+            <span class="arrow">→</span>
+            <div class="flow-node actor-courier rounded-lg p-3 min-w-[130px]"><div class="text-xs text-purple-200">Repartidor</div><div class="text-xs font-semibold mt-1">Firma contrato</div></div>
+            <span class="arrow">→</span>
+            <div class="flow-node actor-admin rounded-lg p-3 min-w-[130px]"><div class="text-xs text-red-200">Admin</div><div class="text-xs font-semibold mt-1">Verifica docs</div></div>
+            <span class="arrow">→</span>
+            <div class="flow-node actor-courier rounded-lg p-3 min-w-[130px]"><div class="text-xs text-purple-200">Repartidor</div><div class="text-xs font-semibold mt-1">Activa disponibilidad</div></div>
+          </div>
+        </div>
+      </details>
+
+      <details class="card p-4">
+        <summary class="flex items-center gap-2">
+          <span class="summary-icon text-slate-500">▶</span>
+          <span class="font-semibold text-white">🛵 Recepción y aceptación de pedido</span>
+        </summary>
+        <div class="mt-4 overflow-x-auto">
+          <div class="flow-container">
+            <div class="flow-node actor-system rounded-lg p-3 min-w-[130px]"><div class="text-xs text-slate-300">Sistema</div><div class="text-xs font-semibold mt-1">POST /orders/{id}/offer</div></div>
+            <span class="arrow">→</span>
+            <div class="flow-node actor-courier rounded-lg p-3 min-w-[130px]"><div class="text-xs text-purple-200">Repartidor</div><div class="text-xs font-semibold mt-1">Push con distancia + $$</div></div>
+            <span class="arrow">→</span>
+            <div class="flow-node actor-courier rounded-lg p-3 min-w-[130px]"><div class="text-xs text-purple-200">Repartidor</div><div class="text-xs font-semibold mt-1">Acepta (30s timeout)</div></div>
+            <span class="arrow">→</span>
+            <div class="flow-node actor-system rounded-lg p-3 min-w-[130px]"><div class="text-xs text-slate-300">Sistema</div><div class="text-xs font-semibold mt-1">Asigna + bloquea otros</div></div>
+            <span class="arrow">→</span>
+            <div class="flow-node actor-courier rounded-lg p-3 min-w-[130px]"><div class="text-xs text-purple-200">Repartidor</div><div class="text-xs font-semibold mt-1">Navega al comercio</div></div>
+          </div>
+        </div>
+      </details>
+
+      <details class="card p-4">
+        <summary class="flex items-center gap-2">
+          <span class="summary-icon text-slate-500">▶</span>
+          <span class="font-semibold text-white">🛵 Rechazo / timeout y reasignación</span>
+        </summary>
+        <div class="mt-4 overflow-x-auto">
+          <div class="flow-container">
+            <div class="flow-node actor-courier rounded-lg p-3 min-w-[140px]"><div class="text-xs text-purple-200">Repartidor</div><div class="text-xs font-semibold mt-1">Rechaza o timeout 30s</div></div>
+            <span class="arrow">→</span>
+            <div class="flow-node actor-system rounded-lg p-3 min-w-[140px]"><div class="text-xs text-slate-300">Sistema</div><div class="text-xs font-semibold mt-1">Siguiente repartidor cercano</div></div>
+            <span class="arrow">→</span>
+            <div class="flow-node actor-system rounded-lg p-3 min-w-[140px]"><div class="text-xs text-slate-300">Sistema</div><div class="text-xs font-semibold mt-1">Repite hasta N intentos</div></div>
+            <span class="arrow">→</span>
+            <div class="flow-node actor-system rounded-lg p-3 min-w-[140px]"><div class="text-xs text-slate-300">Sistema</div><div class="text-xs font-semibold mt-1">Si falla: push a admin</div></div>
+            <span class="arrow">→</span>
+            <div class="flow-node actor-admin rounded-lg p-3 min-w-[140px]"><div class="text-xs text-red-200">Admin</div><div class="text-xs font-semibold mt-1">Asigna manualmente</div></div>
+          </div>
+        </div>
+      </details>
+
+      <details class="card p-4">
+        <summary class="flex items-center gap-2">
+          <span class="summary-icon text-slate-500">▶</span>
+          <span class="font-semibold text-white">🛵 Confirmación de entrega con evidencia</span>
+        </summary>
+        <div class="mt-4 overflow-x-auto">
+          <div class="flow-container">
+            <div class="flow-node actor-courier rounded-lg p-3 min-w-[140px]"><div class="text-xs text-purple-200">Repartidor</div><div class="text-xs font-semibold mt-1">Llega a dirección</div></div>
+            <span class="arrow">→</span>
+            <div class="flow-node actor-courier rounded-lg p-3 min-w-[140px]"><div class="text-xs text-purple-200">Repartidor</div><div class="text-xs font-semibold mt-1">Foto/firma/OTP cliente</div></div>
+            <span class="arrow">→</span>
+            <div class="flow-node actor-system rounded-lg p-3 min-w-[140px]"><div class="text-xs text-slate-300">Sistema</div><div class="text-xs font-semibold mt-1">Sube evidencia a S3</div></div>
+            <span class="arrow">→</span>
+            <div class="flow-node actor-system rounded-lg p-3 min-w-[140px]"><div class="text-xs text-slate-300">Sistema</div><div class="text-xs font-semibold mt-1">Marca order "entregado"</div></div>
+            <span class="arrow">→</span>
+            <div class="flow-node actor-system rounded-lg p-3 min-w-[140px]"><div class="text-xs text-slate-300">Sistema</div><div class="text-xs font-semibold mt-1">Acredita pago + push cliente</div></div>
+          </div>
+        </div>
+      </details>
+
+      <details class="card p-4">
+        <summary class="flex items-center gap-2">
+          <span class="summary-icon text-slate-500">▶</span>
+          <span class="font-semibold text-white">🛵 Cliente ausente / incidencia</span>
+        </summary>
+        <div class="mt-4 overflow-x-auto">
+          <div class="flow-container">
+            <div class="flow-node actor-courier rounded-lg p-3 min-w-[140px]"><div class="text-xs text-purple-200">Repartidor</div><div class="text-xs font-semibold mt-1">Reporta incidencia</div></div>
+            <span class="arrow">→</span>
+            <div class="flow-node actor-system rounded-lg p-3 min-w-[140px]"><div class="text-xs text-slate-300">Sistema</div><div class="text-xs font-semibold mt-1">Intenta contactar cliente</div></div>
+            <span class="arrow">→</span>
+            <div class="flow-node actor-system rounded-lg p-3 min-w-[140px]"><div class="text-xs text-slate-300">Sistema</div><div class="text-xs font-semibold mt-1">Espera X min (configurable)</div></div>
+            <span class="arrow">→</span>
+            <div class="flow-node actor-courier rounded-lg p-3 min-w-[140px]"><div class="text-xs text-purple-200">Repartidor</div><div class="text-xs font-semibold mt-1">Foto + abandona</div></div>
+            <span class="arrow">→</span>
+            <div class="flow-node actor-admin rounded-lg p-3 min-w-[140px]"><div class="text-xs text-red-200">Admin</div><div class="text-xs font-semibold mt-1">Revisa + penaliza</div></div>
+          </div>
+        </div>
+      </details>
+
+      <details class="card p-4">
+        <summary class="flex items-center gap-2">
+          <span class="summary-icon text-slate-500">▶</span>
+          <span class="font-semibold text-white">🛵 Tracking de ubicación en background</span>
+        </summary>
+        <div class="mt-4 overflow-x-auto">
+          <div class="flow-container">
+            <div class="flow-node actor-courier rounded-lg p-3 min-w-[130px]"><div class="text-xs text-purple-200">Repartidor</div><div class="text-xs font-semibold mt-1">App en background</div></div>
+            <span class="arrow">→</span>
+            <div class="flow-node actor-system rounded-lg p-3 min-w-[130px]"><div class="text-xs text-slate-300">Sistema</div><div class="text-xs font-semibold mt-1">Location service cada 10s</div></div>
+            <span class="arrow">→</span>
+            <div class="flow-node actor-courier rounded-lg p-3 min-w-[130px]"><div class="text-xs text-purple-200">Repartidor</div><div class="text-xs font-semibold mt-1">Batch local si sin red</div></div>
+            <span class="arrow">→</span>
+            <div class="flow-node actor-system rounded-lg p-3 min-w-[130px]"><div class="text-xs text-slate-300">Sistema</div><div class="text-xs font-semibold mt-1">POST /geo/track batch</div></div>
+            <span class="arrow">→</span>
+            <div class="flow-node actor-system rounded-lg p-3 min-w-[130px]"><div class="text-xs text-slate-300">Sistema</div><div class="text-xs font-semibold mt-1">Emit WS a cliente</div></div>
+          </div>
+        </div>
+      </details>
+
+      <!-- ADMIN -->
+      <details class="card p-4">
+        <summary class="flex items-center gap-2">
+          <span class="summary-icon text-slate-500">▶</span>
+          <span class="font-semibold text-white">🛡️ Aprobación de actores</span>
+        </summary>
+        <div class="mt-4 overflow-x-auto">
+          <div class="flow-container">
+            <div class="flow-node actor-admin rounded-lg p-3 min-w-[140px]"><div class="text-xs text-red-200">Admin</div><div class="text-xs font-semibold mt-1">Lista "pendientes"</div></div>
+            <span class="arrow">→</span>
+            <div class="flow-node actor-admin rounded-lg p-3 min-w-[140px]"><div class="text-xs text-red-200">Admin</div><div class="text-xs font-semibold mt-1">Revisa docs/datos</div></div>
+            <span class="arrow">→</span>
+            <div class="flow-node actor-admin rounded-lg p-3 min-w-[140px]"><div class="text-xs text-red-200">Admin</div><div class="text-xs font-semibold mt-1">Aprueba / rechaza (motivo)</div></div>
+            <span class="arrow">→</span>
+            <div class="flow-node actor-system rounded-lg p-3 min-w-[140px]"><div class="text-xs text-slate-300">Sistema</div><div class="text-xs font-semibold mt-1">Log auditoría + email</div></div>
+          </div>
+        </div>
+      </details>
+
+      <details class="card p-4">
+        <summary class="flex items-center gap-2">
+          <span class="summary-icon text-slate-500">▶</span>
+          <span class="font-semibold text-white">🛡️ Configuración de esquema de comisión</span>
+        </summary>
+        <div class="mt-4 overflow-x-auto">
+          <div class="flow-container">
+            <div class="flow-node actor-admin rounded-lg p-3 min-w-[140px]"><div class="text-xs text-red-200">Admin</div><div class="text-xs font-semibold mt-1">Crea nuevo esquema</div></div>
+            <span class="arrow">→</span>
+            <div class="flow-node actor-admin rounded-lg p-3 min-w-[140px]"><div class="text-xs text-red-200">Admin</div><div class="text-xs font-semibold mt-1">Define tipo/valor/vigencia</div></div>
+            <span class="arrow">→</span>
+            <div class="flow-node actor-system rounded-lg p-3 min-w-[140px]"><div class="text-xs text-slate-300">Sistema</div><div class="text-xs font-semibold mt-1">Guarda en commission_schemas</div></div>
+            <span class="arrow">→</span>
+            <div class="flow-node actor-admin rounded-lg p-3 min-w-[140px]"><div class="text-xs text-red-200">Admin</div><div class="text-xs font-semibold mt-1">Asigna a segmento</div></div>
+          </div>
+        </div>
+      </details>
+
+      <details class="card p-4">
+        <summary class="flex items-center gap-2">
+          <span class="summary-icon text-slate-500">▶</span>
+          <span class="font-semibold text-white">🛡️ Vencimiento de promoción (job diario)</span>
+        </summary>
+        <div class="mt-4 overflow-x-auto">
+          <div class="flow-container">
+            <div class="flow-node actor-system rounded-lg p-3 min-w-[140px]"><div class="text-xs text-slate-300">Sistema</div><div class="text-xs font-semibold mt-1">Cron 03:00 AM</div></div>
+            <span class="arrow">→</span>
+            <div class="flow-node actor-system rounded-lg p-3 min-w-[140px]"><div class="text-xs text-slate-300">Sistema</div><div class="text-xs font-semibold mt-1">Detecta vencidos</div></div>
+            <span class="arrow">→</span>
+            <div class="flow-node actor-system rounded-lg p-3 min-w-[140px]"><div class="text-xs text-slate-300">Sistema</div><div class="text-xs font-semibold mt-1">Marca "pendiente_renovación"</div></div>
+            <span class="arrow">→</span>
+            <div class="flow-node actor-system rounded-lg p-3 min-w-[140px]"><div class="text-xs text-slate-300">Sistema</div><div class="text-xs font-semibold mt-1">Push + email al actor</div></div>
+            <span class="arrow">→</span>
+            <div class="flow-node actor-merchant rounded-lg p-3 min-w-[140px]"><div class="text-xs text-emerald-200">Actor</div><div class="text-xs font-semibold mt-1">Elige nuevo esquema</div></div>
+          </div>
+        </div>
+      </details>
+
+      <details class="card p-4">
+        <summary class="flex items-center gap-2">
+          <span class="summary-icon text-slate-500">▶</span>
+          <span class="font-semibold text-white">🛡️ Resolución de disputas</span>
+        </summary>
+        <div class="mt-4 overflow-x-auto">
+          <div class="flow-container">
+            <div class="flow-node actor-system rounded-lg p-3 min-w-[140px]"><div class="text-xs text-slate-300">Sistema</div><div class="text-xs font-semibold mt-1">Cola de disputas</div></div>
+            <span class="arrow">→</span>
+            <div class="flow-node actor-admin rounded-lg p-3 min-w-[140px]"><div class="text-xs text-red-200">Admin</div><div class="text-xs font-semibold mt-1">Revisa evidencia</div></div>
+            <span class="arrow">→</span>
+            <div class="flow-node actor-admin rounded-lg p-3 min-w-[140px]"><div class="text-xs text-red-200">Admin</div><div class="text-xs font-semibold mt-1">Decide resolución</div></div>
+            <span class="arrow">→</span>
+            <div class="flow-node actor-system rounded-lg p-3 min-w-[140px]"><div class="text-xs text-slate-300">Sistema</div><div class="text-xs font-semibold mt-1">Reembolso/penalización</div></div>
+            <span class="arrow">→</span>
+            <div class="flow-node actor-system rounded-lg p-3 min-w-[140px]"><div class="text-xs text-slate-300">Sistema</div><div class="text-xs font-semibold mt-1">Notifica + log</div></div>
+          </div>
+        </div>
+      </details>
+
+      <details class="card p-4">
+        <summary class="flex items-center gap-2">
+          <span class="summary-icon text-slate-500">▶</span>
+          <span class="font-semibold text-white">🛡️ Suspensión de actor</span>
+        </summary>
+        <div class="mt-4 overflow-x-auto">
+          <div class="flow-container">
+            <div class="flow-node actor-admin rounded-lg p-3 min-w-[140px]"><div class="text-xs text-red-200">Admin</div><div class="text-xs font-semibold mt-1">Click "suspender"</div></div>
+            <span class="arrow">→</span>
+            <div class="flow-node actor-admin rounded-lg p-3 min-w-[140px]"><div class="text-xs text-red-200">Admin</div><div class="text-xs font-semibold mt-1">Motivo obligatorio</div></div>
+            <span class="arrow">→</span>
+            <div class="flow-node actor-system rounded-lg p-3 min-w-[140px]"><div class="text-xs text-slate-300">Sistema</div><div class="text-xs font-semibold mt-1">Invalida tokens activos</div></div>
+            <span class="arrow">→</span>
+            <div class="flow-node actor-system rounded-lg p-3 min-w-[140px]"><div class="text-xs text-slate-300">Sistema</div><div class="text-xs font-semibold mt-1">Oculta de búsquedas</div></div>
+            <span class="arrow">→</span>
+            <div class="flow-node actor-system rounded-lg p-3 min-w-[140px]"><div class="text-xs text-slate-300">Sistema</div><div class="text-xs font-semibold mt-1">Email + log inmutable</div></div>
+          </div>
+        </div>
+      </details>
+
+      <details class="card p-4">
+        <summary class="flex items-center gap-2">
+          <span class="summary-icon text-slate-500">▶</span>
+          <span class="font-semibold text-white">🛡️ Gestión de zonas y tarifas</span>
+        </summary>
+        <div class="mt-4 overflow-x-auto">
+          <div class="flow-container">
+            <div class="flow-node actor-admin rounded-lg p-3 min-w-[140px]"><div class="text-xs text-red-200">Admin</div><div class="text-xs font-semibold mt-1">Dibuja polígono en mapa</div></div>
+            <span class="arrow">→</span>
+            <div class="flow-node actor-admin rounded-lg p-3 min-w-[140px]"><div class="text-xs text-red-200">Admin</div><div class="text-xs font-semibold mt-1">Define nombre + tarifa base</div></div>
+            <span class="arrow">→</span>
+            <div class="flow-node actor-system rounded-lg p-3 min-w-[140px]"><div class="text-xs text-slate-300">Sistema</div><div class="text-xs font-semibold mt-1">Guarda GeoJSON</div></div>
+            <span class="arrow">→</span>
+            <div class="flow-node actor-system rounded-lg p-3 min-w-[140px]"><div class="text-xs text-slate-300">Sistema</div><div class="text-xs font-semibold mt-1">Aplica a comercios en zona</div></div>
+          </div>
+        </div>
+      </details>
+
+      <!-- SISTEMA -->
+      <details class="card p-4">
+        <summary class="flex items-center gap-2">
+          <span class="summary-icon text-slate-500">▶</span>
+          <span class="font-semibold text-white">⚙️ Asignación inteligente de repartidor</span>
+          <span class="badge-wip ml-auto">MVP 5</span>
+        </summary>
+        <div class="mt-4 overflow-x-auto">
+          <div class="flow-container">
+            <div class="flow-node actor-system rounded-lg p-3 min-w-[130px]"><div class="text-xs text-slate-300">Sistema</div><div class="text-xs font-semibold mt-1">Pedido confirmado</div></div>
+            <span class="arrow">→</span>
+            <div class="flow-node actor-system rounded-lg p-3 min-w-[130px]"><div class="text-xs text-slate-300">Sistema</div><div class="text-xs font-semibold mt-1">PostGIS ST_DWithin 2km</div></div>
+            <span class="arrow">→</span>
+            <div class="flow-node actor-system rounded-lg p-3 min-w-[130px]"><div class="text-xs text-slate-300">Sistema</div><div class="text-xs font-semibold mt-1">Filtra online + disponible</div></div>
+            <span class="arrow">→</span>
+            <div class="flow-node actor-system rounded-lg p-3 min-w-[130px]"><div class="text-xs text-slate-300">Sistema</div><div class="text-xs font-semibold mt-1">Scoring por distancia</div></div>
+            <span class="arrow">→</span>
+            <div class="flow-node actor-courier rounded-lg p-3 min-w-[130px]"><div class="text-xs text-purple-200">Repartidor</div><div class="text-xs font-semibold mt-1">Acepta / rechaza</div></div>
+          </div>
+        </div>
+      </details>
+
+      <details class="card p-4">
+        <summary class="flex items-center gap-2">
+          <span class="summary-icon text-slate-500">▶</span>
+          <span class="font-semibold text-white">⚙️ Limpieza de pedidos stale (job)</span>
+        </summary>
+        <div class="mt-4 overflow-x-auto">
+          <div class="flow-container">
+            <div class="flow-node actor-system rounded-lg p-3 min-w-[140px]"><div class="text-xs text-slate-300">Sistema</div><div class="text-xs font-semibold mt-1">Cron cada 5min</div></div>
+            <span class="arrow">→</span>
+            <div class="flow-node actor-system rounded-lg p-3 min-w-[140px]"><div class="text-xs text-slate-300">Sistema</div><div class="text-xs font-semibold mt-1">Busca pedidos >5min sin confirmar</div></div>
+            <span class="arrow">→</span>
+            <div class="flow-node actor-system rounded-lg p-3 min-w-[140px]"><div class="text-xs text-slate-300">Sistema</div><div class="text-xs font-semibold mt-1">Auto-cancela + reembolso</div></div>
+            <span class="arrow">→</span>
+            <div class="flow-node actor-system rounded-lg p-3 min-w-[140px]"><div class="text-xs text-slate-300">Sistema</div><div class="text-xs font-semibold mt-1">Push a cliente</div></div>
+          </div>
+        </div>
+      </details>
+
+      <details class="card p-4">
+        <summary class="flex items-center gap-2">
+          <span class="summary-icon text-slate-500">▶</span>
+          <span class="font-semibold text-white">⚙️ Cálculo de ratings (job nocturno)</span>
+        </summary>
+        <div class="mt-4 overflow-x-auto">
+          <div class="flow-container">
+            <div class="flow-node actor-system rounded-lg p-3 min-w-[140px]"><div class="text-xs text-slate-300">Sistema</div><div class="text-xs font-semibold mt-1">Cron 02:00 AM</div></div>
+            <span class="arrow">→</span>
+            <div class="flow-node actor-system rounded-lg p-3 min-w-[140px]"><div class="text-xs text-slate-300">Sistema</div><div class="text-xs font-semibold mt-1">Agrega ratings últimas 24h</div></div>
+            <span class="arrow">→</span>
+            <div class="flow-node actor-system rounded-lg p-3 min-w-[140px]"><div class="text-xs text-slate-300">Sistema</div><div class="text-xs font-semibold mt-1">Fórmula Bayes (suavizado)</div></div>
+            <span class="arrow">→</span>
+            <div class="flow-node actor-system rounded-lg p-3 min-w-[140px]"><div class="text-xs text-slate-300">Sistema</div><div class="text-xs font-semibold mt-1">Actualiza merchant/courier</div></div>
+          </div>
+        </div>
+      </details>
+
+      <details class="card p-4">
+        <summary class="flex items-center gap-2">
+          <span class="summary-icon text-slate-500">▶</span>
+          <span class="font-semibold text-white">⚙️ Purge de ubicaciones antiguas</span>
+        </summary>
+        <div class="mt-4 overflow-x-auto">
+          <div class="flow-container">
+            <div class="flow-node actor-system rounded-lg p-3 min-w-[140px]"><div class="text-xs text-slate-300">Sistema</div><div class="text-xs font-semibold mt-1">Cron semanal</div></div>
+            <span class="arrow">→</span>
+            <div class="flow-node actor-system rounded-lg p-3 min-w-[140px]"><div class="text-xs text-slate-300">Sistema</div><div class="text-xs font-semibold mt-1">Elimina courier_locations >90d</div></div>
+            <span class="arrow">→</span>
+            <div class="flow-node actor-system rounded-lg p-3 min-w-[140px]"><div class="text-xs text-slate-300">Sistema</div><div class="text-xs font-semibold mt-1">VACUUM + REINDEX</div></div>
+          </div>
+        </div>
+      </details>
+
+    </div>
+  </section>
+</main>
+
+<footer class="border-t border-slate-800 mt-8">
+  <div class="max-w-7xl mx-auto px-6 py-6 text-center text-xs text-slate-500">
+    Propuesta técnica v1.2 · Septiembre 2026 · Documento de trabajo para equipo de desarrollo y stakeholders técnicos.
+  </div>
+</footer>
+
+<script>
+  document.querySelectorAll('.tab-btn').forEach(function(btn) {
+    var tab = btn.getAttribute('data-tab');
+    if (tab && tab !== 'flujos') {
+      var link = document.createElement('a');
+      link.href = tab + '.html';
+      link.className = 'tab-btn whitespace-nowrap px-3 py-1.5 rounded-md text-xs font-medium bg-slate-800 text-slate-300 hover:bg-slate-700 transition-colors';
+      link.textContent = btn.textContent;
+      btn.parentNode.replaceChild(link, btn);
+    }
+  });
+</script>
+
+</body>
+</html>

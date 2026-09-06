@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Propuesta Técnica — SuperApp Logística Local</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+  body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; background: #0a0f1c; color: #e5e7eb; }
+  .card { background: #111827; border:1px solid #1f2937; border-radius:12px; }
+  .chip { background: #1e293b; color:#cbd5e1; border:1px solid #334155; padding:2px 9px; border-radius:6px; font-size:11px; font-weight:500;}
+  .badge-done { background: #064e3b; color:#6ee7b7; border:1px solid #047857; padding:2px 8px; border-radius:6px; font-size:10px; font-weight:600;}
+  .badge-wip { background: #4c1d95; color:#c4b5fd; border:1px solid #6d28d9; padding:2px 8px; border-radius:6px; font-size:10px; font-weight:600;}
+  .badge-todo { background: #1f2937; color:#94a3b8; border:1px solid #374151; padding:2px 8px; border-radius:6px; font-size:10px; font-weight:600;}
+  .badge-warn { background: #78350f; color:#fcd34d; border:1px solid #a16207; padding:2px 8px; border-radius:6px; font-size:10px; font-weight:600;}
+</style>
+</head>
+<body class="min-h-screen">
+
+<header class="border-b border-slate-800 bg-gradient-to-br from-slate-900 via-slate-950 to-indigo-950/30">
+  <div class="max-w-7xl mx-auto px-6 py-12">
+    <div class="flex items-center gap-2 mb-3 flex-wrap">
+      <span class="chip">Propuesta Técnica</span>
+      <span class="chip">v1.2</span>
+      <span class="chip">Septiembre 2026</span>
+      <span class="badge-wip">MVP 1 · 85% completado</span>
+    </div>
+    <h1 class="text-4xl md:text-5xl font-bold text-white tracking-tight">
+      SuperApp Logística Local
+    </h1>
+    <p class="text-slate-400 mt-3 max-w-3xl">
+      Propuesta integral de ingeniería. Documento para el equipo de desarrollo y stakeholders técnicos.
+    </p>
+    <p class="text-slate-500 mt-2 text-sm">Selecciona una sección del menú para navegar al contenido.</p>
+  </div>
+</header>
+
+<nav class="sticky top-0 z-40 bg-slate-950/95 backdrop-blur border-b border-slate-800">
+  <div class="max-w-7xl mx-auto px-4 py-2 flex gap-1 overflow-x-auto scrollbar-thin">
+      <a href="resumen.html" class="tab-btn whitespace-nowrap px-3 py-1.5 rounded-md text-xs font-medium bg-slate-800 text-slate-300 hover:bg-slate-700 transition-colors">Resumen</a>
+      <a href="estado.html" class="tab-btn whitespace-nowrap px-3 py-1.5 rounded-md text-xs font-medium bg-slate-800 text-slate-300 hover:bg-slate-700 transition-colors">Estado actual</a>
+      <a href="arquitectura.html" class="tab-btn whitespace-nowrap px-3 py-1.5 rounded-md text-xs font-medium bg-slate-800 text-slate-300 hover:bg-slate-700 transition-colors">Arquitectura</a>
+      <a href="stack.html" class="tab-btn whitespace-nowrap px-3 py-1.5 rounded-md text-xs font-medium bg-slate-800 text-slate-300 hover:bg-slate-700 transition-colors">Stack</a>
+      <a href="modulos.html" class="tab-btn whitespace-nowrap px-3 py-1.5 rounded-md text-xs font-medium bg-slate-800 text-slate-300 hover:bg-slate-700 transition-colors">Módulos</a>
+      <a href="flujos.html" class="tab-btn whitespace-nowrap px-3 py-1.5 rounded-md text-xs font-medium bg-slate-800 text-slate-300 hover:bg-slate-700 transition-colors">Flujos de usuario</a>
+      <a href="datos.html" class="tab-btn whitespace-nowrap px-3 py-1.5 rounded-md text-xs font-medium bg-slate-800 text-slate-300 hover:bg-slate-700 transition-colors">Modelo de datos</a>
+      <a href="api.html" class="tab-btn whitespace-nowrap px-3 py-1.5 rounded-md text-xs font-medium bg-slate-800 text-slate-300 hover:bg-slate-700 transition-colors">API</a>
+      <a href="seguridad.html" class="tab-btn whitespace-nowrap px-3 py-1.5 rounded-md text-xs font-medium bg-slate-800 text-slate-300 hover:bg-slate-700 transition-colors">Seguridad</a>
+      <a href="roadmap.html" class="tab-btn whitespace-nowrap px-3 py-1.5 rounded-md text-xs font-medium bg-slate-800 text-slate-300 hover:bg-slate-700 transition-colors">Roadmap</a>
+      <a href="entregables.html" class="tab-btn whitespace-nowrap px-3 py-1.5 rounded-md text-xs font-medium bg-slate-800 text-slate-300 hover:bg-slate-700 transition-colors">Entregables</a>
+      <a href="decisiones.html" class="tab-btn whitespace-nowrap px-3 py-1.5 rounded-md text-xs font-medium bg-slate-800 text-slate-300 hover:bg-slate-700 transition-colors">Decisiones técnicas</a>
+  </div>
+</nav>
+
+<main class="max-w-7xl mx-auto px-6 py-8 text-center">
+  <div class="card p-8">
+    <h2 class="text-xl font-semibold text-white mb-3">Bienvenido</h2>
+    <p class="text-slate-400 mb-4">Usa la barra de navegación superior para acceder a cada sección del documento.</p>
+    <div class="grid md:grid-cols-3 gap-3 mt-6 max-w-2xl mx-auto">
+      <div class="bg-slate-900/60 p-3 rounded-lg border border-slate-800">
+        <div class="text-xs text-slate-500">Total secciones</div>
+        <div class="text-white font-semibold text-sm">12 páginas</div>
+      </div>
+      <div class="bg-slate-900/60 p-3 rounded-lg border border-slate-800">
+        <div class="text-xs text-slate-500">Tecnologías</div>
+        <div class="text-white font-semibold text-sm">React Native · FastAPI · PostgreSQL</div>
+      </div>
+      <div class="bg-slate-900/60 p-3 rounded-lg border border-slate-800">
+        <div class="text-xs text-slate-500">Fases</div>
+        <div class="text-white font-semibold text-sm">6 MVPs</div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<footer class="border-t border-slate-800 mt-8">
+  <div class="max-w-7xl mx-auto px-6 py-6 text-center text-xs text-slate-500">
+    Propuesta técnica v1.2 · Septiembre 2026 · Documento de trabajo para equipo de desarrollo y stakeholders técnicos.
+  </div>
+</footer>
+
+</body>
+</html>

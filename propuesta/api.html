@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>API — SuperApp Logística Local</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+  body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; background: #0a0f1c; color: #e5e7eb; }
+  .tab-btn.active { background: #4f46e5; color: #fff; box-shadow: 0 4px 12px rgba(79,70,229,.4);}
+  .tab-content { display: none; animation: fade .3s ease;}
+  .tab-content.active { display: block;}
+  @keyframes fade { from{opacity:0;transform:translateY(4px);} to{opacity:1;transform:translateY(0);} }
+  .card { background: #111827; border:1px solid #1f2937; border-radius:12px;}
+  .chip { background: #1e293b; color:#cbd5e1; border:1px solid #334155; padding:2px 9px; border-radius:6px; font-size:11px; font-weight:500;}
+  .badge-done { background: #064e3b; color:#6ee7b7; border:1px solid #047857; padding:2px 8px; border-radius:6px; font-size:10px; font-weight:600;}
+  .badge-wip { background: #4c1d95; color:#c4b5fd; border:1px solid #6d28d9; padding:2px 8px; border-radius:6px; font-size:10px; font-weight:600;}
+  .badge-todo { background: #1f2937; color:#94a3b8; border:1px solid #374151; padding:2px 8px; border-radius:6px; font-size:10px; font-weight:600;}
+  .badge-warn { background: #78350f; color:#fcd34d; border:1px solid #a16207; padding:2px 8px; border-radius:6px; font-size:10px; font-weight:600;}
+  .progress-bar { height: 6px; background: #1f2937; border-radius: 4px; overflow: hidden;}
+  .progress-fill { height: 100%; background: linear-gradient(90deg,#6366f1,#8b5cf6);}
+  .timeline-dot { width: 14px; height: 14px; border-radius: 50%; flex-shrink:0;}
+  .timeline-line { width: 2px; background: #1f2937; margin-left: 6px;}
+  pre { font-family: 'JetBrains Mono', 'Courier New', monospace;}
+  .scrollbar-thin::-webkit-scrollbar { width: 6px; height: 6px; }
+  .scrollbar-thin::-webkit-scrollbar-thumb { background: #334155; border-radius: 3px; }
+  table { border-collapse: collapse; }
+  th { font-weight: 600; color: #94a3b8; font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em;}
+  td, th { padding: 10px 12px; border-bottom: 1px solid #1f2937; text-align: left;}
+  tr:last-child td { border-bottom: none;}
+  tr:hover { background: #0f172a;}
+  code { font-family: 'JetBrains Mono', monospace; font-size: 0.85em; background: #1e293b; padding: 2px 6px; border-radius: 4px; color: #c4b5fd;}
+  .flow-node { position: relative; }
+  .actor-client { background: #1e3a8a; border-color: #3b82f6;}
+  .actor-merchant { background: #064e3b; border-color: #10b981;}
+  .actor-courier { background: #4c1d95; border-color: #8b5cf6;}
+  .actor-admin { background: #7f1d1d; border-color: #ef4444;}
+  .actor-system { background: #1f2937; border-color: #6b7280;}
+  .flow-container { display: flex; gap: 8px; flex-wrap: nowrap; align-items: stretch; padding: 8px 0;}
+  .flow-container .arrow { display: flex; align-items: center; color: #64748b; font-size: 18px; font-weight: 700;}
+  .layer-box { border: 2px solid #334155; border-radius: 12px; padding: 16px; background: #0f172a;}
+  .module-box { border: 1px solid #334155; border-radius: 8px; padding: 10px; background: #1e293b;}
+  .endpoint-row { display: grid; grid-template-columns: 70px 1fr 2fr auto; gap: 10px; padding: 8px 0; border-bottom: 1px solid #1f2937; align-items: start;}
+  .method { font-family: monospace; font-weight: 700; font-size: 11px; padding: 2px 6px; border-radius: 4px; text-align: center;}
+  .m-get { background: #064e3b; color: #6ee7b7;}
+  .m-post { background: #1e3a8a; color: #93c5fd;}
+  .m-put { background: #78350f; color: #fcd34d;}
+  .m-patch { background: #78350f; color: #fcd34d;}
+  .m-delete { background: #7f1d1d; color: #fca5a5;}
+  details > summary { cursor: pointer; list-style: none;}
+  details > summary::-webkit-details-marker { display: none;}
+  details[open] .summary-icon { transform: rotate(90deg);}
+  .summary-icon { display: inline-block; transition: transform .2s;}
+</style>
+</head>
+<body class="min-h-screen">
+
+<header class="border-b border-slate-800 bg-gradient-to-br from-slate-900 via-slate-950 to-indigo-950/30">
+  <div class="max-w-7xl mx-auto px-6 py-12">
+    <div class="flex items-center gap-2 mb-3 flex-wrap">
+      <span class="chip">Propuesta Técnica</span>
+      <span class="chip">v1.2</span>
+      <span class="chip">Septiembre 2026</span>
+      <span class="badge-wip">MVP 1 · 85% completado</span>
+    </div>
+    <h1 class="text-4xl md:text-5xl font-bold text-white tracking-tight">
+      SuperApp Logística Local
+    </h1>
+    <p class="text-slate-400 mt-3 max-w-3xl">
+      Propuesta integral de ingeniería. Documento para el equipo de desarrollo y stakeholders técnicos.
+    </p>
+
+    <div class="mt-8 grid grid-cols-2 md:grid-cols-5 gap-3">
+      <div class="bg-slate-900/60 border border-slate-800 rounded-lg p-3">
+        <div class="text-xs text-slate-500">Móvil</div>
+        <div class="text-white font-semibold text-sm">React Native</div>
+      </div>
+      <div class="bg-slate-900/60 border border-slate-800 rounded-lg p-3">
+        <div class="text-xs text-slate-500">Backend</div>
+        <div class="text-white font-semibold text-sm">FastAPI · Python</div>
+      </div>
+      <div class="bg-slate-900/60 border border-slate-800 rounded-lg p-3">
+        <div class="text-xs text-slate-500">Datos</div>
+        <div class="text-white font-semibold text-sm">PostgreSQL + PostGIS</div>
+      </div>
+      <div class="bg-slate-900/60 border border-slate-800 rounded-lg p-3">
+        <div class="text-xs text-slate-500">Realtime</div>
+        <div class="text-white font-semibold text-sm">Socket.io</div>
+      </div>
+      <div class="bg-slate-900/60 border border-slate-800 rounded-lg p-3">
+        <div class="text-xs text-slate-500">Deploy</div>
+        <div class="text-white font-semibold text-sm">Docker · Git local</div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<nav class="sticky top-0 z-40 bg-slate-950/95 backdrop-blur border-b border-slate-800">
+  <div class="max-w-7xl mx-auto px-4 py-2 flex gap-1 overflow-x-auto scrollbar-thin">
+    <button class="tab-btn active whitespace-nowrap px-3 py-1.5 rounded-md text-xs font-medium bg-slate-800 text-slate-300" data-tab="resumen">Resumen</button>
+    <button class="tab-btn whitespace-nowrap px-3 py-1.5 rounded-md text-xs font-medium bg-slate-800 text-slate-300" data-tab="estado">Estado actual</button>
+    <button class="tab-btn whitespace-nowrap px-3 py-1.5 rounded-md text-xs font-medium bg-slate-800 text-slate-300" data-tab="arquitectura">Arquitectura</button>
+    <button class="tab-btn whitespace-nowrap px-3 py-1.5 rounded-md text-xs font-medium bg-slate-800 text-slate-300" data-tab="stack">Stack</button>
+    <button class="tab-btn whitespace-nowrap px-3 py-1.5 rounded-md text-xs font-medium bg-slate-800 text-slate-300" data-tab="modulos">Módulos</button>
+    <button class="tab-btn whitespace-nowrap px-3 py-1.5 rounded-md text-xs font-medium bg-slate-800 text-slate-300" data-tab="flujos">Flujos de usuario</button>
+    <button class="tab-btn whitespace-nowrap px-3 py-1.5 rounded-md text-xs font-medium bg-slate-800 text-slate-300" data-tab="datos">Modelo de datos</button>
+    <button class="tab-btn active whitespace-nowrap px-3 py-1.5 rounded-md text-xs font-medium bg-slate-800 text-slate-300" data-tab="api">API</button>
+    <button class="tab-btn whitespace-nowrap px-3 py-1.5 rounded-md text-xs font-medium bg-slate-800 text-slate-300" data-tab="seguridad">Seguridad</button>
+    <button class="tab-btn whitespace-nowrap px-3 py-1.5 rounded-md text-xs font-medium bg-slate-800 text-slate-300" data-tab="roadmap">Roadmap</button>
+    <button class="tab-btn whitespace-nowrap px-3 py-1.5 rounded-md text-xs font-medium bg-slate-800 text-slate-300" data-tab="entregables">Entregables</button>
+    <button class="tab-btn whitespace-nowrap px-3 py-1.5 rounded-md text-xs font-medium bg-slate-800 text-slate-300" data-tab="decisiones">Decisiones técnicas</button>
+  </div>
+</nav>
+
+<main class="max-w-7xl mx-auto px-6 py-8">
+<section class="tab-content active" id="api">
+    <h2 class="text-xl font-semibold text-white mb-2">API REST</h2>
+    <p class="text-sm text-slate-400 mb-6">Endpoints principales agrupados por dominio. Todos los endpoints REST usan JSON y siguen OpenAPI 3.1.</p>
+
+    <div class="space-y-4">
+      <div class="card p-5">
+        <h3 class="font-semibold text-white mb-3">🔐 Auth</h3>
+        <div class="endpoint-row"><span class="method m-post">POST</span><code>/auth/register</code><span class="text-xs text-slate-400">Registro nuevo usuario (cliente por defecto)</span><span class="chip">Public</span></div>
+        <div class="endpoint-row"><span class="method m-post">POST</span><code>/auth/login</code><span class="text-xs text-slate-400">Login email/password → access+refresh tokens</span><span class="chip">Public</span></div>
+        <div class="endpoint-row"><span class="method m-post">POST</span><code>/auth/refresh</code><span class="text-xs text-slate-400">Renueva access token con refresh token</span><span class="chip">Auth</span></div>
+        <div class="endpoint-row"><span class="method m-post">POST</span><code>/auth/logout</code><span class="text-xs text-slate-400">Revoca refresh token</span><span class="chip">Auth</span></div>
+        <div class="endpoint-row"><span class="method m-post">POST</span><code>/auth/forgot-password</code><span class="text-xs text-slate-400">Envía email con token de reset</span><span class="chip">Public</span></div>
+        <div class="endpoint-row"><span class="method m-post">POST</span><code>/auth/reset-password</code><span class="text-xs text-slate-400">Aplica nueva contraseña con token</span><span class="chip">Public</span></div>
+        <div class="endpoint-row"><span class="method m-get">GET</span><code>/auth/me</code><span class="text-xs text-slate-400">Usuario autenticado con perfil</span><span class="chip">Auth</span></div>
+      </div>
+
+      <div class="card p-5">
+        <h3 class="font-semibold text-white mb-3">👥 Users</h3>
+        <div class="endpoint-row"><span class="method m-get">GET</span><code>/users/me/addresses</code><span class="text-xs text-slate-400">Direcciones guardadas del cliente</span><span class="chip">Auth</span></div>
+        <div class="endpoint-row"><span class="method m-post">POST</span><code>/users/me/addresses</code><span class="text-xs text-slate-400">Crea dirección</span><span class="chip">Auth</span></div>
+        <div class="endpoint-row"><span class="method m-patch">PATCH</span><code>/users/me/profile</code><span class="text-xs text-slate-400">Actualiza datos perfil</span><span class="chip">Auth</span></div>
+        <div class="endpoint-row"><span class="method m-delete">DELETE</span><code>/users/me</code><span class="text-xs text-slate-400">Soft delete de cuenta</span><span class="chip">Auth</span></div>
+      </div>
+
+      <div class="card p-5">
+        <h3 class="font-semibold text-white mb-3">🏪 Merchants</h3>
+        <div class="endpoint-row"><span class="method m-post">POST</span><code>/merchants/register</code><span class="text-xs text-slate-400">Onboarding multi-paso</span><span class="chip">Auth</span></div>
+        <div class="endpoint-row"><span class="method m-post">POST</span><code>/merchants/me/contract/sign</code><span class="text-xs text-slate-400">Firma contrato adhesión</span><span class="chip">Merchant</span></div>
+        <div class="endpoint-row"><span class="method m-get">GET</span><code>/merchants/me</code><span class="text-xs text-slate-400">Perfil del comercio autenticado</span><span class="chip">Merchant</span></div>
+        <div class="endpoint-row"><span class="method m-patch">PATCH</span><code>/merchants/me/schedule</code><span class="text-xs text-slate-400">Actualiza horarios</span><span class="chip">Merchant</span></div>
+        <div class="endpoint-row"><span class="method m-patch">PATCH</span><code>/merchants/me/zone</code><span class="text-xs text-slate-400">Actualiza zona cobertura</span><span class="chip">Merchant</span></div>
+        <div class="endpoint-row"><span class="method m-get">GET</span><code>/merchants/{id}</code><span class="text-xs text-slate-400">Ficha pública de comercio</span><span class="chip">Auth</span></div>
+        <div class="endpoint-row"><span class="method m-get">GET</span><code>/merchants/nearby</code><span class="text-xs text-slate-400">Comercios cercanos (PostGIS)</span><span class="chip">Auth</span></div>
+      </div>
+
+      <div class="card p-5">
+        <h3 class="font-semibold text-white mb-3">🛵 Couriers</h3>
+        <div class="endpoint-row"><span class="method m-post">POST</span><code>/couriers/register</code><span class="text-xs text-slate-400">Onboarding + carga documentos</span><span class="chip">Auth</span></div>
+        <div class="endpoint-row"><span class="method m-post">POST</span><code>/couriers/me/documents</code><span class="text-xs text-slate-400">Sube DNI, licencia, seguro</span><span class="chip">Courier</span></div>
+        <div class="endpoint-row"><span class="method m-patch">PATCH</span><code>/couriers/me/availability</code><span class="text-xs text-slate-400">Toggle online/offline</span><span class="chip">Courier</span></div>
+        <div class="endpoint-row"><span class="method m-get">GET</span><code>/couriers/me/earnings</code><span class="text-xs text-slate-400">Desglose de ganancias</span><span class="chip">Courier</span></div>
+        <div class="endpoint-row"><span class="method m-get">GET</span><code>/couriers/me/history</code><span class="text-xs text-slate-400">Entregas realizadas</span><span class="chip">Courier</span></div>
+      </div>
+
+      <div class="card p-5">
+        <h3 class="font-semibold text-white mb-3">📦 Catalog</h3>
+        <div class="endpoint-row"><span class="method m-get">GET</span><code>/catalog/categories</code><span class="text-xs text-slate-400">Árbol de categorías</span><span class="chip">Auth</span></div>
+        <div class="endpoint-row"><span class="method m-get">GET</span><code>/catalog/products?merchant_id=&q=&category=&near=</code><span class="text-xs text-slate-400">Búsqueda transversal</span><span class="chip">Auth</span></div>
+        <div class="endpoint-row"><span class="method m-get">GET</span><code>/catalog/products/{id}</code><span class="text-xs text-slate-400">Ficha producto + variantes</span><span class="chip">Auth</span></div>
+        <div class="endpoint-row"><span class="method m-post">POST</span><code>/merchants/me/products</code><span class="text-xs text-slate-400">Crea producto propio</span><span class="chip">Merchant</span></div>
+        <div class="endpoint-row"><span class="method m-patch">PATCH</span><code>/merchants/me/products/{id}</code><span class="text-xs text-slate-400">Actualiza producto (stock, precio)</span><span class="chip">Merchant</span></div>
+        <div class="endpoint-row"><span class="method m-post">POST</span><code>/merchants/me/products/bulk-import</code><span class="text-xs text-slate-400">Carga masiva CSV</span><span class="chip">Merchant</span></div>
+        <div class="endpoint-row"><span class="method m-get">GET</span><code>/merchants/me/products/bulk-import/{job_id}</code><span class="text-xs text-slate-400">Estado de import masivo</span><span class="chip">Merchant</span></div>
+      </div>
+
+      <div class="card p-5">
+        <h3 class="font-semibold text-white mb-3">🛒 Orders</h3>
+        <div class="endpoint-row"><span class="method m-post">POST</span><code>/orders</code><span class="text-xs text-slate-400">Crea pedido desde carrito</span><span class="chip">Client</span></div>
+        <div class="endpoint-row"><span class="method m-get">GET</span><code>/orders/me</code><span class="text-xs text-slate-400">Historial del cliente</span><span class="chip">Client</span></div>
+        <div class="endpoint-row"><span class="method m-get">GET</span><code>/orders/{id}</code><span class="text-xs text-slate-400">Detalle + estados</span><span class="chip">Auth</span></div>
+        <div class="endpoint-row"><span class="method m-post">POST</span><code>/merchants/me/orders/{id}/confirm</code><span class="text-xs text-slate-400">Comercio acepta pedido</span><span class="chip">Merchant</span></div>
+        <div class="endpoint-row"><span class="method m-post">POST</span><code>/merchants/me/orders/{id}/reject</code><span class="text-xs text-slate-400">Comercio rechaza con motivo</span><span class="chip">Merchant</span></div>
+        <div class="endpoint-row"><span class="method m-post">POST</span><code>/merchants/me/orders/{id}/ready</code><span class="text-xs text-slate-400">Marca listo para retiro</span><span class="chip">Merchant</span></div>
+        <div class="endpoint-row"><span class="method m-post">POST</span><code>/orders/{id}/cancel</code><span class="text-xs text-slate-400">Cancelación con motivo</span><span class="chip">Auth</span></div>
+        <div class="endpoint-row"><span class="method m-get">GET</span><code>/couriers/me/offers</code><span class="text-xs text-slate-400">Pedidos ofrecidos</span><span class="chip">Courier</span></div>
+        <div class="endpoint-row"><span class="method m-post">POST</span><code>/couriers/me/orders/{id}/accept</code><span class="text-xs text-slate-400">Acepta entrega</span><span class="chip">Courier</span></div>
+        <div class="endpoint-row"><span class="method m-post">POST</span><code>/couriers/me/orders/{id}/reject</code><span class="text-xs text-slate-400">Rechaza entrega</span><span class="chip">Courier</span></div>
+        <div class="endpoint-row"><span class="method m-post">POST</span><code>/couriers/me/orders/{id}/pickup</code><span class="text-xs text-slate-400">Confirma retiro en comercio</span><span class="chip">Courier</span></div>
+        <div class="endpoint-row"><span class="method m-post">POST</span><code>/couriers/me/orders/{id}/deliver</code><span class="text-xs text-slate-400">Confirma entrega con evidencia</span><span class="chip">Courier</span></div>
+      </div>
+
+      <div class="card p-5">
+        <h3 class="font-semibold text-white mb-3">📍 Geo / Tracking</h3>
+        <div class="endpoint-row"><span class="method m-post">POST</span><code>/geo/track</code><span class="text-xs text-slate-400">Batch de ubicaciones del repartidor</span><span class="chip">Courier</span></div>
+        <div class="endpoint-row"><span class="method m-get">GET</span><code>/geo/couriers/{id}/location</code><span class="text-xs text-slate-400">Última ubicación conocida</span><span class="chip">Auth</span></div>
+        <div class="endpoint-row"><span class="method m-get">GET</span><code>/geo/orders/{id}/track</code><span class="text-xs text-slate-400">Historial de tracking de pedido</span><span class="chip">Auth</span></div>
+      </div>
+
+      <div class="card p-5">
+        <h3 class="font-semibold text-white mb-3">⭐ Ratings</h3>
+        <div class="endpoint-row"><span class="method m-post">POST</span><code>/ratings</code><span class="text-xs text-slate-400">Califica pedido (comercio y/o repartidor)</span><span class="chip">Client</span></div>
+        <div class="endpoint-row"><span class="method m-get">GET</span><code>/merchants/{id}/ratings</code><span class="text-xs text-slate-400">Listado paginado de calificaciones</span><span class="chip">Auth</span></div>
+      </div>
+
+      <div class="card p-5">
+        <h3 class="font-semibold text-white mb-3">🛡️ Admin</h3>
+        <div class="endpoint-row"><span class="method m-get">GET</span><code>/admin/merchants?status=pending</code><span class="text-xs text-slate-400">Listado con filtros</span><span class="chip">Admin</span></div>
+        <div class="endpoint-row"><span class="method m-post">POST</span><code>/admin/merchants/{id}/approve</code><span class="text-xs text-slate-400">Aprueba alta</span><span class="chip">Admin</span></div>
+        <div class="endpoint-row"><span class="method m-post">POST</span><code>/admin/merchants/{id}/reject</code><span class="text-xs text-slate-400">Rechaza con motivo</span><span class="chip">Admin</span></div>
+        <div class="endpoint-row"><span class="method m-post">POST</span><code>/admin/merchants/{id}/suspend</code><span class="text-xs text-slate-400">Suspende con motivo</span><span class="chip">Admin</span></div>
+        <div class="endpoint-row"><span class="method m-get">GET</span><code>/admin/couriers</code><span class="text-xs text-slate-400">Listado repartidores</span><span class="chip">Admin</span></div>
+        <div class="endpoint-row"><span class="method m-post">POST</span><code>/admin/couriers/{id}/verify</code><span class="text-xs text-slate-400">Verifica documentos</span><span class="chip">Admin</span></div>
+        <div class="endpoint-row"><span class="method m-get">GET</span><code>/admin/commission-schemas</code><span class="text-xs text-slate-400">Listado esquemas</span><span class="chip">Admin</span></div>
+        <div class="endpoint-row"><span class="method m-post">POST</span><code>/admin/commission-schemas</code><span class="text-xs text-slate-400">Crea nuevo esquema</span><span class="chip">Admin</span></div>
+        <div class="endpoint-row"><span class="method m-get">GET</span><code>/admin/coverage-zones</code><span class="text-xs text-slate-400">Zonas con polígono</span><span class="chip">Admin</span></div>
+        <div class="endpoint-row"><span class="method m-post">POST</span><code>/admin/coverage-zones</code><span class="text-xs text-slate-400">Crea zona (GeoJSON)</span><span class="chip">Admin</span></div>
+        <div class="endpoint-row"><span class="method m-get">GET</span><code>/admin/disputes</code><span class="text-xs text-slate-400">Cola de disputas</span><span class="chip">Admin</span></div>
+        <div class="endpoint-row"><span class="method m-post">POST</span><code>/admin/disputes/{id}/resolve</code><span class="text-xs text-slate-400">Resuelve disputa</span><span class="chip">Admin</span></div>
+        <div class="endpoint-row"><span class="method m-get">GET</span><code>/admin/dashboard</code><span class="text-xs text-slate-400">KPIs agregados</span><span class="chip">Admin</span></div>
+        <div class="endpoint-row"><span class="method m-get">GET</span><code>/admin/audit-logs</code><span class="text-xs text-slate-400">Logs inmutables</span><span class="chip">Admin</span></div>
+      </div>
+
+      <div class="card p-5">
+        <h3 class="font-semibold text-white mb-3">🔔 Webhooks (entrantes)</h3>
+        <div class="endpoint-row"><span class="method m-post">POST</span><code>/webhooks/payments/{provider}</code><span class="text-xs text-slate-400">Confirmaciones de pago asíncronas</span><span class="chip">System</span></div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="border-t border-slate-800 mt-8">
+  <div class="max-w-7xl mx-auto px-6 py-6 text-center text-xs text-slate-500">
+    Propuesta técnica v1.2 · Septiembre 2026 · Documento de trabajo para equipo de desarrollo y stakeholders técnicos.
+  </div>
+</footer>
+
+<script>
+  document.querySelectorAll('.tab-btn').forEach(function(btn) {
+    var tab = btn.getAttribute('data-tab');
+    if (tab && tab !== 'api') {
+      var link = document.createElement('a');
+      link.href = tab + '.html';
+      link.className = 'tab-btn whitespace-nowrap px-3 py-1.5 rounded-md text-xs font-medium bg-slate-800 text-slate-300 hover:bg-slate-700 transition-colors';
+      link.textContent = btn.textContent;
+      btn.parentNode.replaceChild(link, btn);
+    }
+  });
+</script>
+
+</body>
+</html>

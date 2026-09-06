@@ -1,0 +1,2222 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Propuesta Técnica — SuperApp Logística Local</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+  body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; background: #0a0f1c; color: #e5e7eb; }
+  .tab-btn.active { background: #4f46e5; color: #fff; box-shadow: 0 4px 12px rgba(79,70,229,.4);}
+  .tab-content { display: none; animation: fade .3s ease;}
+  .tab-content.active { display: block;}
+  @keyframes fade { from{opacity:0;transform:translateY(4px);} to{opacity:1;transform:translateY(0);} }
+  .card { background: #111827; border:1px solid #1f2937; border-radius:12px;}
+  .chip { background: #1e293b; color:#cbd5e1; border:1px solid #334155; padding:2px 9px; border-radius:6px; font-size:11px; font-weight:500;}
+  .badge-done { background: #064e3b; color:#6ee7b7; border:1px solid #047857; padding:2px 8px; border-radius:6px; font-size:10px; font-weight:600;}
+  .badge-wip { background: #4c1d95; color:#c4b5fd; border:1px solid #6d28d9; padding:2px 8px; border-radius:6px; font-size:10px; font-weight:600;}
+  .badge-todo { background: #1f2937; color:#94a3b8; border:1px solid #374151; padding:2px 8px; border-radius:6px; font-size:10px; font-weight:600;}
+  .badge-warn { background: #78350f; color:#fcd34d; border:1px solid #a16207; padding:2px 8px; border-radius:6px; font-size:10px; font-weight:600;}
+  .progress-bar { height: 6px; background: #1f2937; border-radius: 4px; overflow: hidden;}
+  .progress-fill { height: 100%; background: linear-gradient(90deg,#6366f1,#8b5cf6);}
+  .timeline-dot { width: 14px; height: 14px; border-radius: 50%; flex-shrink:0;}
+  .timeline-line { width: 2px; background: #1f2937; margin-left: 6px;}
+  pre { font-family: 'JetBrains Mono', 'Courier New', monospace;}
+  .scrollbar-thin::-webkit-scrollbar { width: 6px; height: 6px; }
+  .scrollbar-thin::-webkit-scrollbar-thumb { background: #334155; border-radius: 3px; }
+  table { border-collapse: collapse; }
+  th { font-weight: 600; color: #94a3b8; font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em;}
+  td, th { padding: 10px 12px; border-bottom: 1px solid #1f2937; text-align: left;}
+  tr:last-child td { border-bottom: none;}
+  tr:hover { background: #0f172a;}
+  code { font-family: 'JetBrains Mono', monospace; font-size: 0.85em; background: #1e293b; padding: 2px 6px; border-radius: 4px; color: #c4b5fd;}
+  .flow-node { position: relative; }
+  .actor-client { background: #1e3a8a; border-color: #3b82f6;}
+  .actor-merchant { background: #064e3b; border-color: #10b981;}
+  .actor-courier { background: #4c1d95; border-color: #8b5cf6;}
+  .actor-admin { background: #7f1d1d; border-color: #ef4444;}
+  .actor-system { background: #1f2937; border-color: #6b7280;}
+  .flow-container { display: flex; gap: 8px; flex-wrap: nowrap; align-items: stretch; padding: 8px 0;}
+  .flow-container .arrow { display: flex; align-items: center; color: #64748b; font-size: 18px; font-weight: 700;}
+  .layer-box { border: 2px solid #334155; border-radius: 12px; padding: 16px; background: #0f172a;}
+  .module-box { border: 1px solid #334155; border-radius: 8px; padding: 10px; background: #1e293b;}
+  .endpoint-row { display: grid; grid-template-columns: 70px 1fr 2fr auto; gap: 10px; padding: 8px 0; border-bottom: 1px solid #1f2937; align-items: start;}
+  .method { font-family: monospace; font-weight: 700; font-size: 11px; padding: 2px 6px; border-radius: 4px; text-align: center;}
+  .m-get { background: #064e3b; color: #6ee7b7;}
+  .m-post { background: #1e3a8a; color: #93c5fd;}
+  .m-put { background: #78350f; color: #fcd34d;}
+  .m-patch { background: #78350f; color: #fcd34d;}
+  .m-delete { background: #7f1d1d; color: #fca5a5;}
+  details > summary { cursor: pointer; list-style: none;}
+  details > summary::-webkit-details-marker { display: none;}
+  details[open] .summary-icon { transform: rotate(90deg);}
+  .summary-icon { display: inline-block; transition: transform .2s;}
+</style>
+</head>
+<body class="min-h-screen">
+
+<header class="border-b border-slate-800 bg-gradient-to-br from-slate-900 via-slate-950 to-indigo-950/30">
+  <div class="max-w-7xl mx-auto px-6 py-12">
+    <div class="flex items-center gap-2 mb-3 flex-wrap">
+      <span class="chip">Propuesta Técnica</span>
+      <span class="chip">v1.2</span>
+      <span class="chip">Septiembre 2026</span>
+      <span class="badge-wip">MVP 1 · 85% completado</span>
+    </div>
+    <h1 class="text-4xl md:text-5xl font-bold text-white tracking-tight">
+      SuperApp Logística Local
+    </h1>
+    <p class="text-slate-400 mt-3 max-w-3xl">
+      Propuesta integral de ingeniería. Documento para el equipo de desarrollo y stakeholders técnicos.
+    </p>
+
+    <div class="mt-8 grid grid-cols-2 md:grid-cols-5 gap-3">
+      <div class="bg-slate-900/60 border border-slate-800 rounded-lg p-3">
+        <div class="text-xs text-slate-500">Móvil</div>
+        <div class="text-white font-semibold text-sm">React Native</div>
+      </div>
+      <div class="bg-slate-900/60 border border-slate-800 rounded-lg p-3">
+        <div class="text-xs text-slate-500">Backend</div>
+        <div class="text-white font-semibold text-sm">FastAPI · Python</div>
+      </div>
+      <div class="bg-slate-900/60 border border-slate-800 rounded-lg p-3">
+        <div class="text-xs text-slate-500">Datos</div>
+        <div class="text-white font-semibold text-sm">PostgreSQL + PostGIS</div>
+      </div>
+      <div class="bg-slate-900/60 border border-slate-800 rounded-lg p-3">
+        <div class="text-xs text-slate-500">Realtime</div>
+        <div class="text-white font-semibold text-sm">Socket.io</div>
+      </div>
+      <div class="bg-slate-900/60 border border-slate-800 rounded-lg p-3">
+        <div class="text-xs text-slate-500">Deploy</div>
+        <div class="text-white font-semibold text-sm">Docker · Git local</div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<nav class="sticky top-0 z-40 bg-slate-950/95 backdrop-blur border-b border-slate-800">
+  <div class="max-w-7xl mx-auto px-4 py-2 flex gap-1 overflow-x-auto scrollbar-thin">
+    <button class="tab-btn active whitespace-nowrap px-3 py-1.5 rounded-md text-xs font-medium bg-slate-800 text-slate-300" data-tab="resumen">Resumen</button>
+    <button class="tab-btn whitespace-nowrap px-3 py-1.5 rounded-md text-xs font-medium bg-slate-800 text-slate-300" data-tab="estado">Estado actual</button>
+    <button class="tab-btn whitespace-nowrap px-3 py-1.5 rounded-md text-xs font-medium bg-slate-800 text-slate-300" data-tab="arquitectura">Arquitectura</button>
+    <button class="tab-btn whitespace-nowrap px-3 py-1.5 rounded-md text-xs font-medium bg-slate-800 text-slate-300" data-tab="stack">Stack</button>
+    <button class="tab-btn whitespace-nowrap px-3 py-1.5 rounded-md text-xs font-medium bg-slate-800 text-slate-300" data-tab="modulos">Módulos</button>
+    <button class="tab-btn whitespace-nowrap px-3 py-1.5 rounded-md text-xs font-medium bg-slate-800 text-slate-300" data-tab="flujos">Flujos de usuario</button>
+    <button class="tab-btn whitespace-nowrap px-3 py-1.5 rounded-md text-xs font-medium bg-slate-800 text-slate-300" data-tab="datos">Modelo de datos</button>
+    <button class="tab-btn whitespace-nowrap px-3 py-1.5 rounded-md text-xs font-medium bg-slate-800 text-slate-300" data-tab="api">API</button>
+    <button class="tab-btn whitespace-nowrap px-3 py-1.5 rounded-md text-xs font-medium bg-slate-800 text-slate-300" data-tab="seguridad">Seguridad</button>
+    <button class="tab-btn whitespace-nowrap px-3 py-1.5 rounded-md text-xs font-medium bg-slate-800 text-slate-300" data-tab="roadmap">Roadmap</button>
+    <button class="tab-btn whitespace-nowrap px-3 py-1.5 rounded-md text-xs font-medium bg-slate-800 text-slate-300" data-tab="entregables">Entregables</button>
+    <button class="tab-btn whitespace-nowrap px-3 py-1.5 rounded-md text-xs font-medium bg-slate-800 text-slate-300" data-tab="decisiones">Decisiones técnicas</button>
+  </div>
+</nav>
+
+<main class="max-w-7xl mx-auto px-6 py-8">
+
+  <!-- ============== RESUMEN ============== -->
+  <section class="tab-content active" id="resumen">
+    <div class="card p-6 mb-4">
+      <h2 class="text-xl font-semibold text-white mb-3">Alcance técnico</h2>
+      <p class="text-sm text-slate-300 leading-relaxed mb-4">
+        Plataforma de logística multiproveedor compuesta por <strong class="text-white">4 interfaces</strong> (app cliente, app repartidor, panel comercio, backoffice admin) sobre un <strong class="text-white">backend único</strong> construido como monolito modular en Python/FastAPI. El sistema gestiona el ciclo completo: onboarding de actores, catálogo, pedidos, tracking geoespacial y administración operativa.
+      </p>
+      <div class="grid md:grid-cols-4 gap-3">
+        <div class="bg-slate-900/60 p-3 rounded-lg border border-slate-800">
+          <div class="text-xs text-slate-400 mb-1">Actores</div>
+          <div class="text-white font-medium text-sm">4 tipos con roles diferenciados</div>
+        </div>
+        <div class="bg-slate-900/60 p-3 rounded-lg border border-slate-800">
+          <div class="text-xs text-slate-400 mb-1">Módulos de dominio</div>
+          <div class="text-white font-medium text-sm">8 módulos desacoplados</div>
+        </div>
+        <div class="bg-slate-900/60 p-3 rounded-lg border border-slate-800">
+          <div class="text-xs text-slate-400 mb-1">Entidades</div>
+          <div class="text-white font-medium text-sm">14 tablas núcleo</div>
+        </div>
+        <div class="bg-slate-900/60 p-3 rounded-lg border border-slate-800">
+          <div class="text-xs text-slate-400 mb-1">Fases de desarrollo</div>
+          <div class="text-white font-medium text-sm">6 MVPs secuenciales</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid md:grid-cols-2 gap-4">
+      <div class="card p-5">
+        <h3 class="text-sm font-semibold text-white mb-3">Principios de arquitectura</h3>
+        <ul class="text-sm text-slate-300 space-y-2">
+          <li class="flex gap-2"><span class="text-indigo-400">•</span><span><strong class="text-white">Monolito modular con DDD.</strong> Paquetes por dominio (auth, catálogo, pedidos, geo, notificaciones, comisiones). Evita la sobrecarga operativa de microservicios en etapa temprana y permite extraer un módulo cuando la carga lo justifique.</span></li>
+          <li class="flex gap-2"><span class="text-indigo-400">•</span><span><strong class="text-white">Parametrización total.</strong> Valores de negocio (comisiones, tarifas, límites) residen en base de datos. Cero despliegues para cambios de reglas.</span></li>
+          <li class="flex gap-2"><span class="text-indigo-400">•</span><span><strong class="text-white">Stack abierto por defecto.</strong> Solo se integran servicios externos cuando no existe alternativa técnicamente viable.</span></li>
+          <li class="flex gap-2"><span class="text-indigo-400">•</span><span><strong class="text-white">Iterativo y verificable.</strong> Cada MVP entrega funcionalidad end-to-end desplegable y testeable.</span></li>
+        </ul>
+      </div>
+
+      <div class="card p-5">
+        <h3 class="text-sm font-semibold text-white mb-3">Decisiones técnicas clave</h3>
+        <ul class="text-sm text-slate-300 space-y-2">
+          <li class="flex gap-2"><span class="text-indigo-400">•</span><span><strong class="text-white">Multi-plataforma desde día 1.</strong> React Native con un único codebase para iOS y Android.</span></li>
+          <li class="flex gap-2"><span class="text-indigo-400">•</span><span><strong class="text-white">Python por expresividad.</strong> FastAPI para APIs async tipadas con Pydantic, validación automática y documentación OpenAPI.</span></li>
+          <li class="flex gap-2"><span class="text-indigo-400">•</span><span><strong class="text-white">PostGIS para geoespacial.</strong> Evita soluciones externas para queries de proximidad y polígonos.</span></li>
+          <li class="flex gap-2"><span class="text-indigo-400">•</span><span><strong class="text-white">Desarrollo lean.</strong> Un solo desarrollador full-stack. Git local hasta levantar infraestructura cloud dedicada.</span></li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============== ESTADO ACTUAL ============== -->
+  <section class="tab-content" id="estado">
+    <div class="card p-6 mb-4">
+      <div class="flex items-center justify-between mb-3 flex-wrap gap-3">
+        <div>
+          <span class="badge-wip">MVP 1 · Base + Tracking</span>
+          <h2 class="text-lg font-semibold text-white mt-1">Estado actual del desarrollo</h2>
+        </div>
+        <div class="text-right">
+          <div class="text-3xl font-bold text-indigo-400">100%</div>
+          <div class="text-xs text-slate-500">completado</div>
+        </div>
+      </div>
+      <div class="progress-bar"><div class="progress-fill" style="width:100%"></div></div>
+    </div>
+
+    <h3 class="text-sm font-semibold text-white mb-3">Componentes completados</h3>
+    <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-3 mb-6">
+      <div class="card p-4">
+        <div class="flex items-center gap-2 mb-1"><span class="badge-done">✓</span><h4 class="text-sm font-semibold text-white">Backend</h4></div>
+        <p class="text-xs text-slate-400">FastAPI levantado con estructura modular por dominio. Middlewares configurados.</p>
+      </div>
+      <div class="card p-4">
+        <div class="flex items-center gap-2 mb-1"><span class="badge-done">✓</span><h4 class="text-sm font-semibold text-white">Base de datos</h4></div>
+        <p class="text-xs text-slate-400">PostgreSQL con schema definido, migraciones Alembic versionadas, seeders.</p>
+      </div>
+      <div class="card p-4">
+        <div class="flex items-center gap-2 mb-1"><span class="badge-done">✓</span><h4 class="text-sm font-semibold text-white">API REST</h4></div>
+        <p class="text-xs text-slate-400">Endpoints con validación Pydantic, documentación OpenAPI autogenerada en <code>/docs</code>.</p>
+      </div>
+      <div class="card p-4">
+        <div class="flex items-center gap-2 mb-1"><span class="badge-done">✓</span><h4 class="text-sm font-semibold text-white">Autenticación</h4></div>
+        <p class="text-xs text-slate-400">JWT con access tokens (15min) + refresh tokens (7 días), flujo completo.</p>
+      </div>
+      <div class="card p-4">
+        <div class="flex items-center gap-2 mb-1"><span class="badge-done">✓</span><h4 class="text-sm font-semibold text-white">Usuarios</h4></div>
+        <p class="text-xs text-slate-400">CRUD completo, roles (cliente, comercio, repartidor, admin), perfil básico.</p>
+      </div>
+      <div class="card p-4">
+        <div class="flex items-center gap-2 mb-1"><span class="badge-done">✓</span><h4 class="text-sm font-semibold text-white">Panel admin</h4></div>
+        <p class="text-xs text-slate-400">Backoffice web con autenticación, gestión básica de entidades, listados.</p>
+      </div>
+      <div class="card p-4">
+        <div class="flex items-center gap-2 mb-1"><span class="badge-done">✓</span><h4 class="text-sm font-semibold text-white">Tabla coordenadas</h4></div>
+        <p class="text-xs text-slate-400">Storage de GPS con PostGIS, índices espaciales GIST, endpoint de inserción.</p>
+      </div>
+      <div class="card p-4">
+        <div class="flex items-center gap-2 mb-1"><span class="badge-done">✓</span><h4 class="text-sm font-semibold text-white">Docker</h4></div>
+        <p class="text-xs text-slate-400">Contenedorización completa con docker-compose. Entorno reproducible en un comando.</p>
+      </div>
+      <div class="card p-4">
+        <div class="flex items-center gap-2 mb-1"><span class="badge-done">✓</span><h4 class="text-sm font-semibold text-white">Arquitectura inicial</h4></div>
+        <p class="text-xs text-slate-400">Separación routers/services/repositories/models/schemas. Linting + formatting.</p>
+      </div>
+      <div class="card p-4">
+        <div class="flex items-center gap-2 mb-1"><span class="badge-done">✓</span><h4 class="text-sm font-semibold text-white">Seguridad básica</h4></div>
+        <p class="text-xs text-slate-400">bcrypt (cost 12), CORS whitelist, rate limiting inicial, variables de entorno via pydantic-settings.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============== ARQUITECTURA ============== -->
+  <section class="tab-content" id="arquitectura">
+    <h2 class="text-xl font-semibold text-white mb-2">Arquitectura del sistema</h2>
+    <p class="text-sm text-slate-400 mb-6">Diseño en capas siguiendo principios de Clean Architecture / Hexagonal, adaptado a un monolito modular Python.</p>
+
+    <!-- Diagrama de capas visual con CSS -->
+    <div class="card p-6 mb-5">
+      <h3 class="text-sm font-semibold text-white mb-4">Vista de alto nivel</h3>
+
+      <!-- Capa 1: Clientes -->
+      <div class="layer-box mb-3" style="border-color:#3b82f6">
+        <div class="flex items-center justify-between mb-3">
+          <div class="text-xs font-semibold text-blue-400 uppercase tracking-wider">Capa de presentación · Clientes</div>
+          <span class="chip">HTTPS · WSS</span>
+        </div>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+          <div class="module-box"><div class="text-xs text-blue-300">App Cliente</div><div class="text-xs text-slate-400">React Native · iOS/Android</div></div>
+          <div class="module-box"><div class="text-xs text-blue-300">App Repartidor</div><div class="text-xs text-slate-400">React Native · iOS/Android</div></div>
+          <div class="module-box"><div class="text-xs text-blue-300">Panel Comercio</div><div class="text-xs text-slate-400">Web (SPA)</div></div>
+          <div class="module-box"><div class="text-xs text-blue-300">Backoffice</div><div class="text-xs text-slate-400">Web (SPA)</div></div>
+        </div>
+      </div>
+
+      <div class="text-center text-slate-500 my-2 text-xs">↓ REST (HTTP/JSON) · WebSockets (Socket.io) · Push (FCM) ↓</div>
+
+      <!-- Capa 2: API Gateway / Routers -->
+      <div class="layer-box mb-3" style="border-color:#8b5cf6">
+        <div class="flex items-center justify-between mb-3">
+          <div class="text-xs font-semibold text-purple-400 uppercase tracking-wider">Capa de transporte · FastAPI Routers</div>
+          <span class="chip">Uvicorn · ASGI</span>
+        </div>
+        <div class="grid grid-cols-3 md:grid-cols-6 gap-2 text-xs">
+          <div class="module-box"><div class="text-purple-300">/auth</div></div>
+          <div class="module-box"><div class="text-purple-300">/users</div></div>
+          <div class="module-box"><div class="text-purple-300">/merchants</div></div>
+          <div class="module-box"><div class="text-purple-300">/couriers</div></div>
+          <div class="module-box"><div class="text-purple-300">/catalog</div></div>
+          <div class="module-box"><div class="text-purple-300">/orders</div></div>
+          <div class="module-box"><div class="text-purple-300">/geo</div></div>
+          <div class="module-box"><div class="text-purple-300">/tracking</div></div>
+          <div class="module-box"><div class="text-purple-300">/payments</div></div>
+          <div class="module-box"><div class="text-purple-300">/ratings</div></div>
+          <div class="module-box"><div class="text-purple-300">/admin</div></div>
+          <div class="module-box"><div class="text-purple-300">/webhooks</div></div>
+        </div>
+      </div>
+
+      <div class="text-center text-slate-500 my-2 text-xs">↓ DTOs (Pydantic Schemas) ↓</div>
+
+      <!-- Capa 3: Application Services -->
+      <div class="layer-box mb-3" style="border-color:#10b981">
+        <div class="flex items-center justify-between mb-3">
+          <div class="text-xs font-semibold text-emerald-400 uppercase tracking-wider">Capa de aplicación · Servicios de dominio</div>
+          <span class="chip">Orquestación · Casos de uso</span>
+        </div>
+        <div class="grid grid-cols-2 md:grid-cols-5 gap-2 text-xs">
+          <div class="module-box"><div class="text-emerald-300">AuthService</div><div class="text-slate-400">JWT · sesiones</div></div>
+          <div class="module-box"><div class="text-emerald-300">CatalogService</div><div class="text-slate-400">productos · stock</div></div>
+          <div class="module-box"><div class="text-emerald-300">OrderService</div><div class="text-slate-400">ciclo pedido</div></div>
+          <div class="module-box"><div class="text-emerald-300">GeoService</div><div class="text-slate-400">tracking · zonas</div></div>
+          <div class="module-box"><div class="text-emerald-300">CommissionService</div><div class="text-slate-400">motor paramétrico</div></div>
+          <div class="module-box"><div class="text-emerald-300">NotificationService</div><div class="text-slate-400">push · email · WS</div></div>
+          <div class="module-box"><div class="text-emerald-300">PaymentService</div><div class="text-slate-400">pasarela · wallet</div></div>
+          <div class="module-box"><div class="text-emerald-300">RatingService</div><div class="text-slate-400">calificaciones</div></div>
+          <div class="module-box"><div class="text-emerald-300">AssignmentService</div><div class="text-slate-400">asignación repartidor</div></div>
+          <div class="module-box"><div class="text-emerald-300">AuditService</div><div class="text-slate-400">logs inmutables</div></div>
+        </div>
+      </div>
+
+      <div class="text-center text-slate-500 my-2 text-xs">↓ Domain Entities · Value Objects ↓</div>
+
+      <!-- Capa 4: Domain -->
+      <div class="layer-box mb-3" style="border-color:#f59e0b">
+        <div class="flex items-center justify-between mb-3">
+          <div class="text-xs font-semibold text-amber-400 uppercase tracking-wider">Capa de dominio · Entidades y reglas</div>
+          <span class="chip">Agnóstica a infra</span>
+        </div>
+        <div class="grid grid-cols-2 md:grid-cols-6 gap-2 text-xs">
+          <div class="module-box"><div class="text-amber-300">User</div></div>
+          <div class="module-box"><div class="text-amber-300">Merchant</div></div>
+          <div class="module-box"><div class="text-amber-300">Courier</div></div>
+          <div class="module-box"><div class="text-amber-300">Product</div></div>
+          <div class="module-box"><div class="text-amber-300">Order</div></div>
+          <div class="module-box"><div class="text-amber-300">Contract</div></div>
+        </div>
+      </div>
+
+      <div class="text-center text-slate-500 my-2 text-xs">↓ Repository Interfaces (Protocol) ↓</div>
+
+      <!-- Capa 5: Infrastructure -->
+      <div class="layer-box" style="border-color:#6b7280">
+        <div class="flex items-center justify-between mb-3">
+          <div class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Capa de infraestructura · Adaptadores</div>
+          <span class="chip">SQLAlchemy · AsyncPG · Socket.io client</span>
+        </div>
+        <div class="grid grid-cols-2 md:grid-cols-5 gap-2 text-xs">
+          <div class="module-box"><div class="text-slate-300">PostgreSQL Repo</div><div class="text-slate-400">SQLAlchemy 2.0 async</div></div>
+          <div class="module-box"><div class="text-slate-300">PostGIS Repo</div><div class="text-slate-400">GeoAlchemy2</div></div>
+          <div class="module-box"><div class="text-slate-300">Redis Cache</div><div class="text-slate-400">redis-py (futuro)</div></div>
+          <div class="module-box"><div class="text-slate-300">Socket.io Emitter</div><div class="text-slate-400">socket.io-emitter</div></div>
+          <div class="module-box"><div class="text-slate-300">FCM Client</div><div class="text-slate-400">firebase-admin</div></div>
+          <div class="module-box"><div class="text-slate-300">S3 Storage</div><div class="text-slate-400">MinIO compatible</div></div>
+          <div class="module-box"><div class="text-slate-300">Email SMTP</div><div class="text-slate-400">aiosmtplib</div></div>
+          <div class="module-box"><div class="text-slate-300">Payment Gateway</div><div class="text-slate-400">Adapter por proveedor</div></div>
+          <div class="module-box"><div class="text-slate-300">Cron Worker</div><div class="text-slate-400">APScheduler</div></div>
+          <div class="module-box"><div class="text-slate-300">Logger</div><div class="text-slate-400">structlog · JSON</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Principios de diseño -->
+    <div class="grid md:grid-cols-2 gap-4 mb-5">
+      <div class="card p-5">
+        <h3 class="text-sm font-semibold text-white mb-3">Principios aplicados</h3>
+        <ul class="text-sm text-slate-300 space-y-2">
+          <li class="flex gap-2"><span class="text-indigo-400 font-bold">D</span><span><strong class="text-white">Dependency Inversion.</strong> Los servicios dependen de interfaces (Python <code>Protocol</code>), no de implementaciones concretas. Facilita testeo y reemplazo de infraestructura.</span></li>
+          <li class="flex gap-2"><span class="text-indigo-400 font-bold">S</span><span><strong class="text-white">Single Responsibility por módulo.</strong> Cada paquete de dominio (catalog, orders, geo...) es autocontenido con sus propios routers, services, repositories, schemas y tests.</span></li>
+          <li class="flex gap-2"><span class="text-indigo-400 font-bold">I</span><span><strong class="text-white">Inyección de dependencias.</strong> FastAPI <code>Depends()</code> para inyectar DB sessions, current_user y servicios. Cero instanciación manual.</span></li>
+          <li class="flex gap-2"><span class="text-indigo-400 font-bold">C</span><span><strong class="text-white">Comunicación entre módulos.</strong> Sincrónica (llamadas directas) en MVP. Preparamos un <code>EventBus</code> (patrón Observer) para migrar a eventos async cuando sea necesario.</span></li>
+        </ul>
+      </div>
+
+      <div class="card p-5">
+        <h3 class="text-sm font-semibold text-white mb-3">Estrategia de evolución a microservicios</h3>
+        <ul class="text-sm text-slate-300 space-y-2">
+          <li class="flex gap-2"><span class="text-emerald-400">①</span><span><strong class="text-white">Módulo "caliente".</strong> Cuando un módulo (ej. <code>geo</code>) requiere escala independiente, se identifica por métricas de CPU/latencia.</span></li>
+          <li class="flex gap-2"><span class="text-emerald-400">②</span><span><strong class="text-white">Extracción.</strong> Se copia el paquete a un nuevo repositorio, se adapta a FastAPI standalone con su propia BD.</span></li>
+          <li class="flex gap-2"><span class="text-emerald-400">③</span><span><strong class="text-white">API Gateway.</strong> El monolito original pasa a consumir el nuevo servicio vía HTTP/gRPC. El resto del sistema no cambia.</span></li>
+          <li class="flex gap-2"><span class="text-emerald-400">④</span><span><strong class="text-white">Event Bus compartido.</strong> Para consistencia eventual, se introduce RabbitMQ/NATS entre servicios.</span></li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Estructura de carpetas -->
+    <div class="card p-5">
+      <h3 class="text-sm font-semibold text-white mb-3">Estructura de proyecto (monorepo)</h3>
+      <pre class="text-xs text-slate-300 overflow-x-auto leading-relaxed bg-slate-950/60 p-4 rounded-lg border border-slate-800">
+superapp/
+├── alembic/                    # Migraciones de BD
+│   ├── versions/
+│   └── env.py
+├── app/
+│   ├── core/                   # Config, security, exceptions, logging
+│   │   ├── config.py           # Pydantic Settings (env vars)
+│   │   ├── database.py         # Engine + Session async
+│   │   ├── security.py         # JWT, password hashing
+│   │   ├── exceptions.py       # Jerarquía de errores
+│   │   └── events.py           # EventBus interno
+│   │
+│   ├── modules/                # Módulos de dominio
+│   │   ├── auth/
+│   │   │   ├── router.py
+│   │   │   ├── service.py
+│   │   │   ├── schemas.py
+│   │   │   └── dependencies.py
+│   │   ├── users/
+│   │   ├── merchants/
+│   │   ├── couriers/
+│   │   ├── catalog/            # products, categories, variants
+│   │   ├── orders/             # orders, items, state machine
+│   │   ├── geo/                # tracking, zones, PostGIS
+│   │   ├── commissions/        # motor paramétrico
+│   │   ├── payments/           # adapter pattern
+│   │   ├── notifications/      # FCM, email, WS
+│   │   ├── ratings/
+│   │   └── admin/
+│   │
+│   ├── shared/                 # Utils cross-module
+│   │   ├── repositories/       # Repository interfaces
+│   │   ├── pagination.py
+│   │   └── validators.py
+│   │
+│   ├── workers/                # Cron jobs (APScheduler)
+│   │   ├── commission_expirator.py
+│   │   └── stale_orders_cleaner.py
+│   │
+│   └── main.py                 # FastAPI app factory
+│
+├── apps/                       # Frontends
+│   ├── mobile/                 # React Native (cliente + repartidor)
+│   ├── merchant-panel/         # Web (React o similar)
+│   └── backoffice/             # Web (React o similar)
+│
+├── tests/                      # pytest + httpx + factory_boy
+├── docker/
+│   ├── Dockerfile.backend
+│   └── Dockerfile.frontend
+├── docker-compose.yml
+├── pyproject.toml
+└── README.md</pre>
+    </div>
+  </section>
+
+  <!-- ============== STACK ============== -->
+  <section class="tab-content" id="stack">
+    <h2 class="text-xl font-semibold text-white mb-2">Stack tecnológico</h2>
+    <p class="text-sm text-slate-400 mb-6">Justificación técnica de cada elección. Prioridad: open source, gratuita, mantenida activamente.</p>
+
+    <div class="card overflow-hidden mb-5">
+      <table class="w-full text-sm">
+        <thead>
+          <tr class="bg-slate-900/50">
+            <th style="width:18%">Capa</th>
+            <th style="width:22%">Tecnología</th>
+            <th>Justificación</th>
+            <th style="width:12%">Estado</th>
+          </tr>
+        </thead>
+        <tbody class="text-slate-300">
+          <tr>
+            <td>App móvil</td>
+            <td class="text-white font-medium">React Native</td>
+            <td class="text-xs">Build único para iOS y Android. Un codebase, dos plataformas. Librería <code>react-native-maps</code> para mapas, <code>react-native-background-geolocation</code> para tracking.</td>
+            <td><span class="badge-todo">Pendiente</span></td>
+          </tr>
+          <tr>
+            <td>Backend</td>
+            <td class="text-white font-medium">Python 3.12 + FastAPI</td>
+            <td class="text-xs">Async nativo con <code>asyncio</code>, type hints completos, validación automática con Pydantic v2, documentación OpenAPI gratis. Comunidad madura.</td>
+            <td><span class="badge-done">En uso</span></td>
+          </tr>
+          <tr>
+            <td>ORM</td>
+            <td class="text-white font-medium">SQLAlchemy 2.0 (async)</td>
+            <td class="text-xs">Patrón Unit of Work, sessions async con <code>asyncpg</code>, integración directa con PostGIS vía GeoAlchemy2. Estándar de la industria.</td>
+            <td><span class="badge-done">En uso</span></td>
+          </tr>
+          <tr>
+            <td>Migraciones</td>
+            <td class="text-white font-medium">Alembic</td>
+            <td class="text-xs">Migraciones versionadas y reproducibles. Autogeneración a partir de cambios en modelos SQLAlchemy.</td>
+            <td><span class="badge-done">En uso</span></td>
+          </tr>
+          <tr>
+            <td>BD principal</td>
+            <td class="text-white font-medium">PostgreSQL 16 + PostGIS</td>
+            <td class="text-xs">ACID, JSONB para datos semi-estructurados, índices GIN/GIST, full-text search integrado, funciones geoespaciales nativas.</td>
+            <td><span class="badge-done">En uso</span></td>
+          </tr>
+          <tr>
+            <td>Tiempo real</td>
+            <td class="text-white font-medium">Socket.io (Node adapter)</td>
+            <td class="text-xs">WebSockets con fallback automático (long-polling). Cliente oficial en Python via <code>python-socketio</code>. Redis adapter para multi-instancia.</td>
+            <td><span class="badge-todo">Pendiente</span></td>
+          </tr>
+          <tr>
+            <td>Caché</td>
+            <td class="text-white font-medium">Redis 7</td>
+            <td class="text-xs">Caché de queries pesadas, sesiones de WebSocket, rate limiting distribuido, broker para Socket.io adapter. <strong>Se activa cuando la carga lo justifique.</strong></td>
+            <td><span class="badge-wip">Futuro</span></td>
+          </tr>
+          <tr>
+            <td>Mapas</td>
+            <td class="text-white font-medium">OpenStreetMap + Leaflet</td>
+            <td class="text-xs">Tile server open source (OpenMapTiles o similar). Leaflet para web, <code>react-native-maps</code> con provider OSM para móvil.</td>
+            <td><span class="badge-todo">Pendiente</span></td>
+          </tr>
+          <tr>
+            <td>Búsqueda avanzada</td>
+            <td class="text-white font-medium">PostgreSQL FTS → Meilisearch</td>
+            <td class="text-xs">MVP: full-text search con <code>tsvector</code> + GIN index. Futuro: Meilisearch (open source, compatible API Algolia) si la escala lo exige.</td>
+            <td><span class="badge-wip">Futuro</span></td>
+          </tr>
+          <tr>
+            <td>Push notifications</td>
+            <td class="text-white font-medium">Firebase Cloud Messaging</td>
+            <td class="text-xs"><strong>Única excepción no-open-source.</strong> Requerido por Apple/Google para push en móvil. SDK oficial <code>firebase-admin</code> en Python.</td>
+            <td><span class="badge-todo">Pendiente</span></td>
+          </tr>
+          <tr>
+            <td>Pagos</td>
+            <td class="text-white font-medium">Pasarela local (adapter)</td>
+            <td class="text-xs">Patrón Adapter para abstraer proveedor. Permite cambiar de gateway sin tocar lógica de dominio. Se define al iniciar operaciones.</td>
+            <td><span class="badge-todo">Pendiente</span></td>
+          </tr>
+          <tr>
+            <td>Validación / Schemas</td>
+            <td class="text-white font-medium">Pydantic v2</td>
+            <td class="text-xs">Validación con type hints, serialización ultra-rápida (Rust-core), integración nativa con FastAPI.</td>
+            <td><span class="badge-done">En uso</span></td>
+          </tr>
+          <tr>
+            <td>Logging</td>
+            <td class="text-white font-medium">structlog</td>
+            <td class="text-xs">Logs estructurados en JSON. Contexto automático por request (request_id, user_id). Compatible con cualquier agregador.</td>
+            <td><span class="badge-done">En uso</span></td>
+          </tr>
+          <tr>
+            <td>Testing</td>
+            <td class="text-white font-medium">pytest + httpx + factory_boy</td>
+            <td class="text-xs">pytest para test runner, httpx para testing async de APIs, factory_boy para fixtures de datos.</td>
+            <td><span class="badge-todo">Pendiente</span></td>
+          </tr>
+          <tr>
+            <td>CI/CD</td>
+            <td class="text-white font-medium">GitHub Actions / Gitea</td>
+            <td class="text-xs">Pipelines automáticos de lint + test + build. Gitea como alternativa self-hosted gratuita post-inversión.</td>
+            <td><span class="badge-wip">Futuro</span></td>
+          </tr>
+          <tr>
+            <td>Contenedores</td>
+            <td class="text-white font-medium">Docker + Docker Compose</td>
+            <td class="text-xs">Entorno reproducible. <code>docker-compose up</code> levanta backend + DB + migraciones. Base para Kubernetes futuro.</td>
+            <td><span class="badge-done">En uso</span></td>
+          </tr>
+          <tr>
+            <td>Versionado</td>
+            <td class="text-white font-medium">Git local</td>
+            <td class="text-xs">Hasta definir proveedor cloud (GitHub/GitLab/Gitea self-hosted).</td>
+            <td><span class="badge-done">En uso</span></td>
+          </tr>
+          <tr>
+            <td>Infraestructura</td>
+            <td class="text-white font-medium">A definir</td>
+            <td class="text-xs">Post inversión. Candidatos: Hetzner (coste bajo), AWS (ecosistema), DigitalOcean (simplicidad).</td>
+            <td><span class="badge-wip">Futuro</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="grid md:grid-cols-3 gap-4">
+      <div class="card p-4">
+        <h4 class="text-sm font-semibold text-white mb-2">Observabilidad</h4>
+        <ul class="text-xs text-slate-400 space-y-1">
+          <li>• Logs JSON vía <code>structlog</code></li>
+          <li>• Métricas con <code>prometheus-client</code></li>
+          <li>• Error tracking: Sentry (self-hosted)</li>
+          <li>• Tracing: OpenTelemetry (preparado)</li>
+        </ul>
+      </div>
+      <div class="card p-4">
+        <h4 class="text-sm font-semibold text-white mb-2">Scheduler</h4>
+        <ul class="text-xs text-slate-400 space-y-1">
+          <li>• APScheduler (run_once jobs + cron periódicos)</li>
+          <li>• run_once: expiración contratos (fecha elegida por cliente), ofertas con vencimiento</li>
+          <li>• Cron periódico: limpieza pedidos stale, limpieza temp files</li>
+          <li>• Trigger on-write: cálculo ratings (al recibir nueva reseña)</li>
+          <li>• Webhooks: confirmaciones de pago (event-driven, no cron)</li>
+          <li>• Futuro: Celery + Redis si crece</li>
+        </ul>
+      </div>
+      <div class="card p-4">
+        <h4 class="text-sm font-semibold text-white mb-2">Storage de archivos</h4>
+        <ul class="text-xs text-slate-400 space-y-1">
+          <li>• MVP: filesystem local + endpoint estático</li>
+          <li>• Futuro: MinIO (S3-compatible open source)</li>
+          <li>• Uso: fotos documentos, evidencia entregas</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============== MODULOS ============== -->
+  <section class="tab-content" id="modulos">
+    <h2 class="text-xl font-semibold text-white mb-2">Módulos funcionales</h2>
+    <p class="text-sm text-slate-400 mb-6">Desglose por dominio. Cada módulo es un paquete Python autocontenido.</p>
+
+    <div class="grid md:grid-cols-2 gap-4">
+      <div class="card p-5">
+        <div class="flex items-center justify-between mb-2">
+          <h3 class="font-semibold text-white">🔐 Auth</h3>
+          <span class="badge-done">MVP 1</span>
+        </div>
+        <ul class="text-xs text-slate-400 space-y-1">
+          <li>• Registro con email + teléfono</li>
+          <li>• Login con JWT (access 15min, refresh 7 días)</li>
+          <li>• Recuperación de contraseña por email</li>
+          <li>• Roles: client, merchant, courier, admin</li>
+          <li>• Refresh token rotation (revocación)</li>
+          <li>• <strong>Futuro:</strong> OTP, 2FA, social login</li>
+        </ul>
+      </div>
+
+      <div class="card p-5">
+        <div class="flex items-center justify-between mb-2">
+          <h3 class="font-semibold text-white">👥 Users</h3>
+          <span class="badge-done">MVP 2</span>
+        </div>
+        <ul class="text-xs text-slate-400 space-y-1">
+          <li>• CRUD de usuarios</li>
+          <li>• Perfiles extendidos por tipo</li>
+          <li>• Gestión de direcciones guardadas (cliente)</li>
+          <li>• Suspensión / baneo por admin</li>
+          <li>• Soft delete con marca temporal</li>
+        </ul>
+      </div>
+
+      <div class="card p-5">
+        <div class="flex items-center justify-between mb-2">
+          <h3 class="font-semibold text-white">🏪 Merchants</h3>
+          <span class="badge-wip">MVP 3</span>
+        </div>
+        <ul class="text-xs text-slate-400 space-y-1">
+          <li>• Onboarding multi-paso</li>
+          <li>• Firma digital contrato adhesión</li>
+          <li>• Tipos: tienda_barrio, puesto_mercado, supermercado, mayorista</li>
+          <li>• Modalidades: unitaria, mayorista, mixta</li>
+          <li>• Configuración de horarios (JSONB)</li>
+          <li>• Zona de cobertura (polígono GeoJSON)</li>
+          <li>• Aprobación manual por admin</li>
+        </ul>
+      </div>
+
+      <div class="card p-5">
+        <div class="flex items-center justify-between mb-2">
+          <h3 class="font-semibold text-white">🛵 Couriers</h3>
+          <span class="badge-wip">MVP 3</span>
+        </div>
+        <ul class="text-xs text-slate-400 space-y-1">
+          <li>• Onboarding + carga documentos (DNI, licencia, seguro)</li>
+          <li>• Verificación manual por admin</li>
+          <li>• Tipo vehículo: moto, bici, auto, a pie</li>
+          <li>• Toggle disponibilidad (online/offline/en_pedido)</li>
+          <li>• Última ubicación conocida</li>
+          <li>• Rating y estadísticas operativas</li>
+        </ul>
+      </div>
+
+      <div class="card p-5">
+        <div class="flex items-center justify-between mb-2">
+          <h3 class="font-semibold text-white">📦 Catalog</h3>
+          <span class="badge-todo">MVP 4</span>
+        </div>
+        <ul class="text-xs text-slate-400 space-y-1">
+          <li>• Categorías jerárquicas (padre/hijo)</li>
+          <li>• Productos con nombre, descripción, precio, stock</li>
+          <li>• Variantes (talla, color, tamaño) con precio adicional</li>
+          <li>• Carga individual y masiva (CSV)</li>
+          <li>• Imágenes (S3/MinIO)</li>
+          <li>• Estados: activo, agotado, descontinuado</li>
+          <li>• <code>price_tiers</code> JSONB para precios escalonados (mayorista futuro)</li>
+        </ul>
+      </div>
+
+      <div class="card p-5">
+        <div class="flex items-center justify-between mb-2">
+          <h3 class="font-semibold text-white">🛒 Orders</h3>
+          <span class="badge-todo">MVP 4</span>
+        </div>
+        <ul class="text-xs text-slate-400 space-y-1">
+          <li>• Máquina de estados: creado → confirmado → preparando → listo → asignado → en_camino → entregado</li>
+          <li>• Items con referencia a productos y variantes</li>
+          <li>• Cálculo de totales (subtotal, envío, comisión, propina)</li>
+          <li>• Cancelación con motivo</li>
+          <li>• Tiempos estimados de entrega</li>
+          <li>• Notas al comercio y al repartidor</li>
+          <li>• Timeout de confirmación (configurable)</li>
+        </ul>
+      </div>
+
+      <div class="card p-5">
+        <div class="flex items-center justify-between mb-2">
+          <h3 class="font-semibold text-white">📍 Geo</h3>
+          <span class="badge-wip">MVP 2</span>
+        </div>
+        <ul class="text-xs text-slate-400 space-y-1">
+          <li>• Tabla <code>courier_locations</code> con PostGIS Point</li>
+          <li>• Inserción optimizada (batch)</li>
+          <li>• Índices GIST para queries de proximidad</li>
+          <li>• Zonas de cobertura (MultiPolygon)</li>
+          <li>• Query: "repartidores en radio N km"</li>
+          <li>• Streaming por WebSocket en tiempo real</li>
+          <li>• Retención: 90 días con purgado automático</li>
+        </ul>
+      </div>
+
+      <div class="card p-5">
+        <div class="flex items-center justify-between mb-2">
+          <h3 class="font-semibold text-white">💰 Commissions</h3>
+          <span class="badge-todo">MVP 5</span>
+        </div>
+        <ul class="text-xs text-slate-400 space-y-1">
+          <li>• Motor paramétrico por entidad</li>
+          <li>• Tipos: porcentaje, tarifa_fija, suscripción, ninguno</li>
+          <li>• Vigencia (inicio/fin)</li>
+          <li>• Job diario: detecta vencidos → notifica → espera aceptación</li>
+          <li>• Log inmutable de cambios (append-only)</li>
+          <li>• Versionado de términos de contrato</li>
+          <li>• Editable desde backoffice sin deploy</li>
+        </ul>
+      </div>
+
+      <div class="card p-5">
+        <div class="flex items-center justify-between mb-2">
+          <h3 class="font-semibold text-white">💳 Payments</h3>
+          <span class="badge-todo">MVP 4</span>
+        </div>
+        <ul class="text-xs text-slate-400 space-y-1">
+          <li>• Adapter pattern para múltiples gateways</li>
+          <li>• Métodos: tarjeta, efectivo, wallet interna</li>
+          <li>• Webhooks para confirmaciones asíncronas</li>
+          <li>• Idempotencia (clave por pedido)</li>
+          <li>• Conciliación diaria</li>
+          <li>• Reembolsos parciales/totales</li>
+        </ul>
+      </div>
+
+      <div class="card p-5">
+        <div class="flex items-center justify-between mb-2">
+          <h3 class="font-semibold text-white">🔔 Notifications</h3>
+          <span class="badge-todo">MVP 3</span>
+        </div>
+        <ul class="text-xs text-slate-400 space-y-1">
+          <li>• Push móvil (FCM)</li>
+          <li>• Email transaccional (SMTP)</li>
+          <li>• WebSockets para estado en vivo</li>
+          <li>• Templates versionados</li>
+          <li>• Preferencias por usuario (opt-out)</li>
+          <li>• Cola interna para retries</li>
+        </ul>
+      </div>
+
+      <div class="card p-5">
+        <div class="flex items-center justify-between mb-2">
+          <h3 class="font-semibold text-white">⭐ Ratings</h3>
+          <span class="badge-todo">MVP 5</span>
+        </div>
+        <ul class="text-xs text-slate-400 space-y-1">
+          <li>• Calificación 1-5 de comercio y repartidor</li>
+          <li>• Comentarios con moderación</li>
+          <li>• Cálculo de rating promedio con fórmula de Bayes</li>
+          <li>• Solo permitido a clientes que completaron pedido</li>
+          <li>• Ventana de 7 días post-entrega</li>
+        </ul>
+      </div>
+
+      <div class="card p-5">
+        <div class="flex items-center justify-between mb-2">
+          <h3 class="font-semibold text-white">🎯 Assignment</h3>
+          <span class="badge-todo">MVP 5</span>
+        </div>
+        <ul class="text-xs text-slate-400 space-y-1">
+          <li>• Selección de repartidor disponible más cercano</li>
+          <li>• Filtros: radio máximo, tipo vehículo, rating mínimo</li>
+          <li>• Timeout de aceptación (30s)</li>
+          <li>• Reasignación automática si rechaza</li>
+          <li>• Fallback a asignación manual tras N intentos</li>
+          <li>• <strong>Futuro:</strong> scoring ML con historial</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============== FLUJOS ============== -->
+  <section class="tab-content" id="flujos">
+    <h2 class="text-xl font-semibold text-white mb-2">Flujos de usuario</h2>
+    <p class="text-sm text-slate-400 mb-4">Diagramas de flujo por caso de uso. Cada nodo indica el actor responsable de la acción.</p>
+
+    <div class="mb-3 flex gap-2 flex-wrap">
+      <span class="chip actor-client">👤 Cliente</span>
+      <span class="chip actor-merchant">🏪 Comercio</span>
+      <span class="chip actor-courier">🛵 Repartidor</span>
+      <span class="chip actor-admin">🛡️ Admin</span>
+      <span class="chip actor-system">⚙️ Sistema</span>
+    </div>
+
+    <div class="space-y-3">
+
+      <!-- CLIENTE: REGISTRO -->
+      <details class="card p-4" open>
+        <summary class="flex items-center gap-2">
+          <span class="summary-icon text-slate-500">▶</span>
+          <span class="font-semibold text-white">👤 Registro y autenticación del cliente</span>
+          <span class="badge-done ml-auto">MVP 1</span>
+        </summary>
+        <div class="mt-4 overflow-x-auto">
+          <div class="flow-container">
+            <div class="flow-node actor-client rounded-lg p-3 min-w-[140px]"><div class="text-xs text-blue-200">Cliente</div><div class="text-xs font-semibold mt-1">Ingresa email/teléfono</div></div>
+            <span class="arrow">→</span>
+            <div class="flow-node actor-system rounded-lg p-3 min-w-[140px]"><div class="text-xs text-slate-300">Sistema</div><div class="text-xs font-semibold mt-1">Envía OTP (futuro)</div></div>
+            <span class="arrow">→</span>
+            <div class="flow-node actor-client rounded-lg p-3 min-w-[140px]"><div class="text-xs text-blue-200">Cliente</div><div class="text-xs font-semibold mt-1">Define contraseña</div></div>
+            <span class="arrow">→</span>
+            <div class="flow-node actor-system rounded-lg p-3 min-w-[140px]"><div class="text-xs text-slate-300">Sistema</div><div class="text-xs font-semibold mt-1">Crea user + JWT</div></div>
+            <span class="arrow">→</span>
+            <div class="flow-node actor-client rounded-lg p-3 min-w-[140px]"><div class="text-xs text-blue-200">Cliente</div><div class="text-xs font-semibold mt-1">Home</div></div>
+          </div>
+        </div>
+      </details>
+
+      <!-- CLIENTE: LOGIN -->
+      <details class="card p-4">
+        <summary class="flex items-center gap-2">
+          <span class="summary-icon text-slate-500">▶</span>
+          <span class="font-semibold text-white">👤 Login y refresh de token</span>
+        </summary>
+        <div class="mt-4 overflow-x-auto">
+          <div class="flow-container">
+            <div class="flow-node actor-client rounded-lg p-3 min-w-[130px]"><div class="text-xs text-blue-200">Cliente</div><div class="text-xs font-semibold mt-1">POST /auth/login</div></div>
+            <span class="arrow">→</span>
+            <div class="flow-node actor-system rounded-lg p-3 min-w-[130px]"><div class="text-xs text-slate-300">Sistema</div><div class="text-xs font-semibold mt-1">Valida credenciales</div></div>
+            <span class="arrow">→</span>
+            <div class="flow-node actor-system rounded-lg p-3 min-w-[130px]"><div class="text-xs text-slate-300">Sistema</div><div class="text-xs font-semibold mt-1">Genera access+refresh</div></div>
+            <span class="arrow">→</span>
+            <div class="flow-node actor-client rounded-lg p-3 min-w-[130px]"><div class="text-xs text-blue-200">Cliente</div><div class="text-xs font-semibold mt-1">Almacena tokens</div></div>
+            <span class="arrow">→</span>
+            <div class="flow-node actor-client rounded-lg p-3 min-w-[130px]"><div class="text-xs text-blue-200">Cliente</div><div class="text-xs font-semibold mt-1">Al expirar: POST /auth/refresh</div></div>
+          </div>
+        </div>
+      </details>
+
+      <!-- CLIENTE: RECUPERAR CONTRASEÑA -->
+      <details class="card p-4">
+        <summary class="flex items-center gap-2">
+          <span class="summary-icon text-slate-500">▶</span>
+          <span class="font-semibold text-white">👤 Recuperación de contraseña</span>
+        </summary>
+        <div class="mt-4 overflow-x-auto">
+          <div class="flow-container">
+            <div class="flow-node actor-client rounded-lg p-3 min-w-[140px]"><div class="text-xs text-blue-200">Cliente</div><div class="text-xs font-semibold mt-1">POST /auth/forgot-password</div></div>
+            <span class="arrow">→</span>
+            <div class="flow-node actor-system rounded-lg p-3 min-w-[140px]"><div class="text-xs text-slate-300">Sistema</div><div class="text-xs font-semibold mt-1">Genera token 1h + envía email</div></div>
+            <span class="arrow">→</span>
+            <div class="flow-node actor-client rounded-lg p-3 min-w-[140px]"><div class="text-xs text-blue-200">Cliente</div><div class="text-xs font-semibold mt-1">Click en link email</div></div>
+            <span class="arrow">→</span>
+            <div class="flow-node actor-client rounded-lg p-3 min-w-[140px]"><div class="text-xs text-blue-200">Cliente</div><div class="text-xs font-semibold mt-1">Nueva contraseña</div></div>
+            <span class="arrow">→</span>
+            <div class="flow-node actor-system rounded-lg p-3 min-w-[140px]"><div class="text-xs text-slate-300">Sistema</div><div class="text-xs font-semibold mt-1">Invalida refresh tokens</div></div>
+          </div>
+        </div>
+      </details>
+
+      <!-- CLIENTE: BÚSQUEDA -->
+      <details class="card p-4">
+        <summary class="flex items-center gap-2">
+          <span class="summary-icon text-slate-500">▶</span>
+          <span class="font-semibold text-white">👤 Búsqueda y descubrimiento</span>
+        </summary>
+        <div class="mt-4 overflow-x-auto">
+          <div class="flow-container">
+            <div class="flow-node actor-client rounded-lg p-3 min-w-[130px]"><div class="text-xs text-blue-200">Cliente</div><div class="text-xs font-semibold mt-1">Permite GPS</div></div>
+            <span class="arrow">→</span>
+            <div class="flow-node actor-system rounded-lg p-3 min-w-[130px]"><div class="text-xs text-slate-300">Sistema</div><div class="text-xs font-semibold mt-1">GET /catalog/nearby</div></div>
+            <span class="arrow">→</span>
+            <div class="flow-node actor-client rounded-lg p-3 min-w-[130px]"><div class="text-xs text-blue-200">Cliente</div><div class="text-xs font-semibold mt-1">Aplica filtros</div></div>
+            <span class="arrow">→</span>
+            <div class="flow-node actor-system rounded-lg p-3 min-w-[130px]"><div class="text-xs text-slate-300">Sistema</div><div class="text-xs font-semibold mt-1">Full-text + geo filter</div></div>
+            <span class="arrow">→</span>
+            <div class="flow-node actor-client rounded-lg p-3 min-w-[130px]"><div class="text-xs text-blue-200">Cliente</div><div class="text-xs font-semibold mt-1">Ve ficha comercio/producto</div></div>
+          </div>
+        </div>
+      </details>
+
+      <!-- CLIENTE: FAVORITOS -->
+      <details class="card p-4">
+        <summary class="flex items-center gap-2">
+          <span class="summary-icon text-slate-500">▶</span>
+          <span class="font-semibold text-white">👤 Añadir a favoritos / reordenar</span>
+        </summary>
+        <div class="mt-4 overflow-x-auto">
+          <div class="flow-container">
+            <div class="flow-node actor-client rounded-lg p-3 min-w-[140px]"><div class="text-xs text-blue-200">Cliente</div><div class="text-xs font-semibold mt-1">POST /favorites</div></div>
+            <span class="arrow">→</span>
+            <div class="flow-node actor-system rounded-lg p-3 min-w-[140px]"><div class="text-xs text-slate-300">Sistema</div><div class="text-xs font-semibold mt-1">Guarda en user_favorites</div></div>
+            <span class="arrow">→</span>
+            <div class="flow-node actor-client rounded-lg p-3 min-w-[140px]"><div class="text-xs text-blue-200">Cliente</div><div class="text-xs font-semibold mt-1">GET /orders/history</div></div>
+            <span class="arrow">→</span>
+            <div class="flow-node actor-client rounded-lg p-3 min-w-[140px]"><div class="text-xs text-blue-200">Cliente</div><div class="text-xs font-semibold mt-1">Click "reordenar"</div></div>
+            <span class="arrow">→</span>
+            <div class="flow-node actor-system rounded-lg p-3 min-w-[140px]"><div class="text-xs text-slate-300">Sistema</div><div class="text-xs font-semibold mt-1">Valida stock actual</div></div>
+            <span class="arrow">→</span>
+            <div class="flow-node actor-client rounded-lg p-3 min-w-[140px]"><div class="text-xs text-blue-200">Cliente</div><div class="text-xs font-semibold mt-1">Carrito precargado</div></div>
+          </div>
+        </div>
+      </details>
+
+      <!-- CLIENTE: COMPRA COMPLETA -->
+      <details class="card p-4">
+        <summary class="flex items-center gap-2">
+          <span class="summary-icon text-slate-500">▶</span>
+          <span class="font-semibold text-white">👤 Flujo de compra completo</span>
+          <span class="badge-warn ml-auto">Crítico</span>
+        </summary>
+        <div class="mt-4 overflow-x-auto">
+          <div class="flow-container">
+            <div class="flow-node actor-client rounded-lg p-3 min-w-[130px]"><div class="text-xs text-blue-200">Cliente</div><div class="text-xs font-semibold mt-1">Agrega al carrito</div></div>
+            <span class="arrow">→</span>
+            <div class="flow-node actor-client rounded-lg p-3 min-w-[130px]"><div class="text-xs text-blue-200">Cliente</div><div class="text-xs font-semibold mt-1">Checkout + dirección</div></div>
+            <span class="arrow">→</span>
+            <div class="flow-node actor-system rounded-lg p-3 min-w-[130px]"><div class="text-xs text-slate-300">Sistema</div><div class="text-xs font-semibold mt-1">Calcula envío + total</div></div>
+            <span class="arrow">→</span>
+            <div class="flow-node actor-client rounded-lg p-3 min-w-[130px]"><div class="text-xs text-blue-200">Cliente</div><div class="text-xs font-semibold mt-1">Confirma pago</div></div>
+            <span class="arrow">→</span>
+            <div class="flow-node actor-system rounded-lg p-3 min-w-[130px]"><div class="text-xs text-slate-300">Sistema</div><div class="text-xs font-semibold mt-1">Crea order + push comercio</div></div>
+          </div>
+          <div class="flow-container">
+            <div class="flow-node actor-merchant rounded-lg p-3 min-w-[130px]"><div class="text-xs text-emerald-200">Comercio</div><div class="text-xs font-semibold mt-1">Confirma (≤5min)</div></div>
+            <span class="arrow">→</span>
+            <div class="flow-node actor-system rounded-lg p-3 min-w-[130px]"><div class="text-xs text-slate-300">Sistema</div><div class="text-xs font-semibold mt-1">Busca repartidor</div></div>
+            <span class="arrow">→</span>
+            <div class="flow-node actor-courier rounded-lg p-3 min-w-[130px]"><div class="text-xs text-purple-200">Repartidor</div><div class="text-xs font-semibold mt-1">Acepta pedido</div></div>
+            <span class="arrow">→</span>
+            <div class="flow-node actor-merchant rounded-lg p-3 min-w-[130px]"><div class="text-xs text-emerald-200">Comercio</div><div class="text-xs font-semibold mt-1">Marca "listo"</div></div>
+            <span class="arrow">→</span>
+            <div class="flow-node actor-courier rounded-lg p-3 min-w-[130px]"><div class="text-xs text-purple-200">Repartidor</div><div class="text-xs font-semibold mt-1">Retira + confirma</div></div>
+          </div>
+          <div class="flow-container">
+            <div class="flow-node actor-courier rounded-lg p-3 min-w-[130px]"><div class="text-xs text-purple-200">Repartidor</div><div class="text-xs font-semibold mt-1">Navega al cliente</div></div>
+            <span class="arrow">→</span>
+            <div class="flow-node actor-client rounded-lg p-3 min-w-[130px]"><div class="text-xs text-blue-200">Cliente</div><div class="text-xs font-semibold mt-1">Tracking en vivo</div></div>
+            <span class="arrow">→</span>
+            <div class="flow-node actor-courier rounded-lg p-3 min-w-[130px]"><div class="text-xs text-purple-200">Repartidor</div><div class="text-xs font-semibold mt-1">Entrega + evidencia</div></div>
+            <span class="arrow">→</span>
+            <div class="flow-node actor-client rounded-lg p-3 min-w-[130px]"><div class="text-xs text-blue-200">Cliente</div><div class="text-xs font-semibold mt-1">Confirma + califica</div></div>
+            <span class="arrow">→</span>
+            <div class="flow-node actor-system rounded-lg p-3 min-w-[130px]"><div class="text-xs text-slate-300">Sistema</div><div class="text-xs font-semibold mt-1">Cierra + liquida</div></div>
+          </div>
+        </div>
+      </details>
+
+      <!-- CLIENTE: CANCELACIÓN -->
+      <details class="card p-4">
+        <summary class="flex items-center gap-2">
+          <span class="summary-icon text-slate-500">▶</span>
+          <span class="font-semibold text-white">👤 Cancelación por cliente</span>
+        </summary>
+        <div class="mt-4 overflow-x-auto">
+          <div class="flow-container">
+            <div class="flow-node actor-client rounded-lg p-3 min-w-[140px]"><div class="text-xs text-blue-200">Cliente</div><div class="text-xs font-semibold mt-1">POST /orders/{id}/cancel</div></div>
+            <span class="arrow">→</span>
+            <div class="flow-node actor-system rounded-lg p-3 min-w-[140px]"><div class="text-xs text-slate-300">Sistema</div><div class="text-xs font-semibold mt-1">¿Permitido? (estado+tiempo)</div></div>
+            <span class="arrow">→</span>
+            <div class="flow-node actor-system rounded-lg p-3 min-w-[140px]"><div class="text-xs text-slate-300">Sistema</div><div class="text-xs font-semibold mt-1">Notifica a comercio+repartidor</div></div>
+            <span class="arrow">→</span>
+            <div class="flow-node actor-system rounded-lg p-3 min-w-[140px]"><div class="text-xs text-slate-300">Sistema</div><div class="text-xs font-semibold mt-1">Reembolso vía gateway</div></div>
+            <span class="arrow">→</span>
+            <div class="flow-node actor-client rounded-lg p-3 min-w-[140px]"><div class="text-xs text-blue-200">Cliente</div><div class="text-xs font-semibold mt-1">Confirmación</div></div>
+          </div>
+        </div>
+      </details>
+
+      <!-- CLIENTE: INCIDENCIA -->
+      <details class="card p-4">
+        <summary class="flex items-center gap-2">
+          <span class="summary-icon text-slate-500">▶</span>
+          <span class="font-semibold text-white">👤 Reporte de incidencia</span>
+        </summary>
+        <div class="mt-4 overflow-x-auto">
+          <div class="flow-container">
+            <div class="flow-node actor-client rounded-lg p-3 min-w-[140px]"><div class="text-xs text-blue-200">Cliente</div><div class="text-xs font-semibold mt-1">Reporta incidencia</div></div>
+            <span class="arrow">→</span>
+            <div class="flow-node actor-system rounded-lg p-3 min-w-[140px]"><div class="text-xs text-slate-300">Sistema</div><div class="text-xs font-semibold mt-1">Crea ticket + notifica admin</div></div>
+            <span class="arrow">→</span>
+            <div class="flow-node actor-admin rounded-lg p-3 min-w-[140px]"><div class="text-xs text-red-200">Admin</div><div class="text-xs font-semibold mt-1">Revisa evidencia</div></div>
+            <span class="arrow">→</span>
+            <div class="flow-node actor-admin rounded-lg p-3 min-w-[140px]"><div class="text-xs text-red-200">Admin</div><div class="text-xs font-semibold mt-1">Decide: reembolso/penalización</div></div>
+            <span class="arrow">→</span>
+            <div class="flow-node actor-system rounded-lg p-3 min-w-[140px]"><div class="text-xs text-slate-300">Sistema</div><div class="text-xs font-semibold mt-1">Ejecuta + notifica</div></div>
+          </div>
+        </div>
+      </details>
+
+      <!-- COMERCIOS -->
+      <details class="card p-4">
+        <summary class="flex items-center gap-2">
+          <span class="summary-icon text-slate-500">▶</span>
+          <span class="font-semibold text-white">🏪 Onboarding de comercio</span>
+          <span class="badge-wip ml-auto">MVP 3</span>
+        </summary>
+        <div class="mt-4 overflow-x-auto">
+          <div class="flow-container">
+            <div class="flow-node actor-merchant rounded-lg p-3 min-w-[130px]"><div class="text-xs text-emerald-200">Comercio</div><div class="text-xs font-semibold mt-1">Registro básico</div></div>
+            <span class="arrow">→</span>
+            <div class="flow-node actor-merchant rounded-lg p-3 min-w-[130px]"><div class="text-xs text-emerald-200">Comercio</div><div class="text-xs font-semibold mt-1">Datos fiscales</div></div>
+            <span class="arrow">→</span>
+            <div class="flow-node actor-merchant rounded-lg p-3 min-w-[130px]"><div class="text-xs text-emerald-200">Comercio</div><div class="text-xs font-semibold mt-1">Firma contrato adhesión</div></div>
+            <span class="arrow">→</span>
+            <div class="flow-node actor-system rounded-lg p-3 min-w-[130px]"><div class="text-xs text-slate-300">Sistema</div><div class="text-xs font-semibold mt-1">Estado: pendiente</div></div>
+            <span class="arrow">→</span>
+            <div class="flow-node actor-admin rounded-lg p-3 min-w-[130px]"><div class="text-xs text-red-200">Admin</div><div class="text-xs font-semibold mt-1">Revisa y aprueba</div></div>
+          </div>
+          <div class="flow-container">
+            <div class="flow-node actor-system rounded-lg p-3 min-w-[130px]"><div class="text-xs text-slate-300">Sistema</div><div class="text-xs font-semibold mt-1">Email bienvenida</div></div>
+            <span class="arrow">→</span>
+            <div class="flow-node actor-merchant rounded-lg p-3 min-w-[130px]"><div class="text-xs text-emerald-200">Comercio</div><div class="text-xs font-semibold mt-1">Configura horarios/zona</div></div>
+            <span class="arrow">→</span>
+            <div class="flow-node actor-merchant rounded-lg p-3 min-w-[130px]"><div class="text-xs text-emerald-200">Comercio</div><div class="text-xs font-semibold mt-1">Carga catálogo</div></div>
+            <span class="arrow">→</span>
+            <div class="flow-node actor-system rounded-lg p-3 min-w-[130px]"><div class="text-xs text-slate-300">Sistema</div><div class="text-xs font-semibold mt-1">Indexa en búsqueda</div></div>
+            <span class="arrow">→</span>
+            <div class="flow-node actor-merchant rounded-lg p-3 min-w-[130px]"><div class="text-xs text-emerald-200">Comercio</div><div class="text-xs font-semibold mt-1">Publicado en feed</div></div>
+          </div>
+        </div>
+      </details>
+
+      <details class="card p-4">
+        <summary class="flex items-center gap-2">
+          <span class="summary-icon text-slate-500">▶</span>
+          <span class="font-semibold text-white">🏪 Gestión de pedido (comercio)</span>
+        </summary>
+        <div class="mt-4 overflow-x-auto">
+          <div class="flow-container">
+            <div class="flow-node actor-system rounded-lg p-3 min-w-[130px]"><div class="text-xs text-slate-300">Sistema</div><div class="text-xs font-semibold mt-1">Push "nuevo pedido"</div></div>
+            <span class="arrow">→</span>
+            <div class="flow-node actor-merchant rounded-lg p-3 min-w-[130px]"><div class="text-xs text-emerald-200">Comercio</div><div class="text-xs font-semibold mt-1">Acepta/Rechaza (≤5min)</div></div>
+            <span class="arrow">→</span>
+            <div class="flow-node actor-merchant rounded-lg p-3 min-w-[130px]"><div class="text-xs text-emerald-200">Comercio</div><div class="text-xs font-semibold mt-1">Marca "en preparación"</div></div>
+            <span class="arrow">→</span>
+            <div class="flow-node actor-merchant rounded-lg p-3 min-w-[130px]"><div class="text-xs text-emerald-200">Comercio</div><div class="text-xs font-semibold mt-1">Marca "listo"</div></div>
+            <span class="arrow">→</span>
+            <div class="flow-node actor-system rounded-lg p-3 min-w-[130px]"><div class="text-xs text-slate-300">Sistema</div><div class="text-xs font-semibold mt-1">Notifica repartidor</div></div>
+            <span class="arrow">→</span>
+            <div class="flow-node actor-courier rounded-lg p-3 min-w-[130px]"><div class="text-xs text-purple-200">Repartidor</div><div class="text-xs font-semibold mt-1">Retira + confirma</div></div>
+          </div>
+        </div>
+      </details>
+
+      <details class="card p-4">
+        <summary class="flex items-center gap-2">
+          <span class="summary-icon text-slate-500">▶</span>
+          <span class="font-semibold text-white">🏪 Carga masiva de catálogo (CSV)</span>
+        </summary>
+        <div class="mt-4 overflow-x-auto">
+          <div class="flow-container">
+            <div class="flow-node actor-merchant rounded-lg p-3 min-w-[140px]"><div class="text-xs text-emerald-200">Comercio</div><div class="text-xs font-semibold mt-1">Descarga template</div></div>
+            <span class="arrow">→</span>
+            <div class="flow-node actor-merchant rounded-lg p-3 min-w-[140px]"><div class="text-xs text-emerald-200">Comercio</div><div class="text-xs font-semibold mt-1">Completa y sube CSV</div></div>
+            <span class="arrow">→</span>
+            <div class="flow-node actor-system rounded-lg p-3 min-w-[140px]"><div class="text-xs text-slate-300">Sistema</div><div class="text-xs font-semibold mt-1">Valida + crea job</div></div>
+            <span class="arrow">→</span>
+            <div class="flow-node actor-system rounded-lg p-3 min-w-[140px]"><div class="text-xs text-slate-300">Sistema</div><div class="text-xs font-semibold mt-1">Procesa async</div></div>
+            <span class="arrow">→</span>
+            <div class="flow-node actor-merchant rounded-lg p-3 min-w-[140px]"><div class="text-xs text-emerald-200">Comercio</div><div class="text-xs font-semibold mt-1">Ve resultado con errores</div></div>
+          </div>
+        </div>
+      </details>
+
+      <details class="card p-4">
+        <summary class="flex items-center gap-2">
+          <span class="summary-icon text-slate-500">▶</span>
+          <span class="font-semibold text-white">🏪 Reporte de producto agotado</span>
+        </summary>
+        <div class="mt-4 overflow-x-auto">
+          <div class="flow-container">
+            <div class="flow-node actor-merchant rounded-lg p-3 min-w-[140px]"><div class="text-xs text-emerald-200">Comercio</div><div class="text-xs font-semibold mt-1">Marca "agotado"</div></div>
+            <span class="arrow">→</span>
+            <div class="flow-node actor-system rounded-lg p-3 min-w-[140px]"><div class="text-xs text-slate-300">Sistema</div><div class="text-xs font-semibold mt-1">Actualiza stock + reindexa</div></div>
+            <span class="arrow">→</span>
+            <div class="flow-node actor-system rounded-lg p-3 min-w-[140px]"><div class="text-xs text-slate-300">Sistema</div><div class="text-xs font-semibold mt-1">Oculto en búsqueda</div></div>
+          </div>
+        </div>
+      </details>
+
+      <!-- REPARTIDORES -->
+      <details class="card p-4">
+        <summary class="flex items-center gap-2">
+          <span class="summary-icon text-slate-500">▶</span>
+          <span class="font-semibold text-white">🛵 Onboarding y verificación del repartidor</span>
+          <span class="badge-wip ml-auto">MVP 3</span>
+        </summary>
+        <div class="mt-4 overflow-x-auto">
+          <div class="flow-container">
+            <div class="flow-node actor-courier rounded-lg p-3 min-w-[130px]"><div class="text-xs text-purple-200">Repartidor</div><div class="text-xs font-semibold mt-1">Datos personales</div></div>
+            <span class="arrow">→</span>
+            <div class="flow-node actor-courier rounded-lg p-3 min-w-[130px]"><div class="text-xs text-purple-200">Repartidor</div><div class="text-xs font-semibold mt-1">Sube DNI + licencia</div></div>
+            <span class="arrow">→</span>
+            <div class="flow-node actor-courier rounded-lg p-3 min-w-[130px]"><div class="text-xs text-purple-200">Repartidor</div><div class="text-xs font-semibold mt-1">Firma contrato</div></div>
+            <span class="arrow">→</span>
+            <div class="flow-node actor-admin rounded-lg p-3 min-w-[130px]"><div class="text-xs text-red-200">Admin</div><div class="text-xs font-semibold mt-1">Verifica docs</div></div>
+            <span class="arrow">→</span>
+            <div class="flow-node actor-courier rounded-lg p-3 min-w-[130px]"><div class="text-xs text-purple-200">Repartidor</div><div class="text-xs font-semibold mt-1">Activa disponibilidad</div></div>
+          </div>
+        </div>
+      </details>
+
+      <details class="card p-4">
+        <summary class="flex items-center gap-2">
+          <span class="summary-icon text-slate-500">▶</span>
+          <span class="font-semibold text-white">🛵 Recepción y aceptación de pedido</span>
+        </summary>
+        <div class="mt-4 overflow-x-auto">
+          <div class="flow-container">
+            <div class="flow-node actor-system rounded-lg p-3 min-w-[130px]"><div class="text-xs text-slate-300">Sistema</div><div class="text-xs font-semibold mt-1">POST /orders/{id}/offer</div></div>
+            <span class="arrow">→</span>
+            <div class="flow-node actor-courier rounded-lg p-3 min-w-[130px]"><div class="text-xs text-purple-200">Repartidor</div><div class="text-xs font-semibold mt-1">Push con distancia + $$</div></div>
+            <span class="arrow">→</span>
+            <div class="flow-node actor-courier rounded-lg p-3 min-w-[130px]"><div class="text-xs text-purple-200">Repartidor</div><div class="text-xs font-semibold mt-1">Acepta (30s timeout)</div></div>
+            <span class="arrow">→</span>
+            <div class="flow-node actor-system rounded-lg p-3 min-w-[130px]"><div class="text-xs text-slate-300">Sistema</div><div class="text-xs font-semibold mt-1">Asigna + bloquea otros</div></div>
+            <span class="arrow">→</span>
+            <div class="flow-node actor-courier rounded-lg p-3 min-w-[130px]"><div class="text-xs text-purple-200">Repartidor</div><div class="text-xs font-semibold mt-1">Navega al comercio</div></div>
+          </div>
+        </div>
+      </details>
+
+      <details class="card p-4">
+        <summary class="flex items-center gap-2">
+          <span class="summary-icon text-slate-500">▶</span>
+          <span class="font-semibold text-white">🛵 Rechazo / timeout y reasignación</span>
+        </summary>
+        <div class="mt-4 overflow-x-auto">
+          <div class="flow-container">
+            <div class="flow-node actor-courier rounded-lg p-3 min-w-[140px]"><div class="text-xs text-purple-200">Repartidor</div><div class="text-xs font-semibold mt-1">Rechaza o timeout 30s</div></div>
+            <span class="arrow">→</span>
+            <div class="flow-node actor-system rounded-lg p-3 min-w-[140px]"><div class="text-xs text-slate-300">Sistema</div><div class="text-xs font-semibold mt-1">Siguiente repartidor cercano</div></div>
+            <span class="arrow">→</span>
+            <div class="flow-node actor-system rounded-lg p-3 min-w-[140px]"><div class="text-xs text-slate-300">Sistema</div><div class="text-xs font-semibold mt-1">Repite hasta N intentos</div></div>
+            <span class="arrow">→</span>
+            <div class="flow-node actor-system rounded-lg p-3 min-w-[140px]"><div class="text-xs text-slate-300">Sistema</div><div class="text-xs font-semibold mt-1">Si falla: push a admin</div></div>
+            <span class="arrow">→</span>
+            <div class="flow-node actor-admin rounded-lg p-3 min-w-[140px]"><div class="text-xs text-red-200">Admin</div><div class="text-xs font-semibold mt-1">Asigna manualmente</div></div>
+          </div>
+        </div>
+      </details>
+
+      <details class="card p-4">
+        <summary class="flex items-center gap-2">
+          <span class="summary-icon text-slate-500">▶</span>
+          <span class="font-semibold text-white">🛵 Confirmación de entrega con evidencia</span>
+        </summary>
+        <div class="mt-4 overflow-x-auto">
+          <div class="flow-container">
+            <div class="flow-node actor-courier rounded-lg p-3 min-w-[140px]"><div class="text-xs text-purple-200">Repartidor</div><div class="text-xs font-semibold mt-1">Llega a dirección</div></div>
+            <span class="arrow">→</span>
+            <div class="flow-node actor-courier rounded-lg p-3 min-w-[140px]"><div class="text-xs text-purple-200">Repartidor</div><div class="text-xs font-semibold mt-1">Foto/firma/OTP cliente</div></div>
+            <span class="arrow">→</span>
+            <div class="flow-node actor-system rounded-lg p-3 min-w-[140px]"><div class="text-xs text-slate-300">Sistema</div><div class="text-xs font-semibold mt-1">Sube evidencia a S3</div></div>
+            <span class="arrow">→</span>
+            <div class="flow-node actor-system rounded-lg p-3 min-w-[140px]"><div class="text-xs text-slate-300">Sistema</div><div class="text-xs font-semibold mt-1">Marca order "entregado"</div></div>
+            <span class="arrow">→</span>
+            <div class="flow-node actor-system rounded-lg p-3 min-w-[140px]"><div class="text-xs text-slate-300">Sistema</div><div class="text-xs font-semibold mt-1">Acredita pago + push cliente</div></div>
+          </div>
+        </div>
+      </details>
+
+      <details class="card p-4">
+        <summary class="flex items-center gap-2">
+          <span class="summary-icon text-slate-500">▶</span>
+          <span class="font-semibold text-white">🛵 Cliente ausente / incidencia</span>
+        </summary>
+        <div class="mt-4 overflow-x-auto">
+          <div class="flow-container">
+            <div class="flow-node actor-courier rounded-lg p-3 min-w-[140px]"><div class="text-xs text-purple-200">Repartidor</div><div class="text-xs font-semibold mt-1">Reporta incidencia</div></div>
+            <span class="arrow">→</span>
+            <div class="flow-node actor-system rounded-lg p-3 min-w-[140px]"><div class="text-xs text-slate-300">Sistema</div><div class="text-xs font-semibold mt-1">Intenta contactar cliente</div></div>
+            <span class="arrow">→</span>
+            <div class="flow-node actor-system rounded-lg p-3 min-w-[140px]"><div class="text-xs text-slate-300">Sistema</div><div class="text-xs font-semibold mt-1">Espera X min (configurable)</div></div>
+            <span class="arrow">→</span>
+            <div class="flow-node actor-courier rounded-lg p-3 min-w-[140px]"><div class="text-xs text-purple-200">Repartidor</div><div class="text-xs font-semibold mt-1">Foto + abandona</div></div>
+            <span class="arrow">→</span>
+            <div class="flow-node actor-admin rounded-lg p-3 min-w-[140px]"><div class="text-xs text-red-200">Admin</div><div class="text-xs font-semibold mt-1">Revisa + penaliza</div></div>
+          </div>
+        </div>
+      </details>
+
+      <details class="card p-4">
+        <summary class="flex items-center gap-2">
+          <span class="summary-icon text-slate-500">▶</span>
+          <span class="font-semibold text-white">🛵 Tracking de ubicación en background</span>
+        </summary>
+        <div class="mt-4 overflow-x-auto">
+          <div class="flow-container">
+            <div class="flow-node actor-courier rounded-lg p-3 min-w-[130px]"><div class="text-xs text-purple-200">Repartidor</div><div class="text-xs font-semibold mt-1">App en background</div></div>
+            <span class="arrow">→</span>
+            <div class="flow-node actor-system rounded-lg p-3 min-w-[130px]"><div class="text-xs text-slate-300">Sistema</div><div class="text-xs font-semibold mt-1">Location service cada 10s</div></div>
+            <span class="arrow">→</span>
+            <div class="flow-node actor-courier rounded-lg p-3 min-w-[130px]"><div class="text-xs text-purple-200">Repartidor</div><div class="text-xs font-semibold mt-1">Batch local si sin red</div></div>
+            <span class="arrow">→</span>
+            <div class="flow-node actor-system rounded-lg p-3 min-w-[130px]"><div class="text-xs text-slate-300">Sistema</div><div class="text-xs font-semibold mt-1">POST /geo/track batch</div></div>
+            <span class="arrow">→</span>
+            <div class="flow-node actor-system rounded-lg p-3 min-w-[130px]"><div class="text-xs text-slate-300">Sistema</div><div class="text-xs font-semibold mt-1">Emit WS a cliente</div></div>
+          </div>
+        </div>
+      </details>
+
+      <!-- ADMIN -->
+      <details class="card p-4">
+        <summary class="flex items-center gap-2">
+          <span class="summary-icon text-slate-500">▶</span>
+          <span class="font-semibold text-white">🛡️ Aprobación de actores</span>
+        </summary>
+        <div class="mt-4 overflow-x-auto">
+          <div class="flow-container">
+            <div class="flow-node actor-admin rounded-lg p-3 min-w-[140px]"><div class="text-xs text-red-200">Admin</div><div class="text-xs font-semibold mt-1">Lista "pendientes"</div></div>
+            <span class="arrow">→</span>
+            <div class="flow-node actor-admin rounded-lg p-3 min-w-[140px]"><div class="text-xs text-red-200">Admin</div><div class="text-xs font-semibold mt-1">Revisa docs/datos</div></div>
+            <span class="arrow">→</span>
+            <div class="flow-node actor-admin rounded-lg p-3 min-w-[140px]"><div class="text-xs text-red-200">Admin</div><div class="text-xs font-semibold mt-1">Aprueba / rechaza (motivo)</div></div>
+            <span class="arrow">→</span>
+            <div class="flow-node actor-system rounded-lg p-3 min-w-[140px]"><div class="text-xs text-slate-300">Sistema</div><div class="text-xs font-semibold mt-1">Log auditoría + email</div></div>
+          </div>
+        </div>
+      </details>
+
+      <details class="card p-4">
+        <summary class="flex items-center gap-2">
+          <span class="summary-icon text-slate-500">▶</span>
+          <span class="font-semibold text-white">🛡️ Configuración de esquema de comisión</span>
+        </summary>
+        <div class="mt-4 overflow-x-auto">
+          <div class="flow-container">
+            <div class="flow-node actor-admin rounded-lg p-3 min-w-[140px]"><div class="text-xs text-red-200">Admin</div><div class="text-xs font-semibold mt-1">Crea nuevo esquema</div></div>
+            <span class="arrow">→</span>
+            <div class="flow-node actor-admin rounded-lg p-3 min-w-[140px]"><div class="text-xs text-red-200">Admin</div><div class="text-xs font-semibold mt-1">Define tipo/valor/vigencia</div></div>
+            <span class="arrow">→</span>
+            <div class="flow-node actor-system rounded-lg p-3 min-w-[140px]"><div class="text-xs text-slate-300">Sistema</div><div class="text-xs font-semibold mt-1">Guarda en commission_schemas</div></div>
+            <span class="arrow">→</span>
+            <div class="flow-node actor-admin rounded-lg p-3 min-w-[140px]"><div class="text-xs text-red-200">Admin</div><div class="text-xs font-semibold mt-1">Asigna a segmento</div></div>
+          </div>
+        </div>
+      </details>
+
+      <details class="card p-4">
+        <summary class="flex items-center gap-2">
+          <span class="summary-icon text-slate-500">▶</span>
+          <span class="font-semibold text-white">🛡️ Vencimiento de promoción (job diario)</span>
+        </summary>
+        <div class="mt-4 overflow-x-auto">
+          <div class="flow-container">
+            <div class="flow-node actor-system rounded-lg p-3 min-w-[140px]"><div class="text-xs text-slate-300">Sistema</div><div class="text-xs font-semibold mt-1">Cron 03:00 AM</div></div>
+            <span class="arrow">→</span>
+            <div class="flow-node actor-system rounded-lg p-3 min-w-[140px]"><div class="text-xs text-slate-300">Sistema</div><div class="text-xs font-semibold mt-1">Detecta vencidos</div></div>
+            <span class="arrow">→</span>
+            <div class="flow-node actor-system rounded-lg p-3 min-w-[140px]"><div class="text-xs text-slate-300">Sistema</div><div class="text-xs font-semibold mt-1">Marca "pendiente_renovación"</div></div>
+            <span class="arrow">→</span>
+            <div class="flow-node actor-system rounded-lg p-3 min-w-[140px]"><div class="text-xs text-slate-300">Sistema</div><div class="text-xs font-semibold mt-1">Push + email al actor</div></div>
+            <span class="arrow">→</span>
+            <div class="flow-node actor-merchant rounded-lg p-3 min-w-[140px]"><div class="text-xs text-emerald-200">Actor</div><div class="text-xs font-semibold mt-1">Elige nuevo esquema</div></div>
+          </div>
+        </div>
+      </details>
+
+      <details class="card p-4">
+        <summary class="flex items-center gap-2">
+          <span class="summary-icon text-slate-500">▶</span>
+          <span class="font-semibold text-white">🛡️ Resolución de disputas</span>
+        </summary>
+        <div class="mt-4 overflow-x-auto">
+          <div class="flow-container">
+            <div class="flow-node actor-system rounded-lg p-3 min-w-[140px]"><div class="text-xs text-slate-300">Sistema</div><div class="text-xs font-semibold mt-1">Cola de disputas</div></div>
+            <span class="arrow">→</span>
+            <div class="flow-node actor-admin rounded-lg p-3 min-w-[140px]"><div class="text-xs text-red-200">Admin</div><div class="text-xs font-semibold mt-1">Revisa evidencia</div></div>
+            <span class="arrow">→</span>
+            <div class="flow-node actor-admin rounded-lg p-3 min-w-[140px]"><div class="text-xs text-red-200">Admin</div><div class="text-xs font-semibold mt-1">Decide resolución</div></div>
+            <span class="arrow">→</span>
+            <div class="flow-node actor-system rounded-lg p-3 min-w-[140px]"><div class="text-xs text-slate-300">Sistema</div><div class="text-xs font-semibold mt-1">Reembolso/penalización</div></div>
+            <span class="arrow">→</span>
+            <div class="flow-node actor-system rounded-lg p-3 min-w-[140px]"><div class="text-xs text-slate-300">Sistema</div><div class="text-xs font-semibold mt-1">Notifica + log</div></div>
+          </div>
+        </div>
+      </details>
+
+      <details class="card p-4">
+        <summary class="flex items-center gap-2">
+          <span class="summary-icon text-slate-500">▶</span>
+          <span class="font-semibold text-white">🛡️ Suspensión de actor</span>
+        </summary>
+        <div class="mt-4 overflow-x-auto">
+          <div class="flow-container">
+            <div class="flow-node actor-admin rounded-lg p-3 min-w-[140px]"><div class="text-xs text-red-200">Admin</div><div class="text-xs font-semibold mt-1">Click "suspender"</div></div>
+            <span class="arrow">→</span>
+            <div class="flow-node actor-admin rounded-lg p-3 min-w-[140px]"><div class="text-xs text-red-200">Admin</div><div class="text-xs font-semibold mt-1">Motivo obligatorio</div></div>
+            <span class="arrow">→</span>
+            <div class="flow-node actor-system rounded-lg p-3 min-w-[140px]"><div class="text-xs text-slate-300">Sistema</div><div class="text-xs font-semibold mt-1">Invalida tokens activos</div></div>
+            <span class="arrow">→</span>
+            <div class="flow-node actor-system rounded-lg p-3 min-w-[140px]"><div class="text-xs text-slate-300">Sistema</div><div class="text-xs font-semibold mt-1">Oculta de búsquedas</div></div>
+            <span class="arrow">→</span>
+            <div class="flow-node actor-system rounded-lg p-3 min-w-[140px]"><div class="text-xs text-slate-300">Sistema</div><div class="text-xs font-semibold mt-1">Email + log inmutable</div></div>
+          </div>
+        </div>
+      </details>
+
+      <details class="card p-4">
+        <summary class="flex items-center gap-2">
+          <span class="summary-icon text-slate-500">▶</span>
+          <span class="font-semibold text-white">🛡️ Gestión de zonas y tarifas</span>
+        </summary>
+        <div class="mt-4 overflow-x-auto">
+          <div class="flow-container">
+            <div class="flow-node actor-admin rounded-lg p-3 min-w-[140px]"><div class="text-xs text-red-200">Admin</div><div class="text-xs font-semibold mt-1">Dibuja polígono en mapa</div></div>
+            <span class="arrow">→</span>
+            <div class="flow-node actor-admin rounded-lg p-3 min-w-[140px]"><div class="text-xs text-red-200">Admin</div><div class="text-xs font-semibold mt-1">Define nombre + tarifa base</div></div>
+            <span class="arrow">→</span>
+            <div class="flow-node actor-system rounded-lg p-3 min-w-[140px]"><div class="text-xs text-slate-300">Sistema</div><div class="text-xs font-semibold mt-1">Guarda GeoJSON</div></div>
+            <span class="arrow">→</span>
+            <div class="flow-node actor-system rounded-lg p-3 min-w-[140px]"><div class="text-xs text-slate-300">Sistema</div><div class="text-xs font-semibold mt-1">Aplica a comercios en zona</div></div>
+          </div>
+        </div>
+      </details>
+
+      <!-- SISTEMA -->
+      <details class="card p-4">
+        <summary class="flex items-center gap-2">
+          <span class="summary-icon text-slate-500">▶</span>
+          <span class="font-semibold text-white">⚙️ Asignación inteligente de repartidor</span>
+          <span class="badge-wip ml-auto">MVP 5</span>
+        </summary>
+        <div class="mt-4 overflow-x-auto">
+          <div class="flow-container">
+            <div class="flow-node actor-system rounded-lg p-3 min-w-[130px]"><div class="text-xs text-slate-300">Sistema</div><div class="text-xs font-semibold mt-1">Pedido confirmado</div></div>
+            <span class="arrow">→</span>
+            <div class="flow-node actor-system rounded-lg p-3 min-w-[130px]"><div class="text-xs text-slate-300">Sistema</div><div class="text-xs font-semibold mt-1">PostGIS ST_DWithin 2km</div></div>
+            <span class="arrow">→</span>
+            <div class="flow-node actor-system rounded-lg p-3 min-w-[130px]"><div class="text-xs text-slate-300">Sistema</div><div class="text-xs font-semibold mt-1">Filtra online + disponible</div></div>
+            <span class="arrow">→</span>
+            <div class="flow-node actor-system rounded-lg p-3 min-w-[130px]"><div class="text-xs text-slate-300">Sistema</div><div class="text-xs font-semibold mt-1">Scoring por distancia</div></div>
+            <span class="arrow">→</span>
+            <div class="flow-node actor-courier rounded-lg p-3 min-w-[130px]"><div class="text-xs text-purple-200">Repartidor</div><div class="text-xs font-semibold mt-1">Acepta / rechaza</div></div>
+          </div>
+        </div>
+      </details>
+
+      <details class="card p-4">
+        <summary class="flex items-center gap-2">
+          <span class="summary-icon text-slate-500">▶</span>
+          <span class="font-semibold text-white">⚙️ Limpieza de pedidos stale (job)</span>
+        </summary>
+        <div class="mt-4 overflow-x-auto">
+          <div class="flow-container">
+            <div class="flow-node actor-system rounded-lg p-3 min-w-[140px]"><div class="text-xs text-slate-300">Sistema</div><div class="text-xs font-semibold mt-1">Cron cada 5min</div></div>
+            <span class="arrow">→</span>
+            <div class="flow-node actor-system rounded-lg p-3 min-w-[140px]"><div class="text-xs text-slate-300">Sistema</div><div class="text-xs font-semibold mt-1">Busca pedidos >5min sin confirmar</div></div>
+            <span class="arrow">→</span>
+            <div class="flow-node actor-system rounded-lg p-3 min-w-[140px]"><div class="text-xs text-slate-300">Sistema</div><div class="text-xs font-semibold mt-1">Auto-cancela + reembolso</div></div>
+            <span class="arrow">→</span>
+            <div class="flow-node actor-system rounded-lg p-3 min-w-[140px]"><div class="text-xs text-slate-300">Sistema</div><div class="text-xs font-semibold mt-1">Push a cliente</div></div>
+          </div>
+        </div>
+      </details>
+
+      <details class="card p-4">
+        <summary class="flex items-center gap-2">
+          <span class="summary-icon text-slate-500">▶</span>
+          <span class="font-semibold text-white">⚙️ Cálculo de ratings (job nocturno)</span>
+        </summary>
+        <div class="mt-4 overflow-x-auto">
+          <div class="flow-container">
+            <div class="flow-node actor-system rounded-lg p-3 min-w-[140px]"><div class="text-xs text-slate-300">Sistema</div><div class="text-xs font-semibold mt-1">Cron 02:00 AM</div></div>
+            <span class="arrow">→</span>
+            <div class="flow-node actor-system rounded-lg p-3 min-w-[140px]"><div class="text-xs text-slate-300">Sistema</div><div class="text-xs font-semibold mt-1">Agrega ratings últimas 24h</div></div>
+            <span class="arrow">→</span>
+            <div class="flow-node actor-system rounded-lg p-3 min-w-[140px]"><div class="text-xs text-slate-300">Sistema</div><div class="text-xs font-semibold mt-1">Fórmula Bayes (suavizado)</div></div>
+            <span class="arrow">→</span>
+            <div class="flow-node actor-system rounded-lg p-3 min-w-[140px]"><div class="text-xs text-slate-300">Sistema</div><div class="text-xs font-semibold mt-1">Actualiza merchant/courier</div></div>
+          </div>
+        </div>
+      </details>
+
+      <details class="card p-4">
+        <summary class="flex items-center gap-2">
+          <span class="summary-icon text-slate-500">▶</span>
+          <span class="font-semibold text-white">⚙️ Purge de ubicaciones antiguas</span>
+        </summary>
+        <div class="mt-4 overflow-x-auto">
+          <div class="flow-container">
+            <div class="flow-node actor-system rounded-lg p-3 min-w-[140px]"><div class="text-xs text-slate-300">Sistema</div><div class="text-xs font-semibold mt-1">Cron semanal</div></div>
+            <span class="arrow">→</span>
+            <div class="flow-node actor-system rounded-lg p-3 min-w-[140px]"><div class="text-xs text-slate-300">Sistema</div><div class="text-xs font-semibold mt-1">Elimina courier_locations >90d</div></div>
+            <span class="arrow">→</span>
+            <div class="flow-node actor-system rounded-lg p-3 min-w-[140px]"><div class="text-xs text-slate-300">Sistema</div><div class="text-xs font-semibold mt-1">VACUUM + REINDEX</div></div>
+          </div>
+        </div>
+      </details>
+
+    </div>
+  </section>
+
+  <!-- ============== DATOS ============== -->
+  <section class="tab-content" id="datos">
+    <h2 class="text-xl font-semibold text-white mb-2">Modelo de datos</h2>
+    <p class="text-sm text-slate-400 mb-6">Entidades núcleo y sus relaciones. Todas las claves foráneas son UUID.</p>
+
+    <div class="grid md:grid-cols-2 gap-4">
+      <div class="card p-4">
+        <div class="flex items-center justify-between mb-2">
+          <h3 class="font-semibold text-white">users</h3>
+          <span class="chip">Auth</span>
+        </div>
+        <pre class="text-xs text-slate-300 overflow-x-auto leading-relaxed">id UUID PK
+tipo_usuario ENUM(client, merchant, courier, admin)
+nombre VARCHAR(255)
+email VARCHAR(255) UNIQUE
+telefono VARCHAR(20) UNIQUE
+password_hash VARCHAR(255)
+estado ENUM(active, suspended, banned)
+created_at TIMESTAMP
+updated_at TIMESTAMP</pre>
+      </div>
+
+      <div class="card p-4">
+        <div class="flex items-center justify-between mb-2">
+          <h3 class="font-semibold text-white">merchants</h3>
+          <span class="chip">Core</span>
+        </div>
+        <pre class="text-xs text-slate-300 overflow-x-auto leading-relaxed">id UUID PK
+user_id UUID FK(users) UNIQUE
+nombre_comercial VARCHAR(255)
+tipo_comercio ENUM
+modalidad_venta ENUM
+descripcion TEXT
+lat DECIMAL(10,8)
+lng DECIMAL(11,8)
+direccion TEXT
+zona_cobertura_id UUID FK(coverage_zones)
+horario_json JSONB
+rating_promedio DECIMAL(3,2) DEFAULT 0
+total_calificaciones INTEGER DEFAULT 0
+estado ENUM(pending, active, suspended)
+created_at TIMESTAMP</pre>
+      </div>
+
+      <div class="card p-4">
+        <div class="flex items-center justify-between mb-2">
+          <h3 class="font-semibold text-white">merchant_contracts</h3>
+          <span class="chip">Comisiones</span>
+        </div>
+        <pre class="text-xs text-slate-300 overflow-x-auto leading-relaxed">id UUID PK
+merchant_id UUID FK
+schema_id UUID FK(commission_schemas)
+fecha_inicio_vigencia TIMESTAMP
+fecha_fin_vigencia TIMESTAMP
+estado ENUM(promocional, activo, vencido_pendiente)
+version_terminos INTEGER
+ip_firma VARCHAR(45)
+user_agent TEXT
+created_at TIMESTAMP</pre>
+      </div>
+
+      <div class="card p-4">
+        <div class="flex items-center justify-between mb-2">
+          <h3 class="font-semibold text-white">commission_schemas</h3>
+          <span class="chip">Comisiones</span>
+        </div>
+        <pre class="text-xs text-slate-300 overflow-x-auto leading-relaxed">id UUID PK
+nombre VARCHAR(100)
+tipo ENUM(porcentaje, tarifa_fija, suscripcion, ninguno)
+valor DECIMAL(10,4) DEFAULT 0
+descripcion TEXT
+activo BOOLEAN DEFAULT TRUE
+created_by UUID FK(users)
+created_at TIMESTAMP</pre>
+      </div>
+
+      <div class="card p-4">
+        <div class="flex items-center justify-between mb-2">
+          <h3 class="font-semibold text-white">couriers</h3>
+          <span class="chip">Core</span>
+        </div>
+        <pre class="text-xs text-slate-300 overflow-x-auto leading-relaxed">id UUID PK
+user_id UUID FK UNIQUE
+vehiculo_tipo ENUM(moto, bici, auto, a_pie)
+documentos_verificados BOOLEAN DEFAULT FALSE
+estado_disponibilidad ENUM(online, offline, en_pedido)
+ultima_lat DECIMAL(10,8)
+ultima_lng DECIMAL(11,8)
+ultima_ubicacion_at TIMESTAMP
+rating_promedio DECIMAL(3,2) DEFAULT 0
+total_entregas INTEGER DEFAULT 0
+estado ENUM(pending, active, suspended)
+created_at TIMESTAMP</pre>
+      </div>
+
+      <div class="card p-4">
+        <div class="flex items-center justify-between mb-2">
+          <h3 class="font-semibold text-white">courier_contracts</h3>
+          <span class="chip">Comisiones</span>
+        </div>
+        <pre class="text-xs text-slate-300 overflow-x-auto leading-relaxed">id UUID PK
+courier_id UUID FK
+schema_id UUID FK(commission_schemas)
+fecha_inicio_vigencia TIMESTAMP
+fecha_fin_vigencia TIMESTAMP
+estado ENUM(promocional, activo, vencido_pendiente)
+version_terminos INTEGER
+created_at TIMESTAMP</pre>
+      </div>
+
+      <div class="card p-4">
+        <div class="flex items-center justify-between mb-2">
+          <h3 class="font-semibold text-white">categories</h3>
+          <span class="chip">Catálogo</span>
+        </div>
+        <pre class="text-xs text-slate-300 overflow-x-auto leading-relaxed">id UUID PK
+nombre VARCHAR(100)
+categoria_padre_id UUID FK(self) NULL
+nivel INTEGER
+slug VARCHAR(100) UNIQUE
+activo BOOLEAN DEFAULT TRUE
+orden INTEGER DEFAULT 0
+created_at TIMESTAMP</pre>
+      </div>
+
+      <div class="card p-4">
+        <div class="flex items-center justify-between mb-2">
+          <h3 class="font-semibold text-white">products</h3>
+          <span class="chip">Catálogo</span>
+        </div>
+        <pre class="text-xs text-slate-300 overflow-x-auto leading-relaxed">id UUID PK
+merchant_id UUID FK
+categoria_id UUID FK
+nombre VARCHAR(255)
+descripcion TEXT
+precio DECIMAL(10,2)
+stock_disponible BOOLEAN DEFAULT TRUE
+modalidad_venta ENUM(unitaria, mayorista, mixta)
+cantidad_minima_pedido INTEGER DEFAULT 1
+price_tiers_json JSONB
+imagenes JSONB
+search_vector TSVECTOR -- índice GIN
+activo BOOLEAN DEFAULT TRUE
+created_at TIMESTAMP</pre>
+      </div>
+
+      <div class="card p-4">
+        <div class="flex items-center justify-between mb-2">
+          <h3 class="font-semibold text-white">product_variants</h3>
+          <span class="chip">Catálogo</span>
+        </div>
+        <pre class="text-xs text-slate-300 overflow-x-auto leading-relaxed">id UUID PK
+product_id UUID FK
+nombre VARCHAR(100) -- "Talla M", "Rojo"
+precio_adicional DECIMAL(10,2) DEFAULT 0
+stock_disponible BOOLEAN DEFAULT TRUE
+sku VARCHAR(50) UNIQUE</pre>
+      </div>
+
+      <div class="card p-4">
+        <div class="flex items-center justify-between mb-2">
+          <h3 class="font-semibold text-white">orders</h3>
+          <span class="chip">Pedidos</span>
+        </div>
+        <pre class="text-xs text-slate-300 overflow-x-auto leading-relaxed">id UUID PK
+codigo_pedido VARCHAR(20) UNIQUE -- PED-2026-000123
+cliente_id UUID FK(users)
+merchant_id UUID FK
+courier_id UUID FK NULL
+estado ENUM(creado, confirmado, preparando, listo, asignado, en_camino, entregado, cancelado)
+subtotal DECIMAL(10,2)
+costo_envio DECIMAL(10,2)
+comision_aplicada DECIMAL(10,2)
+propina DECIMAL(10,2) DEFAULT 0
+total DECIMAL(10,2)
+direccion_entrega TEXT
+lat_entrega DECIMAL(10,8)
+lng_entrega DECIMAL(11,8)
+notas_cliente TEXT
+metodo_pago ENUM(tarjeta, efectivo, wallet)
+payment_gateway_reference VARCHAR(255)
+tiempo_estimado_min INTEGER
+created_at TIMESTAMP
+confirmed_at TIMESTAMP NULL
+delivered_at TIMESTAMP NULL
+cancel_reason TEXT NULL</pre>
+      </div>
+
+      <div class="card p-4">
+        <div class="flex items-center justify-between mb-2">
+          <h3 class="font-semibold text-white">order_items</h3>
+          <span class="chip">Pedidos</span>
+        </div>
+        <pre class="text-xs text-slate-300 overflow-x-auto leading-relaxed">id UUID PK
+order_id UUID FK
+product_id UUID FK
+variant_id UUID FK NULL
+cantidad INTEGER
+precio_unitario DECIMAL(10,2)
+subtotal DECIMAL(10,2)
+notas TEXT NULL</pre>
+      </div>
+
+      <div class="card p-4">
+        <div class="flex items-center justify-between mb-2">
+          <h3 class="font-semibold text-white">payments</h3>
+          <span class="chip">Pagos</span>
+        </div>
+        <pre class="text-xs text-slate-300 overflow-x-auto leading-relaxed">id UUID PK
+order_id UUID FK UNIQUE
+metodo ENUM(tarjeta, efectivo, wallet)
+estado ENUM(pending, authorized, captured, refunded, failed)
+monto DECIMAL(10,2)
+gateway_reference VARCHAR(255)
+idempotency_key VARCHAR(64) UNIQUE
+metadata JSONB
+created_at TIMESTAMP</pre>
+      </div>
+
+      <div class="card p-4">
+        <div class="flex items-center justify-between mb-2">
+          <h3 class="font-semibold text-white">courier_locations</h3>
+          <span class="chip">Geo · PostGIS</span>
+        </div>
+        <pre class="text-xs text-slate-300 overflow-x-auto leading-relaxed">id UUID PK
+courier_id UUID FK
+location GEOGRAPHY(Point, 4326)
+velocidad DECIMAL(5,2)
+precision_metros INTEGER
+battery_level INTEGER
+timestamp TIMESTAMP
+INDEX: GIST(location)
+INDEX: (courier_id, timestamp DESC)</pre>
+      </div>
+
+      <div class="card p-4">
+        <div class="flex items-center justify-between mb-2">
+          <h3 class="font-semibold text-white">coverage_zones</h3>
+          <span class="chip">Geo</span>
+        </div>
+        <pre class="text-xs text-slate-300 overflow-x-auto leading-relaxed">id UUID PK
+nombre VARCHAR(100)
+poligono GEOGRAPHY(MultiPolygon, 4326)
+tarifa_base_envio DECIMAL(10,2)
+activa BOOLEAN DEFAULT TRUE
+INDEX: GIST(poligono)</pre>
+      </div>
+
+      <div class="card p-4">
+        <div class="flex items-center justify-between mb-2">
+          <h3 class="font-semibold text-white">ratings</h3>
+          <span class="chip">Calificaciones</span>
+        </div>
+        <pre class="text-xs text-slate-300 overflow-x-auto leading-relaxed">id UUID PK
+order_id UUID FK
+tipo ENUM(comercio, repartidor)
+target_id UUID -- merchant o courier
+calificador_id UUID FK(users)
+puntaje INTEGER CHECK (1-5)
+comentario TEXT
+created_at TIMESTAMP
+UNIQUE(order_id, tipo)</pre>
+      </div>
+
+      <div class="card p-4">
+        <div class="flex items-center justify-between mb-2">
+          <h3 class="font-semibold text-white">feature_flags</h3>
+          <span class="chip">Config</span>
+        </div>
+        <pre class="text-xs text-slate-300 overflow-x-auto leading-relaxed">id UUID PK
+nombre VARCHAR(100) UNIQUE
+activo BOOLEAN DEFAULT FALSE
+descripcion TEXT
+created_at TIMESTAMP</pre>
+      </div>
+
+      <div class="card p-4">
+        <div class="flex items-center justify-between mb-2">
+          <h3 class="font-semibold text-white">audit_logs</h3>
+          <span class="chip">Auditoría</span>
+        </div>
+        <pre class="text-xs text-slate-300 overflow-x-auto leading-relaxed">id BIGSERIAL PK
+actor_id UUID FK(users)
+accion VARCHAR(100)
+entidad VARCHAR(50)
+entidad_id UUID
+before_json JSONB
+after_json JSONB
+ip_address VARCHAR(45)
+user_agent TEXT
+created_at TIMESTAMP
+-- Append-only, sin UPDATE/DELETE</pre>
+      </div>
+
+      <div class="card p-4">
+        <div class="flex items-center justify-between mb-2">
+          <h3 class="font-semibold text-white">notifications_log</h3>
+          <span class="chip">Notificaciones</span>
+        </div>
+        <pre class="text-xs text-slate-300 overflow-x-auto leading-relaxed">id UUID PK
+user_id UUID FK
+tipo ENUM(push, email, ws)
+titulo VARCHAR(255)
+cuerpo TEXT
+estado ENUM(pending, sent, failed)
+retry_count INTEGER DEFAULT 0
+sent_at TIMESTAMP NULL
+created_at TIMESTAMP</pre>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ============== API ============== -->
+  <section class="tab-content" id="api">
+    <h2 class="text-xl font-semibold text-white mb-2">API REST</h2>
+    <p class="text-sm text-slate-400 mb-6">Endpoints principales agrupados por dominio. Todos los endpoints REST usan JSON y siguen OpenAPI 3.1.</p>
+
+    <div class="space-y-4">
+      <div class="card p-5">
+        <h3 class="font-semibold text-white mb-3">🔐 Auth</h3>
+        <div class="endpoint-row"><span class="method m-post">POST</span><code>/auth/register</code><span class="text-xs text-slate-400">Registro nuevo usuario (cliente por defecto)</span><span class="chip">Public</span></div>
+        <div class="endpoint-row"><span class="method m-post">POST</span><code>/auth/login</code><span class="text-xs text-slate-400">Login email/password → access+refresh tokens</span><span class="chip">Public</span></div>
+        <div class="endpoint-row"><span class="method m-post">POST</span><code>/auth/refresh</code><span class="text-xs text-slate-400">Renueva access token con refresh token</span><span class="chip">Auth</span></div>
+        <div class="endpoint-row"><span class="method m-post">POST</span><code>/auth/logout</code><span class="text-xs text-slate-400">Revoca refresh token</span><span class="chip">Auth</span></div>
+        <div class="endpoint-row"><span class="method m-post">POST</span><code>/auth/forgot-password</code><span class="text-xs text-slate-400">Envía email con token de reset</span><span class="chip">Public</span></div>
+        <div class="endpoint-row"><span class="method m-post">POST</span><code>/auth/reset-password</code><span class="text-xs text-slate-400">Aplica nueva contraseña con token</span><span class="chip">Public</span></div>
+        <div class="endpoint-row"><span class="method m-get">GET</span><code>/auth/me</code><span class="text-xs text-slate-400">Usuario autenticado con perfil</span><span class="chip">Auth</span></div>
+      </div>
+
+      <div class="card p-5">
+        <h3 class="font-semibold text-white mb-3">👥 Users</h3>
+        <div class="endpoint-row"><span class="method m-get">GET</span><code>/users/me/addresses</code><span class="text-xs text-slate-400">Direcciones guardadas del cliente</span><span class="chip">Auth</span></div>
+        <div class="endpoint-row"><span class="method m-post">POST</span><code>/users/me/addresses</code><span class="text-xs text-slate-400">Crea dirección</span><span class="chip">Auth</span></div>
+        <div class="endpoint-row"><span class="method m-patch">PATCH</span><code>/users/me/profile</code><span class="text-xs text-slate-400">Actualiza datos perfil</span><span class="chip">Auth</span></div>
+        <div class="endpoint-row"><span class="method m-delete">DELETE</span><code>/users/me</code><span class="text-xs text-slate-400">Soft delete de cuenta</span><span class="chip">Auth</span></div>
+      </div>
+
+      <div class="card p-5">
+        <h3 class="font-semibold text-white mb-3">🏪 Merchants</h3>
+        <div class="endpoint-row"><span class="method m-post">POST</span><code>/merchants/register</code><span class="text-xs text-slate-400">Onboarding multi-paso</span><span class="chip">Auth</span></div>
+        <div class="endpoint-row"><span class="method m-post">POST</span><code>/merchants/me/contract/sign</code><span class="text-xs text-slate-400">Firma contrato adhesión</span><span class="chip">Merchant</span></div>
+        <div class="endpoint-row"><span class="method m-get">GET</span><code>/merchants/me</code><span class="text-xs text-slate-400">Perfil del comercio autenticado</span><span class="chip">Merchant</span></div>
+        <div class="endpoint-row"><span class="method m-patch">PATCH</span><code>/merchants/me/schedule</code><span class="text-xs text-slate-400">Actualiza horarios</span><span class="chip">Merchant</span></div>
+        <div class="endpoint-row"><span class="method m-patch">PATCH</span><code>/merchants/me/zone</code><span class="text-xs text-slate-400">Actualiza zona cobertura</span><span class="chip">Merchant</span></div>
+        <div class="endpoint-row"><span class="method m-get">GET</span><code>/merchants/{id}</code><span class="text-xs text-slate-400">Ficha pública de comercio</span><span class="chip">Auth</span></div>
+        <div class="endpoint-row"><span class="method m-get">GET</span><code>/merchants/nearby</code><span class="text-xs text-slate-400">Comercios cercanos (PostGIS)</span><span class="chip">Auth</span></div>
+      </div>
+
+      <div class="card p-5">
+        <h3 class="font-semibold text-white mb-3">🛵 Couriers</h3>
+        <div class="endpoint-row"><span class="method m-post">POST</span><code>/couriers/register</code><span class="text-xs text-slate-400">Onboarding + carga documentos</span><span class="chip">Auth</span></div>
+        <div class="endpoint-row"><span class="method m-post">POST</span><code>/couriers/me/documents</code><span class="text-xs text-slate-400">Sube DNI, licencia, seguro</span><span class="chip">Courier</span></div>
+        <div class="endpoint-row"><span class="method m-patch">PATCH</span><code>/couriers/me/availability</code><span class="text-xs text-slate-400">Toggle online/offline</span><span class="chip">Courier</span></div>
+        <div class="endpoint-row"><span class="method m-get">GET</span><code>/couriers/me/earnings</code><span class="text-xs text-slate-400">Desglose de ganancias</span><span class="chip">Courier</span></div>
+        <div class="endpoint-row"><span class="method m-get">GET</span><code>/couriers/me/history</code><span class="text-xs text-slate-400">Entregas realizadas</span><span class="chip">Courier</span></div>
+      </div>
+
+      <div class="card p-5">
+        <h3 class="font-semibold text-white mb-3">📦 Catalog</h3>
+        <div class="endpoint-row"><span class="method m-get">GET</span><code>/catalog/categories</code><span class="text-xs text-slate-400">Árbol de categorías</span><span class="chip">Auth</span></div>
+        <div class="endpoint-row"><span class="method m-get">GET</span><code>/catalog/products?merchant_id=&q=&category=&near=</code><span class="text-xs text-slate-400">Búsqueda transversal</span><span class="chip">Auth</span></div>
+        <div class="endpoint-row"><span class="method m-get">GET</span><code>/catalog/products/{id}</code><span class="text-xs text-slate-400">Ficha producto + variantes</span><span class="chip">Auth</span></div>
+        <div class="endpoint-row"><span class="method m-post">POST</span><code>/merchants/me/products</code><span class="text-xs text-slate-400">Crea producto propio</span><span class="chip">Merchant</span></div>
+        <div class="endpoint-row"><span class="method m-patch">PATCH</span><code>/merchants/me/products/{id}</code><span class="text-xs text-slate-400">Actualiza producto (stock, precio)</span><span class="chip">Merchant</span></div>
+        <div class="endpoint-row"><span class="method m-post">POST</span><code>/merchants/me/products/bulk-import</code><span class="text-xs text-slate-400">Carga masiva CSV</span><span class="chip">Merchant</span></div>
+        <div class="endpoint-row"><span class="method m-get">GET</span><code>/merchants/me/products/bulk-import/{job_id}</code><span class="text-xs text-slate-400">Estado de import masivo</span><span class="chip">Merchant</span></div>
+      </div>
+
+      <div class="card p-5">
+        <h3 class="font-semibold text-white mb-3">🛒 Orders</h3>
+        <div class="endpoint-row"><span class="method m-post">POST</span><code>/orders</code><span class="text-xs text-slate-400">Crea pedido desde carrito</span><span class="chip">Client</span></div>
+        <div class="endpoint-row"><span class="method m-get">GET</span><code>/orders/me</code><span class="text-xs text-slate-400">Historial del cliente</span><span class="chip">Client</span></div>
+        <div class="endpoint-row"><span class="method m-get">GET</span><code>/orders/{id}</code><span class="text-xs text-slate-400">Detalle + estados</span><span class="chip">Auth</span></div>
+        <div class="endpoint-row"><span class="method m-post">POST</span><code>/merchants/me/orders/{id}/confirm</code><span class="text-xs text-slate-400">Comercio acepta pedido</span><span class="chip">Merchant</span></div>
+        <div class="endpoint-row"><span class="method m-post">POST</span><code>/merchants/me/orders/{id}/reject</code><span class="text-xs text-slate-400">Comercio rechaza con motivo</span><span class="chip">Merchant</span></div>
+        <div class="endpoint-row"><span class="method m-post">POST</span><code>/merchants/me/orders/{id}/ready</code><span class="text-xs text-slate-400">Marca listo para retiro</span><span class="chip">Merchant</span></div>
+        <div class="endpoint-row"><span class="method m-post">POST</span><code>/orders/{id}/cancel</code><span class="text-xs text-slate-400">Cancelación con motivo</span><span class="chip">Auth</span></div>
+        <div class="endpoint-row"><span class="method m-get">GET</span><code>/couriers/me/offers</code><span class="text-xs text-slate-400">Pedidos ofrecidos</span><span class="chip">Courier</span></div>
+        <div class="endpoint-row"><span class="method m-post">POST</span><code>/couriers/me/orders/{id}/accept</code><span class="text-xs text-slate-400">Acepta entrega</span><span class="chip">Courier</span></div>
+        <div class="endpoint-row"><span class="method m-post">POST</span><code>/couriers/me/orders/{id}/reject</code><span class="text-xs text-slate-400">Rechaza entrega</span><span class="chip">Courier</span></div>
+        <div class="endpoint-row"><span class="method m-post">POST</span><code>/couriers/me/orders/{id}/pickup</code><span class="text-xs text-slate-400">Confirma retiro en comercio</span><span class="chip">Courier</span></div>
+        <div class="endpoint-row"><span class="method m-post">POST</span><code>/couriers/me/orders/{id}/deliver</code><span class="text-xs text-slate-400">Confirma entrega con evidencia</span><span class="chip">Courier</span></div>
+      </div>
+
+      <div class="card p-5">
+        <h3 class="font-semibold text-white mb-3">📍 Geo / Tracking</h3>
+        <div class="endpoint-row"><span class="method m-post">POST</span><code>/geo/track</code><span class="text-xs text-slate-400">Batch de ubicaciones del repartidor</span><span class="chip">Courier</span></div>
+        <div class="endpoint-row"><span class="method m-get">GET</span><code>/geo/couriers/{id}/location</code><span class="text-xs text-slate-400">Última ubicación conocida</span><span class="chip">Auth</span></div>
+        <div class="endpoint-row"><span class="method m-get">GET</span><code>/geo/orders/{id}/track</code><span class="text-xs text-slate-400">Historial de tracking de pedido</span><span class="chip">Auth</span></div>
+      </div>
+
+      <div class="card p-5">
+        <h3 class="font-semibold text-white mb-3">⭐ Ratings</h3>
+        <div class="endpoint-row"><span class="method m-post">POST</span><code>/ratings</code><span class="text-xs text-slate-400">Califica pedido (comercio y/o repartidor)</span><span class="chip">Client</span></div>
+        <div class="endpoint-row"><span class="method m-get">GET</span><code>/merchants/{id}/ratings</code><span class="text-xs text-slate-400">Listado paginado de calificaciones</span><span class="chip">Auth</span></div>
+      </div>
+
+      <div class="card p-5">
+        <h3 class="font-semibold text-white mb-3">🛡️ Admin</h3>
+        <div class="endpoint-row"><span class="method m-get">GET</span><code>/admin/merchants?status=pending</code><span class="text-xs text-slate-400">Listado con filtros</span><span class="chip">Admin</span></div>
+        <div class="endpoint-row"><span class="method m-post">POST</span><code>/admin/merchants/{id}/approve</code><span class="text-xs text-slate-400">Aprueba alta</span><span class="chip">Admin</span></div>
+        <div class="endpoint-row"><span class="method m-post">POST</span><code>/admin/merchants/{id}/reject</code><span class="text-xs text-slate-400">Rechaza con motivo</span><span class="chip">Admin</span></div>
+        <div class="endpoint-row"><span class="method m-post">POST</span><code>/admin/merchants/{id}/suspend</code><span class="text-xs text-slate-400">Suspende con motivo</span><span class="chip">Admin</span></div>
+        <div class="endpoint-row"><span class="method m-get">GET</span><code>/admin/couriers</code><span class="text-xs text-slate-400">Listado repartidores</span><span class="chip">Admin</span></div>
+        <div class="endpoint-row"><span class="method m-post">POST</span><code>/admin/couriers/{id}/verify</code><span class="text-xs text-slate-400">Verifica documentos</span><span class="chip">Admin</span></div>
+        <div class="endpoint-row"><span class="method m-get">GET</span><code>/admin/commission-schemas</code><span class="text-xs text-slate-400">Listado esquemas</span><span class="chip">Admin</span></div>
+        <div class="endpoint-row"><span class="method m-post">POST</span><code>/admin/commission-schemas</code><span class="text-xs text-slate-400">Crea nuevo esquema</span><span class="chip">Admin</span></div>
+        <div class="endpoint-row"><span class="method m-get">GET</span><code>/admin/coverage-zones</code><span class="text-xs text-slate-400">Zonas con polígono</span><span class="chip">Admin</span></div>
+        <div class="endpoint-row"><span class="method m-post">POST</span><code>/admin/coverage-zones</code><span class="text-xs text-slate-400">Crea zona (GeoJSON)</span><span class="chip">Admin</span></div>
+        <div class="endpoint-row"><span class="method m-get">GET</span><code>/admin/disputes</code><span class="text-xs text-slate-400">Cola de disputas</span><span class="chip">Admin</span></div>
+        <div class="endpoint-row"><span class="method m-post">POST</span><code>/admin/disputes/{id}/resolve</code><span class="text-xs text-slate-400">Resuelve disputa</span><span class="chip">Admin</span></div>
+        <div class="endpoint-row"><span class="method m-get">GET</span><code>/admin/dashboard</code><span class="text-xs text-slate-400">KPIs agregados</span><span class="chip">Admin</span></div>
+        <div class="endpoint-row"><span class="method m-get">GET</span><code>/admin/audit-logs</code><span class="text-xs text-slate-400">Logs inmutables</span><span class="chip">Admin</span></div>
+      </div>
+
+      <div class="card p-5">
+        <h3 class="font-semibold text-white mb-3">🔔 Webhooks (entrantes)</h3>
+        <div class="endpoint-row"><span class="method m-post">POST</span><code>/webhooks/payments/{provider}</code><span class="text-xs text-slate-400">Confirmaciones de pago asíncronas</span><span class="chip">System</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============== SEGURIDAD ============== -->
+  <section class="tab-content" id="seguridad">
+    <h2 class="text-xl font-semibold text-white mb-2">Seguridad</h2>
+    <p class="text-sm text-slate-400 mb-6">Estrategia de seguridad siguiendo OWASP Top 10 y mejores prácticas.</p>
+
+    <div class="grid md:grid-cols-2 gap-4 mb-4">
+      <div class="card p-5">
+        <h3 class="font-semibold text-white mb-3">🔐 Autenticación</h3>
+        <ul class="text-sm text-slate-300 space-y-2">
+          <li><strong class="text-white">JWT con dos tokens.</strong> Access (15min, en memoria) + Refresh (7 días, httpOnly cookie o secure storage).</li>
+          <li><strong class="text-white">Refresh rotation.</strong> Cada uso de refresh genera uno nuevo y revoca el anterior. Prevención de reutilización.</li>
+          <li><strong class="text-white">Algoritmo RS256.</strong> Clave privada firma, pública verifica. Permite verificación sin contactar al backend.</li>
+          <li><strong class="text-white">Revocación.</strong> Lista negra en Redis para logout activo (futuro).</li>
+          <li><strong class="text-white">Passwords.</strong> bcrypt con cost factor 12, mínimo 8 caracteres + validación zxcvbn.</li>
+        </ul>
+      </div>
+
+      <div class="card p-5">
+        <h3 class="font-semibold text-white mb-3">🔒 Autorización</h3>
+        <ul class="text-sm text-slate-300 space-y-2">
+          <li><strong class="text-white">RBAC estricto.</strong> Dependencia <code>Depends(require_role("admin"))</code> en cada endpoint protegido.</li>
+          <li><strong class="text-white">Ownership check.</strong> Usuarios solo acceden a sus recursos. Validación en service layer.</li>
+          <li><strong class="text-white">Permisos granulares.</strong> Ej: merchant puede modificar solo su catálogo, no el de otros.</li>
+          <li><strong class="text-white">Multi-tenant lógico.</strong> Filtros automáticos por <code>merchant_id</code> en queries sensibles.</li>
+        </ul>
+      </div>
+
+      <div class="card p-5">
+        <h3 class="font-semibold text-white mb-3">🛡️ Protección de endpoints</h3>
+        <ul class="text-sm text-slate-300 space-y-2">
+          <li><strong class="text-white">Rate limiting.</strong> Middleware SlowAPI: 60 req/min por IP general, 5 req/min en login, 100 req/min en tracking.</li>
+          <li><strong class="text-white">CORS whitelist.</strong> Solo dominios conocidos en producción, <code>*</code> solo en desarrollo.</li>
+          <li><strong class="text-white">Validación Pydantic estricta.</strong> Rechazo automático de tipos erróneos, XSS, inyecciones.</li>
+          <li><strong class="text-white">SQL injection.</strong> Impossible vía SQLAlchemy ORM. Solo queries raw auditadas manualmente.</li>
+          <li><strong class="text-white">CSRF.</strong> Tokens en endpoints de estado (POST/PATCH/DELETE) vía cookies httpOnly.</li>
+        </ul>
+      </div>
+
+      <div class="card p-5">
+        <h3 class="font-semibold text-white mb-3">📦 Datos sensibles</h3>
+        <ul class="text-sm text-slate-300 space-y-2">
+          <li><strong class="text-white">TLS 1.3 obligatorio.</strong> HSTS header en producción. Redirect HTTP→HTTPS.</li>
+          <li><strong class="text-white">Encriptación en reposo.</strong> PostgreSQL con TDE a nivel cloud provider.</li>
+          <li><strong class="text-white">Secrets.</strong> Variables de entorno vía <code>pydantic-settings</code>. Nunca hardcodeadas. Rotación periódica.</li>
+          <li><strong class="text-white">Datos de pago.</strong> Nunca almacenamos PAN. Solo reference_id del gateway.</li>
+          <li><strong class="text-white">PII.</strong> Campos como email/teléfono con acceso auditado. Retención GDPR-compliant.</li>
+        </ul>
+      </div>
+
+      <div class="card p-5">
+        <h3 class="font-semibold text-white mb-3">📋 Auditoría</h3>
+        <ul class="text-sm text-slate-300 space-y-2">
+          <li><strong class="text-white">Logs estructurados.</strong> <code>structlog</code> con JSON, request_id por traza, user_id cuando aplica.</li>
+          <li><strong class="text-white">Tabla append-only.</strong> <code>audit_logs</code> sin UPDATE/DELETE. Trigger de BD garantiza inmutabilidad.</li>
+          <li><strong class="text-white">Eventos críticos auditados.</strong> Firma de contratos, cambios de comisión, suspensiones, reembolsos, cambios de rol.</li>
+          <li><strong class="text-white">Retención.</strong> Logs: 1 año. Datos de tracking: 90 días. Pedidos: 2 años. Contratos: 7 años.</li>
+        </ul>
+      </div>
+
+      <div class="card p-5">
+        <h3 class="font-semibold text-white mb-3">🔍 Testing de seguridad</h3>
+        <ul class="text-sm text-slate-300 space-y-2">
+          <li><strong class="text-white">Dependencias.</strong> <code>safety</code> + <code>pip-audit</code> en CI para CVEs.</li>
+          <li><strong class="text-white">SAST.</strong> <code>bandit</code> para análisis estático de Python.</li>
+          <li><strong class="text-white">Secrets.</strong> <code>detect-secrets</code> pre-commit hook.</li>
+          <li><strong class="text-white">DAST.</strong> <code>OWASP ZAP</code> contra staging mensualmente.</li>
+          <li><strong class="text-white">Container scanning.</strong> <code>trivy</code> en imágenes Docker.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============== ROADMAP ============== -->
+  <section class="tab-content" id="roadmap">
+    <h2 class="text-xl font-semibold text-white mb-2">Roadmap de desarrollo</h2>
+    <p class="text-sm text-slate-400 mb-6">Cada MVP entrega funcionalidad end-to-end verificable. Fases secuenciales.</p>
+
+    <div class="space-y-4">
+      <div class="card p-5 border-indigo-900">
+        <div class="flex items-start gap-4">
+          <div class="flex flex-col items-center">
+            <div class="timeline-dot bg-indigo-500"></div>
+            <div class="timeline-line flex-1 mt-1" style="min-height:100px"></div>
+          </div>
+          <div class="flex-1">
+            <div class="flex items-center gap-2 mb-2 flex-wrap">
+              <h3 class="font-semibold text-white">MVP 1 · Base + Tracking</h3>
+              <span class="badge-wip">En ejecución · 100%</span>
+            </div>
+            <p class="text-xs text-slate-400 mb-3">Plataforma base operativa. Envío de coordenadas desde móvil al backend y visualización en panel.</p>
+            <div class="grid md:grid-cols-2 gap-2 text-xs">
+              <div class="bg-slate-900/60 p-2 rounded border border-slate-800"><span class="badge-done">✓</span> Backend FastAPI + arquitectura modular</div>
+              <div class="bg-slate-900/60 p-2 rounded border border-slate-800"><span class="badge-done">✓</span> PostgreSQL + Alembic migraciones</div>
+              <div class="bg-slate-900/60 p-2 rounded border border-slate-800"><span class="badge-done">✓</span> API REST + OpenAPI docs</div>
+              <div class="bg-slate-900/60 p-2 rounded border border-slate-800"><span class="badge-done">✓</span> Auth JWT + refresh rotation</div>
+              <div class="bg-slate-900/60 p-2 rounded border border-slate-800"><span class="badge-done">✓</span> CRUD usuarios + roles</div>
+              <div class="bg-slate-900/60 p-2 rounded border border-slate-800"><span class="badge-done">✓</span> Panel admin básico</div>
+              <div class="bg-slate-900/60 p-2 rounded border border-slate-800"><span class="badge-done">✓</span> Tabla coordenadas + PostGIS</div>
+              <div class="bg-slate-900/60 p-2 rounded border border-slate-800"><span class="badge-done">✓</span> Docker + docker-compose</div>
+              <div class="bg-slate-900/60 p-2 rounded border border-slate-800"><span class="badge-done">✓</span> Seguridad básica (bcrypt, CORS, rate limit)</div>
+              <div class="bg-slate-900/60 p-2 rounded border border-slate-800"><span class="badge-done">✓</span> Logging estructurado structlog</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card p-5">
+        <div class="flex items-start gap-4">
+          <div class="flex flex-col items-center">
+            <div class="timeline-dot bg-slate-600"></div>
+            <div class="timeline-line flex-1 mt-1" style="min-height:100px"></div>
+          </div>
+          <div class="flex-1">
+            <div class="flex items-center gap-2 mb-2 flex-wrap">
+              <h3 class="font-semibold text-white">MVP 2 · Tracking en tiempo real</h3>
+              <span class="badge-todo">Pendiente</span>
+              <span class="chip">~2 semanas</span>
+            </div>
+            <p class="text-xs text-slate-400 mb-3">Visualización de ubicación sobre mapa con actualización en vivo vía WebSockets.</p>
+            <div class="grid md:grid-cols-2 gap-2 text-xs">
+              <div class="bg-slate-900/60 p-2 rounded border border-slate-800">Servidor Socket.io integrado con FastAPI</div>
+              <div class="bg-slate-900/60 p-2 rounded border border-slate-800">Endpoint streaming de coordenadas por courier</div>
+              <div class="bg-slate-900/60 p-2 rounded border border-slate-800">Vista de mapa con markers live</div>
+              <div class="bg-slate-900/60 p-2 rounded border border-slate-800">Indicador online/offline con heartbeat</div>
+              <div class="bg-slate-900/60 p-2 rounded border border-slate-800">Optimización: batching de coords según movimiento</div>
+              <div class="bg-slate-900/60 p-2 rounded border border-slate-800">Reconexión automática + fallback long-polling</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card p-5">
+        <div class="flex items-start gap-4">
+          <div class="flex flex-col items-center">
+            <div class="timeline-dot bg-slate-600"></div>
+            <div class="timeline-line flex-1 mt-1" style="min-height:100px"></div>
+          </div>
+          <div class="flex-1">
+            <div class="flex items-center gap-2 mb-2 flex-wrap">
+              <h3 class="font-semibold text-white">MVP 3 · Gestión de repartidores + notificaciones</h3>
+              <span class="badge-todo">Pendiente</span>
+              <span class="chip">~2 semanas</span>
+            </div>
+            <p class="text-xs text-slate-400 mb-3">Módulo completo de onboarding, disponibilidad y operación del repartidor.</p>
+            <div class="grid md:grid-cols-2 gap-2 text-xs">
+              <div class="bg-slate-900/60 p-2 rounded border border-slate-800">Onboarding con upload de documentos (S3/MinIO)</div>
+              <div class="bg-slate-900/60 p-2 rounded border border-slate-800">Panel de repartidor (perfil, toggle, historial)</div>
+              <div class="bg-slate-900/60 p-2 rounded border border-slate-800">Aprobación manual desde backoffice</div>
+              <div class="bg-slate-900/60 p-2 rounded border border-slate-800">Integración FCM para push notifications</div>
+              <div class="bg-slate-900/60 p-2 rounded border border-slate-800">Email transaccional (SMTP)</div>
+              <div class="bg-slate-900/60 p-2 rounded border border-slate-800">Cola interna con retry exponencial</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card p-5">
+        <div class="flex items-start gap-4">
+          <div class="flex flex-col items-center">
+            <div class="timeline-dot bg-slate-600"></div>
+            <div class="timeline-line flex-1 mt-1" style="min-height:100px"></div>
+          </div>
+          <div class="flex-1">
+            <div class="flex items-center gap-2 mb-2 flex-wrap">
+              <h3 class="font-semibold text-white">MVP 4 · Catálogo + Pedidos + Pagos</h3>
+              <span class="badge-todo">Pendiente</span>
+              <span class="chip">~3 semanas</span>
+            </div>
+            <p class="text-xs text-slate-400 mb-3">Ciclo completo: catálogo del comercio → pedido → pago → asignación manual.</p>
+            <div class="grid md:grid-cols-2 gap-2 text-xs">
+              <div class="bg-slate-900/60 p-2 rounded border border-slate-800">CRUD completo de productos y variantes</div>
+              <div class="bg-slate-900/60 p-2 rounded border border-slate-800">Carga masiva CSV con validación async</div>
+              <div class="bg-slate-900/60 p-2 rounded border border-slate-800">Categorías jerárquicas + búsqueda full-text</div>
+              <div class="bg-slate-900/60 p-2 rounded border border-slate-800">Máquina de estados de pedido</div>
+              <div class="bg-slate-900/60 p-2 rounded border border-slate-800">Integración pasarela local (adapter pattern)</div>
+              <div class="bg-slate-900/60 p-2 rounded border border-slate-800">Webhooks de confirmación asíncronos</div>
+              <div class="bg-slate-900/60 p-2 rounded border border-slate-800">Idempotencia en pagos</div>
+              <div class="bg-slate-900/60 p-2 rounded border border-slate-800">Carrito y checkout</div>
+              <div class="bg-slate-900/60 p-2 rounded border border-slate-800">Asignación manual desde backoffice</div>
+              <div class="bg-slate-900/60 p-2 rounded border border-slate-800">Job limpieza pedidos stale</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card p-5">
+        <div class="flex items-start gap-4">
+          <div class="flex flex-col items-center">
+            <div class="timeline-dot bg-slate-600"></div>
+            <div class="timeline-line flex-1 mt-1" style="min-height:100px"></div>
+          </div>
+          <div class="flex-1">
+            <div class="flex items-center gap-2 mb-2 flex-wrap">
+              <h3 class="font-semibold text-white">MVP 5 · Asignación inteligente + Comisiones + Ratings</h3>
+              <span class="badge-todo">Pendiente</span>
+              <span class="chip">~2.5 semanas</span>
+            </div>
+            <p class="text-xs text-slate-400 mb-3">Asignación automática al repartidor más cercano, motor de comisiones parametrizable y sistema de ratings.</p>
+            <div class="grid md:grid-cols-2 gap-2 text-xs">
+              <div class="bg-slate-900/60 p-2 rounded border border-slate-800">Query PostGIS ST_DWithin + scoring</div>
+              <div class="bg-slate-900/60 p-2 rounded border border-slate-800">Timeout y reasignación automática</div>
+              <div class="bg-slate-900/60 p-2 rounded border border-slate-800">Fallback a asignación manual tras N intentos</div>
+              <div class="bg-slate-900/60 p-2 rounded border border-slate-800">Motor paramétrico de comisiones</div>
+              <div class="bg-slate-900/60 p-2 rounded border border-slate-800">Job diario de expiración de contratos</div>
+              <div class="bg-slate-900/60 p-2 rounded border border-slate-800">Log inmutable de cambios críticos</div>
+              <div class="bg-slate-900/60 p-2 rounded border border-slate-800">Sistema de ratings 1-5 con fórmula Bayes</div>
+              <div class="bg-slate-900/60 p-2 rounded border border-slate-800">Cálculo nocturno de ratings promedio</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card p-5">
+        <div class="flex items-start gap-4">
+          <div class="flex flex-col items-center">
+            <div class="timeline-dot bg-slate-600"></div>
+          </div>
+          <div class="flex-1">
+            <div class="flex items-center gap-2 mb-2 flex-wrap">
+              <h3 class="font-semibold text-white">MVP 6 · Producción y hardening</h3>
+              <span class="badge-todo">Pendiente</span>
+              <span class="chip">~2 semanas</span>
+            </div>
+            <p class="text-xs text-slate-400 mb-3">Preparación del sistema para despliegue productivo con observabilidad completa.</p>
+            <div class="grid md:grid-cols-2 gap-2 text-xs">
+              <div class="bg-slate-900/60 p-2 rounded border border-slate-800">Dashboard métricas técnicas (Prometheus + Grafana)</div>
+              <div class="bg-slate-900/60 p-2 rounded border border-slate-800">Optimización de queries + índices compuestos</div>
+              <div class="bg-slate-900/60 p-2 rounded border border-slate-800">Seguridad avanzada + auditoría completa</div>
+              <div class="bg-slate-900/60 p-2 rounded border border-slate-800">CI/CD con pipelines (lint + test + build + deploy)</div>
+              <div class="bg-slate-900/60 p-2 rounded border border-slate-800">Backup automático de BD</div>
+              <div class="bg-slate-900/60 p-2 rounded border border-slate-800">Pruebas de carga (k6 o Locust)</div>
+              <div class="bg-slate-900/60 p-2 rounded border border-slate-800">Documentación técnica completa</div>
+              <div class="bg-slate-900/60 p-2 rounded border border-slate-800">Plan de deploy + runbook operativo</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============== ENTREGABLES ============== -->
+  <section class="tab-content" id="entregables">
+    <h2 class="text-xl font-semibold text-white mb-2">Entregables por fase</h2>
+    <p class="text-sm text-slate-400 mb-6">Cada MVP entrega incluye estos componentes de forma consistente.</p>
+
+    <div class="card p-5 mb-4">
+      <h3 class="font-semibold text-white mb-3">Entregables estándar (cada MVP)</h3>
+      <div class="grid md:grid-cols-2 gap-3">
+        <div class="bg-slate-900/60 p-3 rounded border border-slate-800">
+          <div class="font-semibold text-white text-sm mb-1">📦 Código fuente</div>
+          <div class="text-xs text-slate-400">Commits con conventional commits. Pull requests revisados (cuando haya equipo).</div>
+        </div>
+        <div class="bg-slate-900/60 p-3 rounded border border-slate-800">
+          <div class="font-semibold text-white text-sm mb-1">🗄️ Migraciones de BD</div>
+          <div class="text-xs text-slate-400">Alembic versionadas. Aplicables a BD limpia sin intervención manual.</div>
+        </div>
+        <div class="bg-slate-900/60 p-3 rounded border border-slate-800">
+          <div class="font-semibold text-white text-sm mb-1">🐳 Entorno reproducible</div>
+          <div class="text-xs text-slate-400"><code>docker-compose up</code> levanta todo. Variables documentadas en .env.example.</div>
+        </div>
+        <div class="bg-slate-900/60 p-3 rounded border border-slate-800">
+          <div class="font-semibold text-white text-sm mb-1">📚 Documentación OpenAPI</div>
+          <div class="text-xs text-slate-400">Autogenerada en <code>/docs</code>. Ejemplos de request/response.</div>
+        </div>
+        <div class="bg-slate-900/60 p-3 rounded border border-slate-800">
+          <div class="font-semibold text-white text-sm mb-1">🧪 Tests automatizados</div>
+          <div class="text-xs text-slate-400">Pytest + httpx. Cobertura mínima 70% en código nuevo.</div>
+        </div>
+        <div class="bg-slate-900/60 p-3 rounded border border-slate-800">
+          <div class="font-semibold text-white text-sm mb-1">✅ Flujo end-to-end</div>
+          <div class="text-xs text-slate-400">Al menos un flujo completo ejecutable y verificable en demo.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card p-5">
+      <h3 class="font-semibold text-white mb-3">Criterios de aceptación</h3>
+      <ul class="text-sm text-slate-300 space-y-2">
+        <li class="flex gap-2"><span class="text-emerald-400">✓</span>Todos los endpoints declarados funcionan y están documentados</li>
+        <li class="flex gap-2"><span class="text-emerald-400">✓</span>Migraciones aplican sin errores a una BD recién creada</li>
+        <li class="flex gap-2"><span class="text-emerald-400">✓</span>Tests unitarios + de integración pasan en CI local (<code>pytest</code>)</li>
+        <li class="flex gap-2"><span class="text-emerald-400">✓</span>Linters (<code>ruff</code>, <code>mypy</code>) sin errores</li>
+        <li class="flex gap-2"><span class="text-emerald-400">✓</span>README actualizado con instrucciones para nuevo developer</li>
+        <li class="flex gap-2"><span class="text-emerald-400">✓</span>Demo grabada o ejecutable en vivo del flujo principal</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ============== DECISIONES ============== -->
+  <section class="tab-content" id="decisiones">
+    <h2 class="text-xl font-semibold text-white mb-2">Decisiones técnicas pendientes</h2>
+    <p class="text-sm text-slate-400 mb-6">Puntos que requieren definición del equipo de producto/negocio antes de avanzar en la fase correspondiente. La arquitectura ya contempla los mecanismos técnicos para soportar cualquier decisión.</p>
+
+    <div class="space-y-3">
+      <div class="card p-5">
+        <div class="flex items-start gap-3">
+          <div class="timeline-dot bg-amber-500 mt-1.5"></div>
+          <div class="flex-1">
+            <h3 class="font-semibold text-white mb-1">Alcance de carrito (MVP 4)</h3>
+            <p class="text-xs text-slate-400 mb-2">¿El pedido permite ítems de un solo comercio o multi-comercio? Impacta la lógica de despacho, el modelo de <code>orders</code> y la liquidación.</p>
+            <div class="flex gap-2 flex-wrap mb-2">
+              <span class="chip">Opción A: single-comercio (recomendado · más simple)</span>
+              <span class="chip">Opción B: multi-comercio (más complejo)</span>
+            </div>
+            <p class="text-xs text-slate-500"><strong>Recomendación técnica:</strong> iniciar con single-comercio. El esquema de datos ya soporta evolución sin migraciones.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="card p-5">
+        <div class="flex items-start gap-3">
+          <div class="timeline-dot bg-amber-500 mt-1.5"></div>
+          <div class="flex-1">
+            <h3 class="font-semibold text-white mb-1">Proveedor de pasarela de pagos (MVP 4)</h3>
+            <p class="text-xs text-slate-400 mb-2">Definir proveedor local y método de integración. El adapter pattern permite cambiar sin tocar dominio.</p>
+            <div class="flex gap-2 flex-wrap">
+              <span class="chip">API directa REST</span>
+              <span class="chip">SDK oficial</span>
+              <span class="chip">Redirect + webhook</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card p-5">
+        <div class="flex items-start gap-3">
+          <div class="timeline-dot bg-amber-500 mt-1.5"></div>
+          <div class="flex-1">
+            <h3 class="font-semibold text-white mb-1">Modelo de tarifa de envío (MVP 4)</h3>
+            <p class="text-xs text-slate-400">Fija por zona · calculada por distancia (PostGIS) · dinámica por demanda. Afecta el checkout y la estructura de <code>coverage_zones</code>.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="card p-5">
+        <div class="flex items-start gap-3">
+          <div class="timeline-dot bg-amber-500 mt-1.5"></div>
+          <div class="flex-1">
+            <h3 class="font-semibold text-white mb-1">Política de aceptación post-promoción (MVP 5)</h3>
+            <p class="text-xs text-slate-400">¿El cambio de comisión requiere aceptación explícita (recomendado legalmente) o es automático por contrato pre-pactado? Afecta el flujo del <code>CommissionService</code>.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="card p-5">
+        <div class="flex items-start gap-3">
+          <div class="timeline-dot bg-amber-500 mt-1.5"></div>
+          <div class="flex-1">
+            <h3 class="font-semibold text-white mb-1">Proveedor de mapas (MVP 2)</h3>
+            <p class="text-xs text-slate-400 mb-2">OpenStreetMap self-hosted (OpenMapTiles) · Mapbox · Google Maps. Trade-off entre costo y calidad.</p>
+            <p class="text-xs text-slate-500"><strong>Recomendación:</strong> Mapbox para MVP (bajo costo, buena calidad) con plan de migración a OSM si escala.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="card p-5">
+        <div class="flex items-start gap-3">
+          <div class="timeline-dot bg-amber-500 mt-1.5"></div>
+          <div class="flex-1">
+            <h3 class="font-semibold text-white mb-1">Infraestructura cloud (MVP 6)</h3>
+            <p class="text-xs text-slate-400">Proveedor, región, plan de cómputo y base de datos gestionada vs. autohospedada. Necesario antes de pruebas de carga.</p>
+            <div class="flex gap-2 flex-wrap">
+              <span class="chip">Hetzner (costo bajo)</span>
+              <span class="chip">AWS (ecosistema)</span>
+              <span class="chip">DigitalOcean (simplicidad)</span>
+              <span class="chip">Self-hosted (máximo control)</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card p-5">
+        <div class="flex items-start gap-3">
+          <div class="timeline-dot bg-amber-500 mt-1.5"></div>
+          <div class="flex-1">
+            <h3 class="font-semibold text-white mb-1">Evidencia de entrega (MVP 4)</h3>
+            <p class="text-xs text-slate-400">¿Foto obligatoria · firma digital · OTP cliente · combinación? Afecta el flujo del repartidor y el storage.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card p-5 mt-5 bg-slate-900/50 border-slate-800">
+      <h3 class="font-semibold text-white mb-2">Fuera del alcance técnico</h3>
+      <p class="text-xs text-slate-400">
+        Decisiones de modelo de negocio (estrategia comercial, pricing al cliente, marketing de adquisición, SLAs comerciales, alianzas) son responsabilidad del equipo de producto/negocio. La arquitectura provee los mecanismos técnicos (motor paramétrico, feature flags, logs de auditoría, APIs extensibles) para que dichas decisiones se implementen sin reescritura de código.
+      </p>
+    </div>
+  </section>
+
+</main>
+
+<footer class="border-t border-slate-800 mt-8">
+  <div class="max-w-7xl mx-auto px-6 py-6 text-center text-xs text-slate-500">
+    Propuesta técnica v1.2 · Septiembre 2026 · Documento de trabajo para equipo de desarrollo y stakeholders técnicos.
+  </div>
+</footer>
+
+<script>
+  const buttons = document.querySelectorAll('.tab-btn');
+  const contents = document.querySelectorAll('.tab-content');
+  buttons.forEach(btn => {
+    btn.addEventListener('click', () => {
+      buttons.forEach(b => b.classList.remove('active'));
+      contents.forEach(c => c.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById(btn.dataset.tab).classList.add('active');
+      window.scrollTo({ top: document.querySelector('nav').offsetTop, behavior: 'smooth' });
+    });
+  });
+</script>
+
+</body>
+</html>

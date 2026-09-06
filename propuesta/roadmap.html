@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Roadmap — SuperApp Logística Local</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+  body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; background: #0a0f1c; color: #e5e7eb; }
+  .tab-btn.active { background: #4f46e5; color: #fff; box-shadow: 0 4px 12px rgba(79,70,229,.4);}
+  .tab-content { display: none; animation: fade .3s ease;}
+  .tab-content.active { display: block;}
+  @keyframes fade { from{opacity:0;transform:translateY(4px);} to{opacity:1;transform:translateY(0);} }
+  .card { background: #111827; border:1px solid #1f2937; border-radius:12px;}
+  .chip { background: #1e293b; color:#cbd5e1; border:1px solid #334155; padding:2px 9px; border-radius:6px; font-size:11px; font-weight:500;}
+  .badge-done { background: #064e3b; color:#6ee7b7; border:1px solid #047857; padding:2px 8px; border-radius:6px; font-size:10px; font-weight:600;}
+  .badge-wip { background: #4c1d95; color:#c4b5fd; border:1px solid #6d28d9; padding:2px 8px; border-radius:6px; font-size:10px; font-weight:600;}
+  .badge-todo { background: #1f2937; color:#94a3b8; border:1px solid #374151; padding:2px 8px; border-radius:6px; font-size:10px; font-weight:600;}
+  .badge-warn { background: #78350f; color:#fcd34d; border:1px solid #a16207; padding:2px 8px; border-radius:6px; font-size:10px; font-weight:600;}
+  .progress-bar { height: 6px; background: #1f2937; border-radius: 4px; overflow: hidden;}
+  .progress-fill { height: 100%; background: linear-gradient(90deg,#6366f1,#8b5cf6);}
+  .timeline-dot { width: 14px; height: 14px; border-radius: 50%; flex-shrink:0;}
+  .timeline-line { width: 2px; background: #1f2937; margin-left: 6px;}
+  pre { font-family: 'JetBrains Mono', 'Courier New', monospace;}
+  .scrollbar-thin::-webkit-scrollbar { width: 6px; height: 6px; }
+  .scrollbar-thin::-webkit-scrollbar-thumb { background: #334155; border-radius: 3px; }
+  table { border-collapse: collapse; }
+  th { font-weight: 600; color: #94a3b8; font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em;}
+  td, th { padding: 10px 12px; border-bottom: 1px solid #1f2937; text-align: left;}
+  tr:last-child td { border-bottom: none;}
+  tr:hover { background: #0f172a;}
+  code { font-family: 'JetBrains Mono', monospace; font-size: 0.85em; background: #1e293b; padding: 2px 6px; border-radius: 4px; color: #c4b5fd;}
+  .flow-node { position: relative; }
+  .actor-client { background: #1e3a8a; border-color: #3b82f6;}
+  .actor-merchant { background: #064e3b; border-color: #10b981;}
+  .actor-courier { background: #4c1d95; border-color: #8b5cf6;}
+  .actor-admin { background: #7f1d1d; border-color: #ef4444;}
+  .actor-system { background: #1f2937; border-color: #6b7280;}
+  .flow-container { display: flex; gap: 8px; flex-wrap: nowrap; align-items: stretch; padding: 8px 0;}
+  .flow-container .arrow { display: flex; align-items: center; color: #64748b; font-size: 18px; font-weight: 700;}
+  .layer-box { border: 2px solid #334155; border-radius: 12px; padding: 16px; background: #0f172a;}
+  .module-box { border: 1px solid #334155; border-radius: 8px; padding: 10px; background: #1e293b;}
+  .endpoint-row { display: grid; grid-template-columns: 70px 1fr 2fr auto; gap: 10px; padding: 8px 0; border-bottom: 1px solid #1f2937; align-items: start;}
+  .method { font-family: monospace; font-weight: 700; font-size: 11px; padding: 2px 6px; border-radius: 4px; text-align: center;}
+  .m-get { background: #064e3b; color: #6ee7b7;}
+  .m-post { background: #1e3a8a; color: #93c5fd;}
+  .m-put { background: #78350f; color: #fcd34d;}
+  .m-patch { background: #78350f; color: #fcd34d;}
+  .m-delete { background: #7f1d1d; color: #fca5a5;}
+  details > summary { cursor: pointer; list-style: none;}
+  details > summary::-webkit-details-marker { display: none;}
+  details[open] .summary-icon { transform: rotate(90deg);}
+  .summary-icon { display: inline-block; transition: transform .2s;}
+</style>
+</head>
+<body class="min-h-screen">
+
+<header class="border-b border-slate-800 bg-gradient-to-br from-slate-900 via-slate-950 to-indigo-950/30">
+  <div class="max-w-7xl mx-auto px-6 py-12">
+    <div class="flex items-center gap-2 mb-3 flex-wrap">
+      <span class="chip">Propuesta Técnica</span>
+      <span class="chip">v1.2</span>
+      <span class="chip">Septiembre 2026</span>
+      <span class="badge-wip">MVP 1 · 85% completado</span>
+    </div>
+    <h1 class="text-4xl md:text-5xl font-bold text-white tracking-tight">
+      SuperApp Logística Local
+    </h1>
+    <p class="text-slate-400 mt-3 max-w-3xl">
+      Propuesta integral de ingeniería. Documento para el equipo de desarrollo y stakeholders técnicos.
+    </p>
+
+    <div class="mt-8 grid grid-cols-2 md:grid-cols-5 gap-3">
+      <div class="bg-slate-900/60 border border-slate-800 rounded-lg p-3">
+        <div class="text-xs text-slate-500">Móvil</div>
+        <div class="text-white font-semibold text-sm">React Native</div>
+      </div>
+      <div class="bg-slate-900/60 border border-slate-800 rounded-lg p-3">
+        <div class="text-xs text-slate-500">Backend</div>
+        <div class="text-white font-semibold text-sm">FastAPI · Python</div>
+      </div>
+      <div class="bg-slate-900/60 border border-slate-800 rounded-lg p-3">
+        <div class="text-xs text-slate-500">Datos</div>
+        <div class="text-white font-semibold text-sm">PostgreSQL + PostGIS</div>
+      </div>
+      <div class="bg-slate-900/60 border border-slate-800 rounded-lg p-3">
+        <div class="text-xs text-slate-500">Realtime</div>
+        <div class="text-white font-semibold text-sm">Socket.io</div>
+      </div>
+      <div class="bg-slate-900/60 border border-slate-800 rounded-lg p-3">
+        <div class="text-xs text-slate-500">Deploy</div>
+        <div class="text-white font-semibold text-sm">Docker · Git local</div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<nav class="sticky top-0 z-40 bg-slate-950/95 backdrop-blur border-b border-slate-800">
+  <div class="max-w-7xl mx-auto px-4 py-2 flex gap-1 overflow-x-auto scrollbar-thin">
+    <button class="tab-btn active whitespace-nowrap px-3 py-1.5 rounded-md text-xs font-medium bg-slate-800 text-slate-300" data-tab="resumen">Resumen</button>
+    <button class="tab-btn whitespace-nowrap px-3 py-1.5 rounded-md text-xs font-medium bg-slate-800 text-slate-300" data-tab="estado">Estado actual</button>
+    <button class="tab-btn whitespace-nowrap px-3 py-1.5 rounded-md text-xs font-medium bg-slate-800 text-slate-300" data-tab="arquitectura">Arquitectura</button>
+    <button class="tab-btn whitespace-nowrap px-3 py-1.5 rounded-md text-xs font-medium bg-slate-800 text-slate-300" data-tab="stack">Stack</button>
+    <button class="tab-btn whitespace-nowrap px-3 py-1.5 rounded-md text-xs font-medium bg-slate-800 text-slate-300" data-tab="modulos">Módulos</button>
+    <button class="tab-btn whitespace-nowrap px-3 py-1.5 rounded-md text-xs font-medium bg-slate-800 text-slate-300" data-tab="flujos">Flujos de usuario</button>
+    <button class="tab-btn whitespace-nowrap px-3 py-1.5 rounded-md text-xs font-medium bg-slate-800 text-slate-300" data-tab="datos">Modelo de datos</button>
+    <button class="tab-btn whitespace-nowrap px-3 py-1.5 rounded-md text-xs font-medium bg-slate-800 text-slate-300" data-tab="api">API</button>
+    <button class="tab-btn whitespace-nowrap px-3 py-1.5 rounded-md text-xs font-medium bg-slate-800 text-slate-300" data-tab="seguridad">Seguridad</button>
+    <button class="tab-btn active whitespace-nowrap px-3 py-1.5 rounded-md text-xs font-medium bg-slate-800 text-slate-300" data-tab="roadmap">Roadmap</button>
+    <button class="tab-btn whitespace-nowrap px-3 py-1.5 rounded-md text-xs font-medium bg-slate-800 text-slate-300" data-tab="entregables">Entregables</button>
+    <button class="tab-btn whitespace-nowrap px-3 py-1.5 rounded-md text-xs font-medium bg-slate-800 text-slate-300" data-tab="decisiones">Decisiones técnicas</button>
+  </div>
+</nav>
+
+<main class="max-w-7xl mx-auto px-6 py-8">
+<section class="tab-content active" id="roadmap">
+    <h2 class="text-xl font-semibold text-white mb-2">Roadmap de desarrollo</h2>
+    <p class="text-sm text-slate-400 mb-6">Cada MVP entrega funcionalidad end-to-end verificable. Fases secuenciales.</p>
+
+    <div class="space-y-4">
+      <div class="card p-5 border-indigo-900">
+        <div class="flex items-start gap-4">
+          <div class="flex flex-col items-center">
+            <div class="timeline-dot bg-indigo-500"></div>
+            <div class="timeline-line flex-1 mt-1" style="min-height:100px"></div>
+          </div>
+          <div class="flex-1">
+            <div class="flex items-center gap-2 mb-2 flex-wrap">
+              <h3 class="font-semibold text-white">MVP 1 · Base + Tracking</h3>
+              <span class="badge-wip">En ejecución · 100%</span>
+            </div>
+            <p class="text-xs text-slate-400 mb-3">Plataforma base operativa. Envío de coordenadas desde móvil al backend y visualización en panel.</p>
+            <div class="grid md:grid-cols-2 gap-2 text-xs">
+              <div class="bg-slate-900/60 p-2 rounded border border-slate-800"><span class="badge-done">✓</span> Backend FastAPI + arquitectura modular</div>
+              <div class="bg-slate-900/60 p-2 rounded border border-slate-800"><span class="badge-done">✓</span> PostgreSQL + Alembic migraciones</div>
+              <div class="bg-slate-900/60 p-2 rounded border border-slate-800"><span class="badge-done">✓</span> API REST + OpenAPI docs</div>
+              <div class="bg-slate-900/60 p-2 rounded border border-slate-800"><span class="badge-done">✓</span> Auth JWT + refresh rotation</div>
+              <div class="bg-slate-900/60 p-2 rounded border border-slate-800"><span class="badge-done">✓</span> CRUD usuarios + roles</div>
+              <div class="bg-slate-900/60 p-2 rounded border border-slate-800"><span class="badge-done">✓</span> Panel admin básico</div>
+              <div class="bg-slate-900/60 p-2 rounded border border-slate-800"><span class="badge-done">✓</span> Tabla coordenadas + PostGIS</div>
+              <div class="bg-slate-900/60 p-2 rounded border border-slate-800"><span class="badge-done">✓</span> Docker + docker-compose</div>
+              <div class="bg-slate-900/60 p-2 rounded border border-slate-800"><span class="badge-done">✓</span> Seguridad básica (bcrypt, CORS, rate limit)</div>
+              <div class="bg-slate-900/60 p-2 rounded border border-slate-800"><span class="badge-done">✓</span> Logging estructurado structlog</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card p-5">
+        <div class="flex items-start gap-4">
+          <div class="flex flex-col items-center">
+            <div class="timeline-dot bg-slate-600"></div>
+            <div class="timeline-line flex-1 mt-1" style="min-height:100px"></div>
+          </div>
+          <div class="flex-1">
+            <div class="flex items-center gap-2 mb-2 flex-wrap">
+              <h3 class="font-semibold text-white">MVP 2 · Tracking en tiempo real</h3>
+              <span class="badge-todo">Pendiente</span>
+              <span class="chip">~2 semanas</span>
+            </div>
+            <p class="text-xs text-slate-400 mb-3">Visualización de ubicación sobre mapa con actualización en vivo vía WebSockets.</p>
+            <div class="grid md:grid-cols-2 gap-2 text-xs">
+              <div class="bg-slate-900/60 p-2 rounded border border-slate-800">Servidor Socket.io integrado con FastAPI</div>
+              <div class="bg-slate-900/60 p-2 rounded border border-slate-800">Endpoint streaming de coordenadas por courier</div>
+              <div class="bg-slate-900/60 p-2 rounded border border-slate-800">Vista de mapa con markers live</div>
+              <div class="bg-slate-900/60 p-2 rounded border border-slate-800">Indicador online/offline con heartbeat</div>
+              <div class="bg-slate-900/60 p-2 rounded border border-slate-800">Optimización: batching de coords según movimiento</div>
+              <div class="bg-slate-900/60 p-2 rounded border border-slate-800">Reconexión automática + fallback long-polling</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card p-5">
+        <div class="flex items-start gap-4">
+          <div class="flex flex-col items-center">
+            <div class="timeline-dot bg-slate-600"></div>
+            <div class="timeline-line flex-1 mt-1" style="min-height:100px"></div>
+          </div>
+          <div class="flex-1">
+            <div class="flex items-center gap-2 mb-2 flex-wrap">
+              <h3 class="font-semibold text-white">MVP 3 · Gestión de repartidores + notificaciones</h3>
+              <span class="badge-todo">Pendiente</span>
+              <span class="chip">~2 semanas</span>
+            </div>
+            <p class="text-xs text-slate-400 mb-3">Módulo completo de onboarding, disponibilidad y operación del repartidor.</p>
+            <div class="grid md:grid-cols-2 gap-2 text-xs">
+              <div class="bg-slate-900/60 p-2 rounded border border-slate-800">Onboarding con upload de documentos (S3/MinIO)</div>
+              <div class="bg-slate-900/60 p-2 rounded border border-slate-800">Panel de repartidor (perfil, toggle, historial)</div>
+              <div class="bg-slate-900/60 p-2 rounded border border-slate-800">Aprobación manual desde backoffice</div>
+              <div class="bg-slate-900/60 p-2 rounded border border-slate-800">Integración FCM para push notifications</div>
+              <div class="bg-slate-900/60 p-2 rounded border border-slate-800">Email transaccional (SMTP)</div>
+              <div class="bg-slate-900/60 p-2 rounded border border-slate-800">Cola interna con retry exponencial</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card p-5">
+        <div class="flex items-start gap-4">
+          <div class="flex flex-col items-center">
+            <div class="timeline-dot bg-slate-600"></div>
+            <div class="timeline-line flex-1 mt-1" style="min-height:100px"></div>
+          </div>
+          <div class="flex-1">
+            <div class="flex items-center gap-2 mb-2 flex-wrap">
+              <h3 class="font-semibold text-white">MVP 4 · Catálogo + Pedidos + Pagos</h3>
+              <span class="badge-todo">Pendiente</span>
+              <span class="chip">~3 semanas</span>
+            </div>
+            <p class="text-xs text-slate-400 mb-3">Ciclo completo: catálogo del comercio → pedido → pago → asignación manual.</p>
+            <div class="grid md:grid-cols-2 gap-2 text-xs">
+              <div class="bg-slate-900/60 p-2 rounded border border-slate-800">CRUD completo de productos y variantes</div>
+              <div class="bg-slate-900/60 p-2 rounded border border-slate-800">Carga masiva CSV con validación async</div>
+              <div class="bg-slate-900/60 p-2 rounded border border-slate-800">Categorías jerárquicas + búsqueda full-text</div>
+              <div class="bg-slate-900/60 p-2 rounded border border-slate-800">Máquina de estados de pedido</div>
+              <div class="bg-slate-900/60 p-2 rounded border border-slate-800">Integración pasarela local (adapter pattern)</div>
+              <div class="bg-slate-900/60 p-2 rounded border border-slate-800">Webhooks de confirmación asíncronos</div>
+              <div class="bg-slate-900/60 p-2 rounded border border-slate-800">Idempotencia en pagos</div>
+              <div class="bg-slate-900/60 p-2 rounded border border-slate-800">Carrito y checkout</div>
+              <div class="bg-slate-900/60 p-2 rounded border border-slate-800">Asignación manual desde backoffice</div>
+              <div class="bg-slate-900/60 p-2 rounded border border-slate-800">Job limpieza pedidos stale</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card p-5">
+        <div class="flex items-start gap-4">
+          <div class="flex flex-col items-center">
+            <div class="timeline-dot bg-slate-600"></div>
+            <div class="timeline-line flex-1 mt-1" style="min-height:100px"></div>
+          </div>
+          <div class="flex-1">
+            <div class="flex items-center gap-2 mb-2 flex-wrap">
+              <h3 class="font-semibold text-white">MVP 5 · Asignación inteligente + Comisiones + Ratings</h3>
+              <span class="badge-todo">Pendiente</span>
+              <span class="chip">~2.5 semanas</span>
+            </div>
+            <p class="text-xs text-slate-400 mb-3">Asignación automática al repartidor más cercano, motor de comisiones parametrizable y sistema de ratings.</p>
+            <div class="grid md:grid-cols-2 gap-2 text-xs">
+              <div class="bg-slate-900/60 p-2 rounded border border-slate-800">Query PostGIS ST_DWithin + scoring</div>
+              <div class="bg-slate-900/60 p-2 rounded border border-slate-800">Timeout y reasignación automática</div>
+              <div class="bg-slate-900/60 p-2 rounded border border-slate-800">Fallback a asignación manual tras N intentos</div>
+              <div class="bg-slate-900/60 p-2 rounded border border-slate-800">Motor paramétrico de comisiones</div>
+              <div class="bg-slate-900/60 p-2 rounded border border-slate-800">Job diario de expiración de contratos</div>
+              <div class="bg-slate-900/60 p-2 rounded border border-slate-800">Log inmutable de cambios críticos</div>
+              <div class="bg-slate-900/60 p-2 rounded border border-slate-800">Sistema de ratings 1-5 con fórmula Bayes</div>
+              <div class="bg-slate-900/60 p-2 rounded border border-slate-800">Cálculo nocturno de ratings promedio</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card p-5">
+        <div class="flex items-start gap-4">
+          <div class="flex flex-col items-center">
+            <div class="timeline-dot bg-slate-600"></div>
+          </div>
+          <div class="flex-1">
+            <div class="flex items-center gap-2 mb-2 flex-wrap">
+              <h3 class="font-semibold text-white">MVP 6 · Producción y hardening</h3>
+              <span class="badge-todo">Pendiente</span>
+              <span class="chip">~2 semanas</span>
+            </div>
+            <p class="text-xs text-slate-400 mb-3">Preparación del sistema para despliegue productivo con observabilidad completa.</p>
+            <div class="grid md:grid-cols-2 gap-2 text-xs">
+              <div class="bg-slate-900/60 p-2 rounded border border-slate-800">Dashboard métricas técnicas (Prometheus + Grafana)</div>
+              <div class="bg-slate-900/60 p-2 rounded border border-slate-800">Optimización de queries + índices compuestos</div>
+              <div class="bg-slate-900/60 p-2 rounded border border-slate-800">Seguridad avanzada + auditoría completa</div>
+              <div class="bg-slate-900/60 p-2 rounded border border-slate-800">CI/CD con pipelines (lint + test + build + deploy)</div>
+              <div class="bg-slate-900/60 p-2 rounded border border-slate-800">Backup automático de BD</div>
+              <div class="bg-slate-900/60 p-2 rounded border border-slate-800">Pruebas de carga (k6 o Locust)</div>
+              <div class="bg-slate-900/60 p-2 rounded border border-slate-800">Documentación técnica completa</div>
+              <div class="bg-slate-900/60 p-2 rounded border border-slate-800">Plan de deploy + runbook operativo</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="border-t border-slate-800 mt-8">
+  <div class="max-w-7xl mx-auto px-6 py-6 text-center text-xs text-slate-500">
+    Propuesta técnica v1.2 · Septiembre 2026 · Documento de trabajo para equipo de desarrollo y stakeholders técnicos.
+  </div>
+</footer>
+
+<script>
+  document.querySelectorAll('.tab-btn').forEach(function(btn) {
+    var tab = btn.getAttribute('data-tab');
+    if (tab && tab !== 'roadmap') {
+      var link = document.createElement('a');
+      link.href = tab + '.html';
+      link.className = 'tab-btn whitespace-nowrap px-3 py-1.5 rounded-md text-xs font-medium bg-slate-800 text-slate-300 hover:bg-slate-700 transition-colors';
+      link.textContent = btn.textContent;
+      btn.parentNode.replaceChild(link, btn);
+    }
+  });
+</script>
+
+</body>
+</html>

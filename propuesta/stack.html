@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Stack — SuperApp Logística Local</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+  body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; background: #0a0f1c; color: #e5e7eb; }
+  .tab-btn.active { background: #4f46e5; color: #fff; box-shadow: 0 4px 12px rgba(79,70,229,.4);}
+  .tab-content { display: none; animation: fade .3s ease;}
+  .tab-content.active { display: block;}
+  @keyframes fade { from{opacity:0;transform:translateY(4px);} to{opacity:1;transform:translateY(0);} }
+  .card { background: #111827; border:1px solid #1f2937; border-radius:12px;}
+  .chip { background: #1e293b; color:#cbd5e1; border:1px solid #334155; padding:2px 9px; border-radius:6px; font-size:11px; font-weight:500;}
+  .badge-done { background: #064e3b; color:#6ee7b7; border:1px solid #047857; padding:2px 8px; border-radius:6px; font-size:10px; font-weight:600;}
+  .badge-wip { background: #4c1d95; color:#c4b5fd; border:1px solid #6d28d9; padding:2px 8px; border-radius:6px; font-size:10px; font-weight:600;}
+  .badge-todo { background: #1f2937; color:#94a3b8; border:1px solid #374151; padding:2px 8px; border-radius:6px; font-size:10px; font-weight:600;}
+  .badge-warn { background: #78350f; color:#fcd34d; border:1px solid #a16207; padding:2px 8px; border-radius:6px; font-size:10px; font-weight:600;}
+  .progress-bar { height: 6px; background: #1f2937; border-radius: 4px; overflow: hidden;}
+  .progress-fill { height: 100%; background: linear-gradient(90deg,#6366f1,#8b5cf6);}
+  .timeline-dot { width: 14px; height: 14px; border-radius: 50%; flex-shrink:0;}
+  .timeline-line { width: 2px; background: #1f2937; margin-left: 6px;}
+  pre { font-family: 'JetBrains Mono', 'Courier New', monospace;}
+  .scrollbar-thin::-webkit-scrollbar { width: 6px; height: 6px; }
+  .scrollbar-thin::-webkit-scrollbar-thumb { background: #334155; border-radius: 3px; }
+  table { border-collapse: collapse; }
+  th { font-weight: 600; color: #94a3b8; font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em;}
+  td, th { padding: 10px 12px; border-bottom: 1px solid #1f2937; text-align: left;}
+  tr:last-child td { border-bottom: none;}
+  tr:hover { background: #0f172a;}
+  code { font-family: 'JetBrains Mono', monospace; font-size: 0.85em; background: #1e293b; padding: 2px 6px; border-radius: 4px; color: #c4b5fd;}
+  .flow-node { position: relative; }
+  .actor-client { background: #1e3a8a; border-color: #3b82f6;}
+  .actor-merchant { background: #064e3b; border-color: #10b981;}
+  .actor-courier { background: #4c1d95; border-color: #8b5cf6;}
+  .actor-admin { background: #7f1d1d; border-color: #ef4444;}
+  .actor-system { background: #1f2937; border-color: #6b7280;}
+  .flow-container { display: flex; gap: 8px; flex-wrap: nowrap; align-items: stretch; padding: 8px 0;}
+  .flow-container .arrow { display: flex; align-items: center; color: #64748b; font-size: 18px; font-weight: 700;}
+  .layer-box { border: 2px solid #334155; border-radius: 12px; padding: 16px; background: #0f172a;}
+  .module-box { border: 1px solid #334155; border-radius: 8px; padding: 10px; background: #1e293b;}
+  .endpoint-row { display: grid; grid-template-columns: 70px 1fr 2fr auto; gap: 10px; padding: 8px 0; border-bottom: 1px solid #1f2937; align-items: start;}
+  .method { font-family: monospace; font-weight: 700; font-size: 11px; padding: 2px 6px; border-radius: 4px; text-align: center;}
+  .m-get { background: #064e3b; color: #6ee7b7;}
+  .m-post { background: #1e3a8a; color: #93c5fd;}
+  .m-put { background: #78350f; color: #fcd34d;}
+  .m-patch { background: #78350f; color: #fcd34d;}
+  .m-delete { background: #7f1d1d; color: #fca5a5;}
+  details > summary { cursor: pointer; list-style: none;}
+  details > summary::-webkit-details-marker { display: none;}
+  details[open] .summary-icon { transform: rotate(90deg);}
+  .summary-icon { display: inline-block; transition: transform .2s;}
+</style>
+</head>
+<body class="min-h-screen">
+
+<header class="border-b border-slate-800 bg-gradient-to-br from-slate-900 via-slate-950 to-indigo-950/30">
+  <div class="max-w-7xl mx-auto px-6 py-12">
+    <div class="flex items-center gap-2 mb-3 flex-wrap">
+      <span class="chip">Propuesta Técnica</span>
+      <span class="chip">v1.2</span>
+      <span class="chip">Septiembre 2026</span>
+      <span class="badge-wip">MVP 1 · 85% completado</span>
+    </div>
+    <h1 class="text-4xl md:text-5xl font-bold text-white tracking-tight">
+      SuperApp Logística Local
+    </h1>
+    <p class="text-slate-400 mt-3 max-w-3xl">
+      Propuesta integral de ingeniería. Documento para el equipo de desarrollo y stakeholders técnicos.
+    </p>
+
+    <div class="mt-8 grid grid-cols-2 md:grid-cols-5 gap-3">
+      <div class="bg-slate-900/60 border border-slate-800 rounded-lg p-3">
+        <div class="text-xs text-slate-500">Móvil</div>
+        <div class="text-white font-semibold text-sm">React Native</div>
+      </div>
+      <div class="bg-slate-900/60 border border-slate-800 rounded-lg p-3">
+        <div class="text-xs text-slate-500">Backend</div>
+        <div class="text-white font-semibold text-sm">FastAPI · Python</div>
+      </div>
+      <div class="bg-slate-900/60 border border-slate-800 rounded-lg p-3">
+        <div class="text-xs text-slate-500">Datos</div>
+        <div class="text-white font-semibold text-sm">PostgreSQL + PostGIS</div>
+      </div>
+      <div class="bg-slate-900/60 border border-slate-800 rounded-lg p-3">
+        <div class="text-xs text-slate-500">Realtime</div>
+        <div class="text-white font-semibold text-sm">Socket.io</div>
+      </div>
+      <div class="bg-slate-900/60 border border-slate-800 rounded-lg p-3">
+        <div class="text-xs text-slate-500">Deploy</div>
+        <div class="text-white font-semibold text-sm">Docker · Git local</div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<nav class="sticky top-0 z-40 bg-slate-950/95 backdrop-blur border-b border-slate-800">
+  <div class="max-w-7xl mx-auto px-4 py-2 flex gap-1 overflow-x-auto scrollbar-thin">
+    <button class="tab-btn active whitespace-nowrap px-3 py-1.5 rounded-md text-xs font-medium bg-slate-800 text-slate-300" data-tab="resumen">Resumen</button>
+    <button class="tab-btn whitespace-nowrap px-3 py-1.5 rounded-md text-xs font-medium bg-slate-800 text-slate-300" data-tab="estado">Estado actual</button>
+    <button class="tab-btn whitespace-nowrap px-3 py-1.5 rounded-md text-xs font-medium bg-slate-800 text-slate-300" data-tab="arquitectura">Arquitectura</button>
+    <button class="tab-btn active whitespace-nowrap px-3 py-1.5 rounded-md text-xs font-medium bg-slate-800 text-slate-300" data-tab="stack">Stack</button>
+    <button class="tab-btn whitespace-nowrap px-3 py-1.5 rounded-md text-xs font-medium bg-slate-800 text-slate-300" data-tab="modulos">Módulos</button>
+    <button class="tab-btn whitespace-nowrap px-3 py-1.5 rounded-md text-xs font-medium bg-slate-800 text-slate-300" data-tab="flujos">Flujos de usuario</button>
+    <button class="tab-btn whitespace-nowrap px-3 py-1.5 rounded-md text-xs font-medium bg-slate-800 text-slate-300" data-tab="datos">Modelo de datos</button>
+    <button class="tab-btn whitespace-nowrap px-3 py-1.5 rounded-md text-xs font-medium bg-slate-800 text-slate-300" data-tab="api">API</button>
+    <button class="tab-btn whitespace-nowrap px-3 py-1.5 rounded-md text-xs font-medium bg-slate-800 text-slate-300" data-tab="seguridad">Seguridad</button>
+    <button class="tab-btn whitespace-nowrap px-3 py-1.5 rounded-md text-xs font-medium bg-slate-800 text-slate-300" data-tab="roadmap">Roadmap</button>
+    <button class="tab-btn whitespace-nowrap px-3 py-1.5 rounded-md text-xs font-medium bg-slate-800 text-slate-300" data-tab="entregables">Entregables</button>
+    <button class="tab-btn whitespace-nowrap px-3 py-1.5 rounded-md text-xs font-medium bg-slate-800 text-slate-300" data-tab="decisiones">Decisiones técnicas</button>
+  </div>
+</nav>
+
+<main class="max-w-7xl mx-auto px-6 py-8">
+<section class="tab-content active" id="stack">
+    <h2 class="text-xl font-semibold text-white mb-2">Stack tecnológico</h2>
+    <p class="text-sm text-slate-400 mb-6">Justificación técnica de cada elección. Prioridad: open source, gratuita, mantenida activamente.</p>
+
+    <div class="card overflow-hidden mb-5">
+      <table class="w-full text-sm">
+        <thead>
+          <tr class="bg-slate-900/50">
+            <th style="width:18%">Capa</th>
+            <th style="width:22%">Tecnología</th>
+            <th>Justificación</th>
+            <th style="width:12%">Estado</th>
+          </tr>
+        </thead>
+        <tbody class="text-slate-300">
+          <tr>
+            <td>App móvil</td>
+            <td class="text-white font-medium">React Native</td>
+            <td class="text-xs">Build único para iOS y Android. Un codebase, dos plataformas. Librería <code>react-native-maps</code> para mapas, <code>react-native-background-geolocation</code> para tracking.</td>
+            <td><span class="badge-todo">Pendiente</span></td>
+          </tr>
+          <tr>
+            <td>Backend</td>
+            <td class="text-white font-medium">Python 3.12 + FastAPI</td>
+            <td class="text-xs">Async nativo con <code>asyncio</code>, type hints completos, validación automática con Pydantic v2, documentación OpenAPI gratis. Comunidad madura.</td>
+            <td><span class="badge-done">En uso</span></td>
+          </tr>
+          <tr>
+            <td>ORM</td>
+            <td class="text-white font-medium">SQLAlchemy 2.0 (async)</td>
+            <td class="text-xs">Patrón Unit of Work, sessions async con <code>asyncpg</code>, integración directa con PostGIS vía GeoAlchemy2. Estándar de la industria.</td>
+            <td><span class="badge-done">En uso</span></td>
+          </tr>
+          <tr>
+            <td>Migraciones</td>
+            <td class="text-white font-medium">Alembic</td>
+            <td class="text-xs">Migraciones versionadas y reproducibles. Autogeneración a partir de cambios en modelos SQLAlchemy.</td>
+            <td><span class="badge-done">En uso</span></td>
+          </tr>
+          <tr>
+            <td>BD principal</td>
+            <td class="text-white font-medium">PostgreSQL 16 + PostGIS</td>
+            <td class="text-xs">ACID, JSONB para datos semi-estructurados, índices GIN/GIST, full-text search integrado, funciones geoespaciales nativas.</td>
+            <td><span class="badge-done">En uso</span></td>
+          </tr>
+          <tr>
+            <td>Tiempo real</td>
+            <td class="text-white font-medium">Socket.io (Node adapter)</td>
+            <td class="text-xs">WebSockets con fallback automático (long-polling). Cliente oficial en Python via <code>python-socketio</code>. Redis adapter para multi-instancia.</td>
+            <td><span class="badge-todo">Pendiente</span></td>
+          </tr>
+          <tr>
+            <td>Caché</td>
+            <td class="text-white font-medium">Redis 7</td>
+            <td class="text-xs">Caché de queries pesadas, sesiones de WebSocket, rate limiting distribuido, broker para Socket.io adapter. <strong>Se activa cuando la carga lo justifique.</strong></td>
+            <td><span class="badge-wip">Futuro</span></td>
+          </tr>
+          <tr>
+            <td>Mapas</td>
+            <td class="text-white font-medium">OpenStreetMap + Leaflet</td>
+            <td class="text-xs">Tile server open source (OpenMapTiles o similar). Leaflet para web, <code>react-native-maps</code> con provider OSM para móvil.</td>
+            <td><span class="badge-todo">Pendiente</span></td>
+          </tr>
+          <tr>
+            <td>Búsqueda avanzada</td>
+            <td class="text-white font-medium">PostgreSQL FTS → Meilisearch</td>
+            <td class="text-xs">MVP: full-text search con <code>tsvector</code> + GIN index. Futuro: Meilisearch (open source, compatible API Algolia) si la escala lo exige.</td>
+            <td><span class="badge-wip">Futuro</span></td>
+          </tr>
+          <tr>
+            <td>Push notifications</td>
+            <td class="text-white font-medium">Firebase Cloud Messaging</td>
+            <td class="text-xs"><strong>Única excepción no-open-source.</strong> Requerido por Apple/Google para push en móvil. SDK oficial <code>firebase-admin</code> en Python.</td>
+            <td><span class="badge-todo">Pendiente</span></td>
+          </tr>
+          <tr>
+            <td>Pagos</td>
+            <td class="text-white font-medium">Pasarela local (adapter)</td>
+            <td class="text-xs">Patrón Adapter para abstraer proveedor. Permite cambiar de gateway sin tocar lógica de dominio. Se define al iniciar operaciones.</td>
+            <td><span class="badge-todo">Pendiente</span></td>
+          </tr>
+          <tr>
+            <td>Validación / Schemas</td>
+            <td class="text-white font-medium">Pydantic v2</td>
+            <td class="text-xs">Validación con type hints, serialización ultra-rápida (Rust-core), integración nativa con FastAPI.</td>
+            <td><span class="badge-done">En uso</span></td>
+          </tr>
+          <tr>
+            <td>Logging</td>
+            <td class="text-white font-medium">structlog</td>
+            <td class="text-xs">Logs estructurados en JSON. Contexto automático por request (request_id, user_id). Compatible con cualquier agregador.</td>
+            <td><span class="badge-done">En uso</span></td>
+          </tr>
+          <tr>
+            <td>Testing</td>
+            <td class="text-white font-medium">pytest + httpx + factory_boy</td>
+            <td class="text-xs">pytest para test runner, httpx para testing async de APIs, factory_boy para fixtures de datos.</td>
+            <td><span class="badge-todo">Pendiente</span></td>
+          </tr>
+          <tr>
+            <td>CI/CD</td>
+            <td class="text-white font-medium">GitHub Actions / Gitea</td>
+            <td class="text-xs">Pipelines automáticos de lint + test + build. Gitea como alternativa self-hosted gratuita post-inversión.</td>
+            <td><span class="badge-wip">Futuro</span></td>
+          </tr>
+          <tr>
+            <td>Contenedores</td>
+            <td class="text-white font-medium">Docker + Docker Compose</td>
+            <td class="text-xs">Entorno reproducible. <code>docker-compose up</code> levanta backend + DB + migraciones. Base para Kubernetes futuro.</td>
+            <td><span class="badge-done">En uso</span></td>
+          </tr>
+          <tr>
+            <td>Versionado</td>
+            <td class="text-white font-medium">Git local</td>
+            <td class="text-xs">Hasta definir proveedor cloud (GitHub/GitLab/Gitea self-hosted).</td>
+            <td><span class="badge-done">En uso</span></td>
+          </tr>
+          <tr>
+            <td>Infraestructura</td>
+            <td class="text-white font-medium">A definir</td>
+            <td class="text-xs">Post inversión. Candidatos: Hetzner (coste bajo), AWS (ecosistema), DigitalOcean (simplicidad).</td>
+            <td><span class="badge-wip">Futuro</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="grid md:grid-cols-3 gap-4">
+      <div class="card p-4">
+        <h4 class="text-sm font-semibold text-white mb-2">Observabilidad</h4>
+        <ul class="text-xs text-slate-400 space-y-1">
+          <li>• Logs JSON vía <code>structlog</code></li>
+          <li>• Métricas con <code>prometheus-client</code></li>
+          <li>• Error tracking: Sentry (self-hosted)</li>
+          <li>• Tracing: OpenTelemetry (preparado)</li>
+        </ul>
+      </div>
+      <div class="card p-4">
+        <h4 class="text-sm font-semibold text-white mb-2">Scheduler</h4>
+        <ul class="text-xs text-slate-400 space-y-1">
+          <li>• APScheduler (run_once jobs + cron periódicos)</li>
+          <li>• run_once: expiración contratos (fecha elegida por cliente), ofertas con vencimiento</li>
+          <li>• Cron periódico: limpieza pedidos stale, limpieza temp files</li>
+          <li>• Trigger on-write: cálculo ratings (al recibir nueva reseña)</li>
+          <li>• Webhooks: confirmaciones de pago (event-driven, no cron)</li>
+          <li>• Futuro: Celery + Redis si crece</li>
+        </ul>
+      </div>
+      <div class="card p-4">
+        <h4 class="text-sm font-semibold text-white mb-2">Storage de archivos</h4>
+        <ul class="text-xs text-slate-400 space-y-1">
+          <li>• MVP: filesystem local + endpoint estático</li>
+          <li>• Futuro: MinIO (S3-compatible open source)</li>
+          <li>• Uso: fotos documentos, evidencia entregas</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="border-t border-slate-800 mt-8">
+  <div class="max-w-7xl mx-auto px-6 py-6 text-center text-xs text-slate-500">
+    Propuesta técnica v1.2 · Septiembre 2026 · Documento de trabajo para equipo de desarrollo y stakeholders técnicos.
+  </div>
+</footer>
+
+<script>
+  document.querySelectorAll('.tab-btn').forEach(function(btn) {
+    var tab = btn.getAttribute('data-tab');
+    if (tab && tab !== 'stack') {
+      var link = document.createElement('a');
+      link.href = tab + '.html';
+      link.className = 'tab-btn whitespace-nowrap px-3 py-1.5 rounded-md text-xs font-medium bg-slate-800 text-slate-300 hover:bg-slate-700 transition-colors';
+      link.textContent = btn.textContent;
+      btn.parentNode.replaceChild(link, btn);
+    }
+  });
+</script>
+
+</body>
+</html>
