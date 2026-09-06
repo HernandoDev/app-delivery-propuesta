@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>¿Por qué WebSockets? — SuperApp Logística Local</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+  body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; background: #0a0f1c; color: #e5e7eb; }
+  .tab-btn.active { background: #4f46e5; color: #fff; box-shadow: 0 4px 12px rgba(79,70,229,.4);}
+  .tab-content { display: none; animation: fade .3s ease;}
+  .tab-content.active { display: block;}
+  @keyframes fade { from{opacity:0;transform:translateY(4px);} to{opacity:1;transform:translateY(0);} }
+  .card { background: #111827; border:1px solid #1f2937; border-radius:12px;}
+  .chip { background: #1e293b; color:#cbd5e1; border:1px solid #334155; padding:2px 9px; border-radius:6px; font-size:11px; font-weight:500;}
+  .badge-done { background: #064e3b; color:#6ee7b7; border:1px solid #047857; padding:2px 8px; border-radius:6px; font-size:10px; font-weight:600;}
+  .badge-wip { background: #4c1d95; color:#c4b5fd; border:1px solid #6d28d9; padding:2px 8px; border-radius:6px; font-size:10px; font-weight:600;}
+  .badge-todo { background: #1f2937; color:#94a3b8; border:1px solid #374151; padding:2px 8px; border-radius:6px; font-size:10px; font-weight:600;}
+  .badge-warn { background: #78350f; color:#fcd34d; border:1px solid #a16207; padding:2px 8px; border-radius:6px; font-size:10px; font-weight:600;}
+  .progress-bar { height: 6px; background: #1f2937; border-radius: 4px; overflow: hidden;}
+  .progress-fill { height: 100%; background: linear-gradient(90deg,#6366f1,#8b5cf6);}
+  .timeline-dot { width: 14px; height: 14px; border-radius: 50%; flex-shrink:0;}
+  .timeline-line { width: 2px; background: #1f2937; margin-left: 6px;}
+  pre { font-family: 'JetBrains Mono', 'Courier New', monospace;}
+  .scrollbar-thin::-webkit-scrollbar { width: 6px; height: 6px; }
+  .scrollbar-thin::-webkit-scrollbar-thumb { background: #334155; border-radius: 3px; }
+  table { border-collapse: collapse; }
+  th { font-weight: 600; color: #94a3b8; font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em;}
+  td, th { padding: 10px 12px; border-bottom: 1px solid #1f2937; text-align: left;}
+  tr:last-child td { border-bottom: none;}
+  tr:hover { background: #0f172a;}
+  code { font-family: 'JetBrains Mono', monospace; font-size: 0.85em; background: #1e293b; padding: 2px 6px; border-radius: 4px; color: #c4b5fd;}
+  .flow-node { position: relative; }
+  .actor-client { background: #1e3a8a; border-color: #3b82f6;}
+  .actor-merchant { background: #064e3b; border-color: #10b981;}
+  .actor-courier { background: #4c1d95; border-color: #8b5cf6;}
+  .actor-admin { background: #7f1d1d; border-color: #ef4444;}
+  .actor-system { background: #1f2937; border-color: #6b7280;}
+  .flow-container { display: flex; gap: 8px; flex-wrap: nowrap; align-items: stretch; padding: 8px 0;}
+  .flow-container .arrow { display: flex; align-items: center; color: #64748b; font-size: 18px; font-weight: 700;}
+  .layer-box { border: 2px solid #334155; border-radius: 12px; padding: 16px; background: #0f172a;}
+  .module-box { border: 1px solid #334155; border-radius: 8px; padding: 10px; background: #1e293b;}
+  details > summary { cursor: pointer; list-style: none;}
+  details > summary::-webkit-details-marker { display: none;}
+  details[open] .summary-icon { transform: rotate(90deg);}
+  .summary-icon { display: inline-block; transition: transform .2s;}
+</style>
+</head>
+<body class="min-h-screen">
+
+<header class="border-b border-slate-800 bg-gradient-to-br from-slate-900 via-slate-950 to-indigo-950/30">
+  <div class="max-w-7xl mx-auto px-6 py-12">
+    <div class="flex items-center gap-2 mb-3 flex-wrap">
+      <span class="chip">Propuesta Técnica</span>
+      <span class="chip">Alpha Version</span>
+      <span class="chip">Septiembre 2026</span>
+      <span class="badge-wip">MVP 1 · 100% completado</span>
+    </div>
+    <h1 class="text-4xl md:text-5xl font-bold text-white tracking-tight">
+      SuperApp Logística Local
+    </h1>
+    <p class="text-slate-400 mt-3 max-w-3xl">
+      Propuesta integral de ingeniería. Documento para el equipo de desarrollo y stakeholders técnicos.
+    </p>
+
+    <div class="mt-8 grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-3">
+      <div class="bg-slate-900/60 border border-slate-800 rounded-lg p-3">
+        <div class="text-xs text-slate-500">Móvil</div>
+        <div class="text-white font-semibold text-sm">React Native</div>
+      </div>
+      <div class="bg-slate-900/60 border border-slate-800 rounded-lg p-3">
+        <div class="text-xs text-slate-500">Web</div>
+        <div class="text-white font-semibold text-sm">Angular 22</div>
+      </div>
+      <div class="bg-slate-900/60 border border-slate-800 rounded-lg p-3">
+        <div class="text-xs text-slate-500">Backend</div>
+        <div class="text-white font-semibold text-sm">FastAPI · Python</div>
+      </div>
+      <div class="bg-slate-900/60 border border-slate-800 rounded-lg p-3">
+        <div class="text-xs text-slate-500">Datos</div>
+        <div class="text-white font-semibold text-sm">PostgreSQL + PostGIS</div>
+      </div>
+      <div class="bg-slate-900/60 border border-slate-800 rounded-lg p-3">
+        <div class="text-xs text-slate-500">Realtime</div>
+        <div class="text-white font-semibold text-sm">Socket.io</div>
+      </div>
+      <div class="bg-slate-900/60 border border-slate-800 rounded-lg p-3">
+        <div class="text-xs text-slate-500">Deploy</div>
+        <div class="text-white font-semibold text-sm">Docker · Git local</div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<nav class="sticky top-0 z-40 bg-slate-950/95 backdrop-blur border-b border-slate-800">
+  <div class="max-w-7xl mx-auto px-4 py-2">
+    <details class="group xl:hidden">
+      <summary class="flex cursor-pointer select-none list-none items-center justify-between gap-2 rounded-md bg-slate-800 px-3 py-2 text-xs font-medium text-slate-300 [&::-webkit-details-marker]:hidden">
+        <span>📑 ⚡ WebSockets</span>
+        <span class="text-slate-500 transition-transform group-open:rotate-180">▾</span>
+      </summary>
+      <div class="scrollbar-thin mt-2 grid max-h-[60vh] grid-cols-1 gap-1.5 overflow-y-auto pb-1 sm:grid-cols-2 lg:grid-cols-3">
+      <a href="resumen.html" class="tab-btn whitespace-nowrap rounded-md px-3 py-1.5 text-center text-xs font-medium bg-slate-800 text-slate-300 hover:bg-slate-700 transition-colors">Resumen</a>
+      <a href="estado.html" class="tab-btn whitespace-nowrap rounded-md px-3 py-1.5 text-center text-xs font-medium bg-slate-800 text-slate-300 hover:bg-slate-700 transition-colors">Estado actual</a>
+      <a href="arquitectura.html" class="tab-btn whitespace-nowrap rounded-md px-3 py-1.5 text-center text-xs font-medium bg-slate-800 text-slate-300 hover:bg-slate-700 transition-colors">Arquitectura</a>
+      <a href="stack.html" class="tab-btn whitespace-nowrap rounded-md px-3 py-1.5 text-center text-xs font-medium bg-slate-800 text-slate-300 hover:bg-slate-700 transition-colors">Stack</a>
+      <a href="modulos.html" class="tab-btn whitespace-nowrap rounded-md px-3 py-1.5 text-center text-xs font-medium bg-slate-800 text-slate-300 hover:bg-slate-700 transition-colors">Módulos</a>
+      <a href="flujos.html" class="tab-btn whitespace-nowrap rounded-md px-3 py-1.5 text-center text-xs font-medium bg-slate-800 text-slate-300 hover:bg-slate-700 transition-colors">Flujos de usuario</a>
+      <a href="datos.html" class="tab-btn whitespace-nowrap rounded-md px-3 py-1.5 text-center text-xs font-medium bg-slate-800 text-slate-300 hover:bg-slate-700 transition-colors">Modelo de datos</a>
+      <a href="api.html" class="tab-btn whitespace-nowrap rounded-md px-3 py-1.5 text-center text-xs font-medium bg-slate-800 text-slate-300 hover:bg-slate-700 transition-colors">API</a>
+      <a href="seguridad.html" class="tab-btn whitespace-nowrap rounded-md px-3 py-1.5 text-center text-xs font-medium bg-slate-800 text-slate-300 hover:bg-slate-700 transition-colors">Seguridad</a>
+      <a href="roadmap.html" class="tab-btn whitespace-nowrap rounded-md px-3 py-1.5 text-center text-xs font-medium bg-slate-800 text-slate-300 hover:bg-slate-700 transition-colors">Roadmap</a>
+      <a href="entregables.html" class="tab-btn whitespace-nowrap rounded-md px-3 py-1.5 text-center text-xs font-medium bg-slate-800 text-slate-300 hover:bg-slate-700 transition-colors">Entregables</a>
+      <a href="decisiones.html" class="tab-btn whitespace-nowrap rounded-md px-3 py-1.5 text-center text-xs font-medium bg-slate-800 text-slate-300 hover:bg-slate-700 transition-colors">Decisiones técnicas</a>
+      <a href="websocket.html" class="tab-btn active whitespace-nowrap rounded-md px-3 py-1.5 text-center text-xs font-medium bg-slate-800 text-slate-300 hover:bg-slate-700 transition-colors">⚡ WebSockets</a>
+      <a href="mappin.html" class="tab-btn whitespace-nowrap rounded-md px-3 py-1.5 text-center text-xs font-medium bg-slate-800 text-slate-300 hover:bg-slate-700 transition-colors">🗺️ Mapping & Tracking</a>
+      </div>
+    </details>
+    <div class="hidden flex-wrap gap-1.5 xl:flex">
+      <a href="resumen.html" class="tab-btn whitespace-nowrap rounded-md px-3 py-1.5 text-center text-xs font-medium bg-slate-800 text-slate-300 hover:bg-slate-700 transition-colors">Resumen</a>
+      <a href="estado.html" class="tab-btn whitespace-nowrap rounded-md px-3 py-1.5 text-center text-xs font-medium bg-slate-800 text-slate-300 hover:bg-slate-700 transition-colors">Estado actual</a>
+      <a href="arquitectura.html" class="tab-btn whitespace-nowrap rounded-md px-3 py-1.5 text-center text-xs font-medium bg-slate-800 text-slate-300 hover:bg-slate-700 transition-colors">Arquitectura</a>
+      <a href="stack.html" class="tab-btn whitespace-nowrap rounded-md px-3 py-1.5 text-center text-xs font-medium bg-slate-800 text-slate-300 hover:bg-slate-700 transition-colors">Stack</a>
+      <a href="modulos.html" class="tab-btn whitespace-nowrap rounded-md px-3 py-1.5 text-center text-xs font-medium bg-slate-800 text-slate-300 hover:bg-slate-700 transition-colors">Módulos</a>
+      <a href="flujos.html" class="tab-btn whitespace-nowrap rounded-md px-3 py-1.5 text-center text-xs font-medium bg-slate-800 text-slate-300 hover:bg-slate-700 transition-colors">Flujos de usuario</a>
+      <a href="datos.html" class="tab-btn whitespace-nowrap rounded-md px-3 py-1.5 text-center text-xs font-medium bg-slate-800 text-slate-300 hover:bg-slate-700 transition-colors">Modelo de datos</a>
+      <a href="api.html" class="tab-btn whitespace-nowrap rounded-md px-3 py-1.5 text-center text-xs font-medium bg-slate-800 text-slate-300 hover:bg-slate-700 transition-colors">API</a>
+      <a href="seguridad.html" class="tab-btn whitespace-nowrap rounded-md px-3 py-1.5 text-center text-xs font-medium bg-slate-800 text-slate-300 hover:bg-slate-700 transition-colors">Seguridad</a>
+      <a href="roadmap.html" class="tab-btn whitespace-nowrap rounded-md px-3 py-1.5 text-center text-xs font-medium bg-slate-800 text-slate-300 hover:bg-slate-700 transition-colors">Roadmap</a>
+      <a href="entregables.html" class="tab-btn whitespace-nowrap rounded-md px-3 py-1.5 text-center text-xs font-medium bg-slate-800 text-slate-300 hover:bg-slate-700 transition-colors">Entregables</a>
+      <a href="decisiones.html" class="tab-btn whitespace-nowrap rounded-md px-3 py-1.5 text-center text-xs font-medium bg-slate-800 text-slate-300 hover:bg-slate-700 transition-colors">Decisiones técnicas</a>
+      <a href="websocket.html" class="tab-btn active whitespace-nowrap rounded-md px-3 py-1.5 text-center text-xs font-medium bg-slate-800 text-slate-300 hover:bg-slate-700 transition-colors">⚡ WebSockets</a>
+      <a href="mappin.html" class="tab-btn whitespace-nowrap rounded-md px-3 py-1.5 text-center text-xs font-medium bg-slate-800 text-slate-300 hover:bg-slate-700 transition-colors">🗺️ Mapping & Tracking</a>
+    </div>
+  </div>
+</nav>
+
+<main class="max-w-7xl mx-auto px-6 py-8">
+<section class="tab-content active" id="websocket">
+    <h2 class="text-xl font-semibold text-white mb-2">¿Por qué usaremos WebSockets?</h2>
+    <p class="text-sm text-slate-400 mb-6 max-w-3xl">
+      El producto <strong class="text-white">es</strong> en tiempo real: un pedido cambia de estado, un repartidor se mueve en un mapa, un comercio recibe un pedido que debe preparar ya. La pregunta no es si necesitamos tiempo real, sino <em>cómo</em> entregarlo sin romper el presupuesto de infraestructura, la batería de los celulares ni la experiencia de usuario. Esta página documenta la decisión y las alternativas evaluadas.
+    </p>
+
+    <!-- EL PROBLEMA -->
+    <div class="card p-6 mb-4">
+      <h3 class="font-semibold text-white mb-1">El problema: todo el producto depende de eventos en vivo</h3>
+      <p class="text-xs text-slate-400 mb-4">Funcionalidades que ya están en el alcance (MVP 2–4) y requieren propagación de eventos en menos de un segundo:</p>
+      <div class="grid md:grid-cols-2 xl:grid-cols-3 gap-3">
+        <div class="bg-slate-900/60 p-3 rounded-lg border border-blue-900/40">
+          <div class="text-xs text-blue-400 font-semibold mb-1">Cliente · Tracking del pedido</div>
+          <div class="text-slate-300 text-xs">Posición del repartidor en el mapa cada 3–5 s, ETA y cambios de estado (<code>confirmado → en camino → entregado</code>) sin refrescar la pantalla.</div>
+        </div>
+        <div class="bg-slate-900/60 p-3 rounded-lg border border-violet-900/40">
+          <div class="text-xs text-violet-400 font-semibold mb-1">Repartidor · Asignación de pedidos</div>
+          <div class="text-slate-300 text-xs">El dispatch ofrece el pedido a los repartidores disponibles en la zona; el primero que acepta gana. Requiere ida y vuelta instantánea.</div>
+        </div>
+        <div class="bg-slate-900/60 p-3 rounded-lg border border-emerald-900/40">
+          <div class="text-xs text-emerald-400 font-semibold mb-1">Comercio · Panel de pedidos</div>
+          <div class="text-slate-300 text-xs">Nuevo pedido entra con sonido inmediato y cuenta regresiva de preparación. Un retardo de 30 s ya es dinero perdido.</div>
+        </div>
+        <div class="bg-slate-900/60 p-3 rounded-lg border border-red-900/40">
+          <div class="text-xs text-red-400 font-semibold mb-1">Admin · Operaciones en vivo</div>
+          <div class="text-slate-300 text-xs">Vista de demanda/oferta por zona, repartidores activos e incidentes en tiempo real para decidir re-asignaciones.</div>
+        </div>
+        <div class="bg-slate-900/60 p-3 rounded-lg border border-slate-700">
+          <div class="text-xs text-slate-400 font-semibold mb-1">Chat de soporte del pedido</div>
+          <div class="text-slate-300 text-xs">Cliente ↔ comercio ↔ repartidor: mensajería bidireccional con acuses de lectura.</div>
+        </div>
+        <div class="bg-slate-900/60 p-3 rounded-lg border border-slate-700">
+          <div class="text-xs text-slate-400 font-semibold mb-1">Notificaciones de estado</div>
+          <div class="text-slate-300 text-xs">Mientras la app está abierta, los eventos llegan por el canal directo; el push (FCM) queda solo como respaldo en segundo plano.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ALTERNATIVAS -->
+    <div class="card p-6 mb-4">
+      <h3 class="font-semibold text-white mb-1">Alternativas evaluadas</h3>
+      <p class="text-xs text-slate-400 mb-4">Comparación para el caso de uso dominante: posición de repartidor cada 3–5 s hacia el servidor + eventos de estado multiplexados a N observadores.</p>
+      <div class="overflow-x-auto">
+        <table class="w-full text-xs">
+          <thead>
+            <tr>
+              <th>Mecanismo</th>
+              <th>Latencia</th>
+              <th>Bidireccional</th>
+              <th>Overhead por mensaje</th>
+              <th>Coste en móvil (batería/datos)</th>
+              <th>Veredicto</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="text-white font-medium">HTTP Polling</td>
+              <td>Igual al intervalo (2–30 s)</td>
+              <td>Simulado (2 requests por evento)</td>
+              <td>~1 KB+ de headers en cada petición, aunque no haya nada nuevo</td>
+              <td>Alto: radio encendido constante, peticiones inútiles</td>
+              <td><span class="badge-todo">❌ No escala</span></td>
+            </tr>
+            <tr>
+              <td class="text-white font-medium">Long Polling</td>
+              <td>Mejor, pero con reconexión tras cada evento</td>
+              <td>Simulado</td>
+              <td>Requiere re-handshake HTTP completo a cada rato</td>
+              <td>Medio-alto</td>
+              <td><span class="badge-warn">◐ Solo como fallback</span></td>
+            </tr>
+            <tr>
+              <td class="text-white font-medium">SSE (Server-Sent Events)</td>
+              <td>&lt;1 s</td>
+              <td><strong class="text-red-400">Solo servidor → cliente</strong></td>
+              <td>Bajo</td>
+              <td>Bajo</td>
+              <td><span class="badge-warn">◐ No cubre el upload de posición</span></td>
+            </tr>
+            <tr>
+              <td class="text-white font-medium">Push (FCM / APNs)</td>
+              <td>Segundos–minutos, sin garantía de orden</td>
+              <td>No (canal de notificación)</td>
+              <td>Útil solo con app cerrada</td>
+              <td>Bajo, pero dependiente del SO</td>
+              <td><span class="badge-todo">❌ No es canal de tracking</span></td>
+            </tr>
+            <tr>
+              <td class="text-white font-medium">WebSocket</td>
+              <td>&lt;100 ms</td>
+              <td><strong class="text-emerald-400">Sí, full-duplex real</strong></td>
+              <td>~2–14 bytes de framing tras el handshake</td>
+              <td>Bajo: una sola conexión persistente</td>
+              <td><span class="badge-done">✅ Elegido</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="text-xs text-slate-500 mt-3"><strong>Por qué fallan las demás aquí:</strong> SSE y Push son unidireccionales — el repartidor no puede enviar su posición por ese canal. El polling multiplica el tráfico: 300 repartidores subiendo posición cada 4 s + clientes observando cada 2 s ⇒ ~25 000 requests/min, cuando el mismo flujo por WebSocket son ~25 000 <em>eventos</em> sin headers ni reconexiones.</p>
+    </div>
+
+    <!-- POR QUE ENCAJA -->
+    <div class="card p-6 mb-4">
+      <h3 class="font-semibold text-white mb-4">Por qué WebSocket encaja con <em>esta</em> arquitectura</h3>
+      <div class="space-y-3">
+        <div class="flex items-start gap-3">
+          <div class="timeline-dot bg-indigo-500 mt-1.5"></div>
+          <div>
+            <h4 class="text-sm font-semibold text-white">Full-duplex: un solo canal cubre los dos sentidos</h4>
+            <p class="text-xs text-slate-400">El repartidor <em>envía</em> posición y acepta pedidos; el cliente <em>recibe</em> tracking y confirma lectura. Con REST se pagarían dos peticiones por evento y latencia doble.</p>
+          </div>
+        </div>
+        <div class="flex items-start gap-3">
+          <div class="timeline-dot bg-indigo-500 mt-1.5"></div>
+          <div>
+            <h4 class="text-sm font-semibold text-white">Bajo consumo en dispositivos de repartidor</h4>
+            <p class="text-xs text-slate-400">Los celulares de los repartidores son la herramienta de trabajo: una conexión persistente gasta menos batería y datos móviles que sondear la API cada pocos segundos durante toda la jornada.</p>
+          </div>
+        </div>
+        <div class="flex items-start gap-3">
+          <div class="timeline-dot bg-indigo-500 mt-1.5"></div>
+          <div>
+            <h4 class="text-sm font-semibold text-white">Ya está en el stack: FastAPI + Socket.io</h4>
+            <p class="text-xs text-slate-400">FastAPI soporta WebSockets de forma nativa; Socket.io añade sobre el protocolo bruto reconexión automática, rooms, acuses y <strong class="text-white">fallback a long-polling</strong> en redes móviles restringidas o proxies agresivos — algo común en conexiones de datos locales.</p>
+          </div>
+        </div>
+        <div class="flex items-start gap-3">
+          <div class="timeline-dot bg-indigo-500 mt-1.5"></div>
+          <div>
+            <h4 class="text-sm font-semibold text-white">Fan-out natural con Redis Pub/Sub</h4>
+            <p class="text-xs text-slate-400">Un evento de dominio (<code>order.status.changed</code>) publicado en Redis se propaga a las conexiones suscritas sin que el emisor conozca a los receptores. Coincide con el patrón-evento ya planteado en la arquitectura.</p>
+          </div>
+        </div>
+        <div class="flex items-start gap-3">
+          <div class="timeline-dot bg-indigo-500 mt-1.5"></div>
+          <div>
+            <h4 class="text-sm font-semibold text-white">Misma autenticación que la API REST</h4>
+            <p class="text-xs text-slate-400">El JWT se valida en el handshake de conexión y en cada <code>join</code> a una sala: un usuario solo puede escuchar eventos de pedidos y posiciones en los que participa.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- IMPLEMENTACION -->
+    <div class="card p-6 mb-4">
+      <h3 class="font-semibold text-white mb-1">Cómo lo implementamos</h3>
+      <p class="text-xs text-slate-400 mb-3">Principio rector: <strong class="text-white">WebSocket es el medio de entrega, REST es la fuente de verdad</strong>. Si el cliente pierde mensajes, se pone al día con una llamada REST idempotente.</p>
+      <div class="overflow-x-auto mb-4">
+        <div class="flow-container min-w-max">
+          <div class="flow-node module-box actor-client text-xs text-white font-medium flex items-center px-3 border" style="border-width:1px;">App Móvil / Web<br/>(Socket.io client)</div>
+          <div class="arrow">⇄</div>
+          <div class="flow-node module-box actor-system text-xs text-white font-medium flex items-center px-3 border" style="border-width:1px;">Gateway WS<br/>FastAPI + Socket.io</div>
+          <div class="arrow">⇄</div>
+          <div class="flow-node module-box actor-system text-xs text-white font-medium flex items-center px-3 border" style="border-width:1px;">Redis Pub/Sub<br/>(adaptador + fan-out)</div>
+          <div class="arrow">⇄</div>
+          <div class="flow-node module-box actor-merchant text-xs text-white font-medium flex items-center px-3 border" style="border-width:1px;">Dominio<br/>orders · dispatch · tracking</div>
+          <div class="arrow">→</div>
+          <div class="flow-node module-box actor-admin text-xs text-white font-medium flex items-center px-3 border" style="border-width:1px;">PostgreSQL<br/>+ PostGIS</div>
+        </div>
+      </div>
+      <div class="grid md:grid-cols-2 gap-3 text-xs text-slate-300">
+        <div class="bg-slate-900/60 p-3 rounded-lg border border-slate-800">
+          <div class="text-white font-semibold mb-1">Rooms (salas)</div>
+          <code>order:{id}</code> · <code>merchant:{id}</code> · <code>courier:{id}</code> · <code>zone:{id}</code> · <code>admin</code><br/>
+          <span class="text-slate-400">El server autoriza cada join; nada se decide en el cliente.</span>
+        </div>
+        <div class="bg-slate-900/60 p-3 rounded-lg border border-slate-800">
+          <div class="text-white font-semibold mb-1">Escalado horizontal</div>
+          <span class="text-slate-400">El adaptador de Redis permite varias instancias del gateway detrás del balanceador: cualquier servidor puede entregar cualquier evento. Sin afinidad de sesión compleja.</span>
+        </div>
+        <div class="bg-slate-900/60 p-3 rounded-lg border border-slate-800">
+          <div class="text-white font-semibold mb-1">Resiliencia</div>
+          <span class="text-slate-400">Ping/pong de heartbeat, reconexión con backoff exponencial y <code>catch-up</code> REST al reconectar (<code>GET /orders/{id}/events?since=…</code>).</span>
+        </div>
+        <div class="bg-slate-900/60 p-3 rounded-lg border border-slate-800">
+          <div class="text-white font-semibold mb-1">Eventos versionados</div>
+          <span class="text-slate-400">Payload JSON con <code>event</code>, <code>v</code>, <code>ts</code> e <code>id</code> para idempotencia. Versionar evita romper apps antiguas en campo.</span>
+        </div>
+      </div>
+
+      <h4 class="text-sm font-semibold text-white mt-5 mb-2">Ejemplo de evento</h4>
+      <pre class="bg-slate-900/60 border border-slate-800 rounded-lg p-4 text-xs text-slate-300 overflow-x-auto">{
+  "id": "evt_01J8XQ2M9K",
+  "event": "courier.location.updated",
+  "v": 1,
+  "room": "order:ord_8f3a2c",
+  "ts": "2026-09-06T14:03:22.512Z",
+  "data": {
+    "orderId": "ord_8f3a2c",
+    "courierId": "cry_21b7d9",
+    "lat": -16.409012,
+    "lng": -71.537084,
+    "speedKmh": 22,
+    "etaMin": 7
+  }
+}</pre>
+    </div>
+
+    <!-- RIESGOS -->
+    <div class="card p-6 mb-4">
+      <h3 class="font-semibold text-white mb-4">Riesgos aceptados y mitigaciones</h3>
+      <div class="space-y-3 text-xs">
+        <div class="flex items-start gap-3">
+          <div class="timeline-dot bg-amber-500 mt-1"></div>
+          <p class="text-slate-400"><strong class="text-white">Conexión intermitente (cobertura móvil):</strong> Socket.io reconecta solo con backoff; el estado visible se restaura vía REST. La UX nunca depende de que el socket esté vivo en todo momento.</p>
+        </div>
+        <div class="flex items-start gap-3">
+          <div class="timeline-dot bg-amber-500 mt-1"></div>
+          <p class="text-slate-400"><strong class="text-white">Coste de memoria por conexión:</strong> miles de sockets abiertos consumen RAM; se mitiga con límite de conexiones por usuario, mensajes máximos (<code>maxHttpBufferSize</code>) y escalado horizontal con Redis adapter.</p>
+        </div>
+        <div class="flex items-start gap-3">
+          <div class="timeline-dot bg-amber-500 mt-1"></div>
+          <p class="text-slate-400"><strong class="text-white">Pérdida de eventos:</strong> WebSocket no garantiza entrega. Los eventos críticos de estado se derivan además a una tabla <code>order_events</code> (outbox) y el cliente reconcilia por <code>id</code>/<code>since</code>.</p>
+        </div>
+        <div class="flex items-start gap-3">
+          <div class="timeline-dot bg-amber-500 mt-1"></div>
+          <p class="text-slate-400"><strong class="text-white">Datos sensibles por el canal:</strong> solo <code>wss://</code> (TLS), JWT en handshake, autorización por sala y payloads mínimos (nunca teléfonos completos ni direcciones exactas a quien no corresponde).</p>
+        </div>
+        <div class="flex items-start gap-3">
+          <div class="timeline-dot bg-amber-500 mt-1"></div>
+          <p class="text-slate-400"><strong class="text-white">Complejidad operativa:</strong> un único endpoint (<code>/socket.io</code>), métricas de conexiones activas / mensajes por segundo / tasa de reconexión, y runbook de depuración desde el MVP 2.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- CONCLUSION -->
+    <div class="card p-5 bg-slate-900/50 border-slate-800">
+      <h3 class="font-semibold text-white mb-2">Conclusión</h3>
+      <p class="text-xs text-slate-400 leading-relaxed">
+        WebSocket no es una moda tecnológica en esta propuesta: es el <strong class="text-white">único mecanismo que ofrece latencia subsegundo, canal bidireccional y un coste por mensaje sostenible</strong> al ritmo de eventos que exige el tracking (posición cada 3–5 s + fan-out multi-rol). El polling no escala, SSE y Push no cubren el sentido cliente→servidor, y WebRTC es un sobre-diseño para este caso. La decisión deja el push (FCM/APNs) reservado para eventos con la app cerrada y a REST como fuente de verdad: los tres canales se complementan, ninguno se solapa.
+      </p>
+      <div class="flex gap-2 flex-wrap mt-3">
+        <span class="chip">WebSocket sobre TLS (wss)</span>
+        <span class="chip">Socket.io · fallback long-polling</span>
+        <span class="chip">Redis Pub/Sub adapter</span>
+        <span class="chip">Rooms autorizadas por JWT</span>
+        <span class="chip">Catch-up REST</span>
+        <span class="chip">Desde MVP 2 (tracking)</span>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer class="border-t border-slate-800 mt-8">
+  <div class="max-w-7xl mx-auto px-6 py-6 text-center text-xs text-slate-500">
+    Propuesta técnica Alpha Version · Septiembre 2026 · Documento de trabajo para equipo de desarrollo y stakeholders técnicos.
+  </div>
+</footer>
+
+</body>
+</html>

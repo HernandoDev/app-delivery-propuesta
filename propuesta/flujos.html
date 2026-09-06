@@ -59,7 +59,7 @@
   <div class="max-w-7xl mx-auto px-6 py-12">
     <div class="flex items-center gap-2 mb-3 flex-wrap">
       <span class="chip">Propuesta Técnica</span>
-      <span class="chip">v1.2</span>
+      <span class="chip">Alpha Version</span>
       <span class="chip">Septiembre 2026</span>
       <span class="badge-wip">MVP 1 · 100% completado</span>
     </div>
@@ -70,10 +70,14 @@
       Propuesta integral de ingeniería. Documento para el equipo de desarrollo y stakeholders técnicos.
     </p>
 
-    <div class="mt-8 grid grid-cols-2 md:grid-cols-5 gap-3">
+    <div class="mt-8 grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-3">
       <div class="bg-slate-900/60 border border-slate-800 rounded-lg p-3">
         <div class="text-xs text-slate-500">Móvil</div>
         <div class="text-white font-semibold text-sm">React Native</div>
+      </div>
+      <div class="bg-slate-900/60 border border-slate-800 rounded-lg p-3">
+        <div class="text-xs text-slate-500">Web</div>
+        <div class="text-white font-semibold text-sm">Angular 22</div>
       </div>
       <div class="bg-slate-900/60 border border-slate-800 rounded-lg p-3">
         <div class="text-xs text-slate-500">Backend</div>
@@ -96,19 +100,45 @@
 </header>
 
 <nav class="sticky top-0 z-40 bg-slate-950/95 backdrop-blur border-b border-slate-800">
-  <div class="max-w-7xl mx-auto px-4 py-2 flex gap-1 overflow-x-auto scrollbar-thin">
-    <button class="tab-btn active whitespace-nowrap px-3 py-1.5 rounded-md text-xs font-medium bg-slate-800 text-slate-300" data-tab="resumen">Resumen</button>
-    <button class="tab-btn whitespace-nowrap px-3 py-1.5 rounded-md text-xs font-medium bg-slate-800 text-slate-300" data-tab="estado">Estado actual</button>
-    <button class="tab-btn whitespace-nowrap px-3 py-1.5 rounded-md text-xs font-medium bg-slate-800 text-slate-300" data-tab="arquitectura">Arquitectura</button>
-    <button class="tab-btn whitespace-nowrap px-3 py-1.5 rounded-md text-xs font-medium bg-slate-800 text-slate-300" data-tab="stack">Stack</button>
-    <button class="tab-btn whitespace-nowrap px-3 py-1.5 rounded-md text-xs font-medium bg-slate-800 text-slate-300" data-tab="modulos">Módulos</button>
-    <button class="tab-btn active whitespace-nowrap px-3 py-1.5 rounded-md text-xs font-medium bg-slate-800 text-slate-300" data-tab="flujos">Flujos de usuario</button>
-    <button class="tab-btn whitespace-nowrap px-3 py-1.5 rounded-md text-xs font-medium bg-slate-800 text-slate-300" data-tab="datos">Modelo de datos</button>
-    <button class="tab-btn whitespace-nowrap px-3 py-1.5 rounded-md text-xs font-medium bg-slate-800 text-slate-300" data-tab="api">API</button>
-    <button class="tab-btn whitespace-nowrap px-3 py-1.5 rounded-md text-xs font-medium bg-slate-800 text-slate-300" data-tab="seguridad">Seguridad</button>
-    <button class="tab-btn whitespace-nowrap px-3 py-1.5 rounded-md text-xs font-medium bg-slate-800 text-slate-300" data-tab="roadmap">Roadmap</button>
-    <button class="tab-btn whitespace-nowrap px-3 py-1.5 rounded-md text-xs font-medium bg-slate-800 text-slate-300" data-tab="entregables">Entregables</button>
-    <button class="tab-btn whitespace-nowrap px-3 py-1.5 rounded-md text-xs font-medium bg-slate-800 text-slate-300" data-tab="decisiones">Decisiones técnicas</button>
+  <div class="max-w-7xl mx-auto px-4 py-2">
+    <details class="group xl:hidden">
+      <summary class="flex cursor-pointer select-none list-none items-center justify-between gap-2 rounded-md bg-slate-800 px-3 py-2 text-xs font-medium text-slate-300 [&::-webkit-details-marker]:hidden">
+        <span>📑 Flujos de usuario</span>
+        <span class="text-slate-500 transition-transform group-open:rotate-180">▾</span>
+      </summary>
+      <div class="scrollbar-thin mt-2 grid max-h-[60vh] grid-cols-1 gap-1.5 overflow-y-auto pb-1 sm:grid-cols-2 lg:grid-cols-3">
+      <a href="resumen.html" class="tab-btn whitespace-nowrap rounded-md px-3 py-1.5 text-center text-xs font-medium bg-slate-800 text-slate-300 hover:bg-slate-700 transition-colors">Resumen</a>
+      <a href="estado.html" class="tab-btn whitespace-nowrap rounded-md px-3 py-1.5 text-center text-xs font-medium bg-slate-800 text-slate-300 hover:bg-slate-700 transition-colors">Estado actual</a>
+      <a href="arquitectura.html" class="tab-btn whitespace-nowrap rounded-md px-3 py-1.5 text-center text-xs font-medium bg-slate-800 text-slate-300 hover:bg-slate-700 transition-colors">Arquitectura</a>
+      <a href="stack.html" class="tab-btn whitespace-nowrap rounded-md px-3 py-1.5 text-center text-xs font-medium bg-slate-800 text-slate-300 hover:bg-slate-700 transition-colors">Stack</a>
+      <a href="modulos.html" class="tab-btn whitespace-nowrap rounded-md px-3 py-1.5 text-center text-xs font-medium bg-slate-800 text-slate-300 hover:bg-slate-700 transition-colors">Módulos</a>
+      <a href="flujos.html" class="tab-btn active whitespace-nowrap rounded-md px-3 py-1.5 text-center text-xs font-medium bg-slate-800 text-slate-300 hover:bg-slate-700 transition-colors">Flujos de usuario</a>
+      <a href="datos.html" class="tab-btn whitespace-nowrap rounded-md px-3 py-1.5 text-center text-xs font-medium bg-slate-800 text-slate-300 hover:bg-slate-700 transition-colors">Modelo de datos</a>
+      <a href="api.html" class="tab-btn whitespace-nowrap rounded-md px-3 py-1.5 text-center text-xs font-medium bg-slate-800 text-slate-300 hover:bg-slate-700 transition-colors">API</a>
+      <a href="seguridad.html" class="tab-btn whitespace-nowrap rounded-md px-3 py-1.5 text-center text-xs font-medium bg-slate-800 text-slate-300 hover:bg-slate-700 transition-colors">Seguridad</a>
+      <a href="roadmap.html" class="tab-btn whitespace-nowrap rounded-md px-3 py-1.5 text-center text-xs font-medium bg-slate-800 text-slate-300 hover:bg-slate-700 transition-colors">Roadmap</a>
+      <a href="entregables.html" class="tab-btn whitespace-nowrap rounded-md px-3 py-1.5 text-center text-xs font-medium bg-slate-800 text-slate-300 hover:bg-slate-700 transition-colors">Entregables</a>
+      <a href="decisiones.html" class="tab-btn whitespace-nowrap rounded-md px-3 py-1.5 text-center text-xs font-medium bg-slate-800 text-slate-300 hover:bg-slate-700 transition-colors">Decisiones técnicas</a>
+      <a href="websocket.html" class="tab-btn whitespace-nowrap rounded-md px-3 py-1.5 text-center text-xs font-medium bg-slate-800 text-slate-300 hover:bg-slate-700 transition-colors">⚡ WebSockets</a>
+      <a href="mappin.html" class="tab-btn whitespace-nowrap rounded-md px-3 py-1.5 text-center text-xs font-medium bg-slate-800 text-slate-300 hover:bg-slate-700 transition-colors">🗺️ Mapping & Tracking</a>
+      </div>
+    </details>
+    <div class="hidden flex-wrap gap-1.5 xl:flex">
+      <a href="resumen.html" class="tab-btn whitespace-nowrap rounded-md px-3 py-1.5 text-center text-xs font-medium bg-slate-800 text-slate-300 hover:bg-slate-700 transition-colors">Resumen</a>
+      <a href="estado.html" class="tab-btn whitespace-nowrap rounded-md px-3 py-1.5 text-center text-xs font-medium bg-slate-800 text-slate-300 hover:bg-slate-700 transition-colors">Estado actual</a>
+      <a href="arquitectura.html" class="tab-btn whitespace-nowrap rounded-md px-3 py-1.5 text-center text-xs font-medium bg-slate-800 text-slate-300 hover:bg-slate-700 transition-colors">Arquitectura</a>
+      <a href="stack.html" class="tab-btn whitespace-nowrap rounded-md px-3 py-1.5 text-center text-xs font-medium bg-slate-800 text-slate-300 hover:bg-slate-700 transition-colors">Stack</a>
+      <a href="modulos.html" class="tab-btn whitespace-nowrap rounded-md px-3 py-1.5 text-center text-xs font-medium bg-slate-800 text-slate-300 hover:bg-slate-700 transition-colors">Módulos</a>
+      <a href="flujos.html" class="tab-btn active whitespace-nowrap rounded-md px-3 py-1.5 text-center text-xs font-medium bg-slate-800 text-slate-300 hover:bg-slate-700 transition-colors">Flujos de usuario</a>
+      <a href="datos.html" class="tab-btn whitespace-nowrap rounded-md px-3 py-1.5 text-center text-xs font-medium bg-slate-800 text-slate-300 hover:bg-slate-700 transition-colors">Modelo de datos</a>
+      <a href="api.html" class="tab-btn whitespace-nowrap rounded-md px-3 py-1.5 text-center text-xs font-medium bg-slate-800 text-slate-300 hover:bg-slate-700 transition-colors">API</a>
+      <a href="seguridad.html" class="tab-btn whitespace-nowrap rounded-md px-3 py-1.5 text-center text-xs font-medium bg-slate-800 text-slate-300 hover:bg-slate-700 transition-colors">Seguridad</a>
+      <a href="roadmap.html" class="tab-btn whitespace-nowrap rounded-md px-3 py-1.5 text-center text-xs font-medium bg-slate-800 text-slate-300 hover:bg-slate-700 transition-colors">Roadmap</a>
+      <a href="entregables.html" class="tab-btn whitespace-nowrap rounded-md px-3 py-1.5 text-center text-xs font-medium bg-slate-800 text-slate-300 hover:bg-slate-700 transition-colors">Entregables</a>
+      <a href="decisiones.html" class="tab-btn whitespace-nowrap rounded-md px-3 py-1.5 text-center text-xs font-medium bg-slate-800 text-slate-300 hover:bg-slate-700 transition-colors">Decisiones técnicas</a>
+      <a href="websocket.html" class="tab-btn whitespace-nowrap rounded-md px-3 py-1.5 text-center text-xs font-medium bg-slate-800 text-slate-300 hover:bg-slate-700 transition-colors">⚡ WebSockets</a>
+      <a href="mappin.html" class="tab-btn whitespace-nowrap rounded-md px-3 py-1.5 text-center text-xs font-medium bg-slate-800 text-slate-300 hover:bg-slate-700 transition-colors">🗺️ Mapping & Tracking</a>
+    </div>
   </div>
 </nav>
 
@@ -729,22 +759,9 @@
 
 <footer class="border-t border-slate-800 mt-8">
   <div class="max-w-7xl mx-auto px-6 py-6 text-center text-xs text-slate-500">
-    Propuesta técnica v1.2 · Septiembre 2026 · Documento de trabajo para equipo de desarrollo y stakeholders técnicos.
+    Propuesta técnica Alpha Version · Septiembre 2026 · Documento de trabajo para equipo de desarrollo y stakeholders técnicos.
   </div>
 </footer>
-
-<script>
-  document.querySelectorAll('.tab-btn').forEach(function(btn) {
-    var tab = btn.getAttribute('data-tab');
-    if (tab && tab !== 'flujos') {
-      var link = document.createElement('a');
-      link.href = tab + '.html';
-      link.className = 'tab-btn whitespace-nowrap px-3 py-1.5 rounded-md text-xs font-medium bg-slate-800 text-slate-300 hover:bg-slate-700 transition-colors';
-      link.textContent = btn.textContent;
-      btn.parentNode.replaceChild(link, btn);
-    }
-  });
-</script>
 
 </body>
 </html>
