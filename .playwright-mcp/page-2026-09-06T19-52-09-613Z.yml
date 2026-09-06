@@ -1,0 +1,632 @@
+- generic [active] [ref=e1]:
+  - banner [ref=e2]:
+    - generic [ref=e3]:
+      - generic [ref=e4]:
+        - generic [ref=e5]: Propuesta Técnica
+        - generic [ref=e6]: Alpha Version
+        - generic [ref=e7]: Septiembre 2026
+        - generic [ref=e8]: MVP 1 · 100% completado
+      - heading "App Logística Local" [level=1] [ref=e9]
+      - paragraph [ref=e10]: Propuesta integral de ingeniería. Documento para el equipo de desarrollo y stakeholders técnicos.
+      - paragraph [ref=e11]:
+        - text: 🧭
+        - strong [ref=e12]: ¿No vienes del mundo técnico?
+        - text: "Esta página está escrita en dos niveles: cada bloque técnico va acompañado de una nota azul “En palabras simples” que explica lo mismo sin jerga. Puedes leer solo esas notas y entenderás el 100% del diseño."
+      - generic [ref=e13]:
+        - generic [ref=e14]:
+          - generic [ref=e15]: 📱 Móvil
+          - generic [ref=e16]: React Native
+        - generic [ref=e17]:
+          - generic [ref=e18]: 🖥️ Web
+          - generic [ref=e19]: Angular 22
+        - generic [ref=e20]:
+          - generic [ref=e21]: ⚙️ Backend
+          - generic [ref=e22]: FastAPI · Python
+        - generic [ref=e23]:
+          - generic [ref=e24]: 🗄️ Datos
+          - generic [ref=e25]: PostgreSQL + PostGIS
+        - generic [ref=e26]:
+          - generic [ref=e27]: ⚡ Realtime
+          - generic [ref=e28]: Socket.io
+        - generic [ref=e29]:
+          - generic [ref=e30]: 🚀 Deploy
+          - generic [ref=e31]: Docker · Git local
+  - navigation [ref=e32]:
+    - group [ref=e34]:
+      - generic "📑 Arquitectura ▾" [ref=e35] [cursor=pointer]:
+        - generic [ref=e36]: 📑 Arquitectura
+        - generic [ref=e37]: ▾
+  - main [ref=e38]:
+    - generic [ref=e39]:
+      - generic [ref=e40]:
+        - link "❓ Qué es la arquitectura" [ref=e41] [cursor=pointer]:
+          - /url: "#que-es"
+        - link "🍕 La analogía del restaurante" [ref=e42] [cursor=pointer]:
+          - /url: "#analogia"
+        - link "🏗️ Diagrama por capas" [ref=e43] [cursor=pointer]:
+          - /url: "#diagrama"
+        - link "🛒 El viaje de un pedido" [ref=e44] [cursor=pointer]:
+          - /url: "#viaje"
+        - link "📐 Principios de diseño" [ref=e45] [cursor=pointer]:
+          - /url: "#principios"
+        - link "📈 Evolución futura" [ref=e46] [cursor=pointer]:
+          - /url: "#evolucion"
+        - link "📁 Estructura del proyecto" [ref=e47] [cursor=pointer]:
+          - /url: "#estructura"
+        - link "📖 Glosario para todos" [ref=e48] [cursor=pointer]:
+          - /url: "#glosario"
+      - generic [ref=e49]:
+        - heading "¿Qué es la “arquitectura” y por qué debería importarte?" [level=2] [ref=e50]
+        - paragraph [ref=e51]:
+          - text: La arquitectura de un sistema es
+          - strong [ref=e52]: el plano del edificio
+          - text: ": decide qué piezas existen, cómo se organizan y cómo se comunican entre sí. No se ve desde fuera —el cliente solo ve una app bonita—, pero determina si el proyecto crece sin dolores de cabeza o si se derrumba bajo su propio peso al añadir la tercera funcionalidad nueva."
+        - generic [ref=e53]:
+          - generic [ref=e54]:
+            - generic [ref=e55]: 🧱
+            - generic [ref=e56]: Cimientos sólidos
+            - paragraph [ref=e57]: Un buen plano permite añadir pisos (funcionalidades) sin demoler la planta baja. Nuestro diseño en capas está hecho exactamente para eso.
+          - generic [ref=e58]:
+            - generic [ref=e59]: 🔧
+            - generic [ref=e60]: Reparable sin cerrar
+            - paragraph [ref=e61]: Si una “tubería” falla (por ejemplo, el servicio de notificaciones), se sustituye sin tocar el resto del edificio. Cada pieza tiene una única responsabilidad.
+          - generic [ref=e62]:
+            - generic [ref=e63]: 💰
+            - generic [ref=e64]: Ahorro directo
+            - paragraph [ref=e65]: Cada decisión del plano busca minimizar costes de servidores y de horas de desarrollo, algo crítico en la fase temprana del negocio.
+        - generic [ref=e66]:
+          - generic [ref=e67]: En resumen
+          - generic [ref=e68]:
+            - text: Este documento describe
+            - strong [ref=e69]: 4 aplicaciones
+            - text: (cliente, repartidor, comercio, administración) que comparten
+            - strong [ref=e70]: un único “cerebro” central
+            - text: "(el backend). Ese cerebro está organizado en 5 capas, como un edificio: la planta de atención al público arriba y los almacenes y servicios técnicos en el sótano."
+      - generic [ref=e71]:
+        - heading "La analogía del restaurante" [level=2] [ref=e72]
+        - paragraph [ref=e73]: "Si el sistema fuera un restaurante, cada parte de nuestra arquitectura sería una de sus áreas. Así de simple:"
+        - generic [ref=e74]:
+          - generic [ref=e75]:
+            - generic [ref=e76]: 🪑
+            - generic [ref=e77]: El comedor y la carta
+            - paragraph [ref=e78]:
+              - strong [ref=e79]: = Las apps (frontend).
+              - text: "Es lo que ve el cliente: el menú de productos, el carrito, el botón de pedir. Debe ser atractivo y fácil de usar."
+          - generic [ref=e80]:
+            - generic [ref=e81]: 🧾
+            - generic [ref=e82]: El camarero que anota el pedido
+            - paragraph [ref=e83]:
+              - strong [ref=e84]: = La API (rutas FastAPI).
+              - text: Recibe lo que pides, comprueba que tenga sentido y lo transmite a la cocina en el formato correcto.
+          - generic [ref=e85]:
+            - generic [ref=e86]: 👨‍🍳
+            - generic [ref=e87]: La cocina y sus jefes de partida
+            - paragraph [ref=e88]:
+              - strong [ref=e89]: = Los servicios del backend.
+              - text: "Donde ocurre la lógica: calcular comisiones, asignar repartidor, avisar por push. Cada “jefe” se ocupa de una cosa."
+          - generic [ref=e90]:
+            - generic [ref=e91]: 📜
+            - generic [ref=e92]: Las recetas y normas de la casa
+            - paragraph [ref=e93]:
+              - strong [ref=e94]: = El dominio.
+              - text: Las reglas del negocio puras (“un pedido no puede cancelarse tras entregarse”). Viven aisladas del resto para no corromperse.
+          - generic [ref=e95]:
+            - generic [ref=e96]: 🧊
+            - generic [ref=e97]: La cámara de conservación
+            - paragraph [ref=e98]:
+              - strong [ref=e99]: = La base de datos.
+              - text: "Donde se guarda todo con orden y nada se pierde: pedidos, usuarios, posiciones GPS, histórico."
+          - generic [ref=e100]:
+            - generic [ref=e101]: 📟
+            - generic [ref=e102]: Los pinganillos del personal
+            - paragraph [ref=e103]:
+              - strong [ref=e104]: = WebSockets.
+              - text: "Comunicación instantánea en ambos sentidos: “¡mesa 4 lista!”, “tu pedido sale ya”. Sin tener que preguntar a cada rato."
+          - generic [ref=e105]:
+            - generic [ref=e106]: 🛵
+            - generic [ref=e107]: Los repartidores
+            - paragraph [ref=e108]:
+              - strong [ref=e109]: = Las apps móviles externas.
+              - text: Clientes y repartidores reciben avisos en el móvil (push) aunque tengan la app cerrada.
+          - generic [ref=e110]:
+            - generic [ref=e111]: 🗄️
+            - generic [ref=e112]: La oficina del gerente
+            - paragraph [ref=e113]:
+              - strong [ref=e114]: = El backoffice.
+              - text: Auditoría, altas de comercios, ajustes de tarifas y resolución de incidencias desde un panel web.
+      - generic [ref=e115]:
+        - 'heading "Arquitectura del sistema: vista por capas" [level=2] [ref=e116]'
+        - paragraph [ref=e117]:
+          - text: Diseño en capas siguiendo principios de
+          - emphasis [ref=e118]: Clean Architecture
+          - text: / Hexagonal, adaptado a un monolito modular en Python.
+        - paragraph [ref=e119]:
+          - text: "Cómo leer el diagrama: cada"
+          - strong [ref=e120]: recuadro de color
+          - text: es una planta del edificio; las etiquetas grises indican la tecnología usada; las flechas ↓ muestran el camino de una petición desde el móvil del cliente hasta la base de datos y de vuelta.
+        - generic [ref=e121]:
+          - generic [ref=e122]:
+            - generic [ref=e123]:
+              - generic [ref=e124]: "1"
+              - generic [ref=e125]:
+                - generic [ref=e126]: 📱 Capa de presentación · Clientes
+                - generic [ref=e127]: Las 4 puertas por las que la gente usa el producto
+              - generic [ref=e128]: HTTPS · WSS
+            - generic [ref=e129]:
+              - generic [ref=e130]:
+                - generic [ref=e131]:
+                  - generic [ref=e132]: App Cliente
+                  - generic [ref=e133]: React Native · iOS/Android
+                - generic [ref=e134]:
+                  - generic [ref=e135]: App Repartidor
+                  - generic [ref=e136]: React Native · iOS/Android
+                - generic [ref=e137]:
+                  - generic [ref=e138]: Panel Comercio
+                  - generic [ref=e139]: Angular 22 · SPA
+                - generic [ref=e140]:
+                  - generic [ref=e141]: Backoffice
+                  - generic [ref=e142]: Angular 22 · SPA
+              - generic [ref=e143]:
+                - generic [ref=e144]: Palabras simples
+                - generic [ref=e145]:
+                  - text: "Es la “fachada” del restaurante: lo que el cliente, el comercio y el repartidor ven y tocan. Aquí solo hay pantallas y botones —"
+                  - strong [ref=e146]: ninguna regla de negocio vive aquí
+                  - text: ", por seguridad y para que cambie de diseño sin romper nada por dentro."
+          - generic [ref=e147]:
+            - generic [ref=e148]: ↓
+            - text: "La petición viaja cifrada por internet: REST (HTTP/JSON) · WebSockets (Socket.io) · Push (FCM)"
+          - generic [ref=e149]:
+            - generic [ref=e150]:
+              - generic [ref=e151]: "2"
+              - generic [ref=e152]:
+                - generic [ref=e153]: 🚪 Capa de transporte · FastAPI Routers
+                - generic [ref=e154]: "La recepcionista: recibe, identifica y encamina cada petición"
+              - generic [ref=e155]: Uvicorn · ASGI
+            - generic [ref=e156]:
+              - generic [ref=e157]:
+                - generic [ref=e158]:
+                  - generic [ref=e159]: /auth
+                  - generic [ref=e160]: login y registro
+                - generic [ref=e161]:
+                  - generic [ref=e162]: /users
+                  - generic [ref=e163]: perfiles
+                - generic [ref=e164]:
+                  - generic [ref=e165]: /merchants
+                  - generic [ref=e166]: comercios
+                - generic [ref=e167]:
+                  - generic [ref=e168]: /couriers
+                  - generic [ref=e169]: repartidores
+                - generic [ref=e170]:
+                  - generic [ref=e171]: /catalog
+                  - generic [ref=e172]: productos
+                - generic [ref=e173]:
+                  - generic [ref=e174]: /orders
+                  - generic [ref=e175]: pedidos
+                - generic [ref=e176]:
+                  - generic [ref=e177]: /geo
+                  - generic [ref=e178]: zonas y distancias
+                - generic [ref=e179]:
+                  - generic [ref=e180]: /tracking
+                  - generic [ref=e181]: posición en vivo
+                - generic [ref=e182]:
+                  - generic [ref=e183]: /payments
+                  - generic [ref=e184]: pagos
+                - generic [ref=e185]:
+                  - generic [ref=e186]: /ratings
+                  - generic [ref=e187]: valoraciones
+                - generic [ref=e188]:
+                  - generic [ref=e189]: /admin
+                  - generic [ref=e190]: gestión interna
+                - generic [ref=e191]:
+                  - generic [ref=e192]: /webhooks
+                  - generic [ref=e193]: aviso de pasarelas
+              - generic [ref=e194]:
+                - generic [ref=e195]: Palabras simples
+                - generic [ref=e196]:
+                  - text: Cada
+                  - code [ref=e197]: /ruta
+                  - text: es una ventanilla de atención. Cuando tu app quiere “crear un pedido”, llama a la ventanilla
+                  - code [ref=e198]: /orders
+                  - text: . Esta capa
+                  - strong [ref=e199]: no decide nada
+                  - text: ": comprueba que vienes identificado (token), que la solicitud está bien escrita, y la pasa a la cocina. Es el equivalentes al camarero que anota el pedido."
+          - generic [ref=e200]:
+            - generic [ref=e201]: ↓
+            - text: Schemata validados (DTOs Pydantic) — “el comanda con el formato estándar”
+          - generic [ref=e202]:
+            - generic [ref=e203]:
+              - generic [ref=e204]: "3"
+              - generic [ref=e205]:
+                - generic [ref=e206]: 👨‍🍳 Capa de aplicación · Servicios de dominio
+                - generic [ref=e207]: "El “cerebro”: orquesta cada caso de uso de principio a fin"
+              - generic [ref=e208]: Orquestación · Casos de uso
+            - generic [ref=e209]:
+              - generic [ref=e210]:
+                - generic [ref=e211]:
+                  - generic [ref=e212]: AuthService
+                  - generic [ref=e213]: JWT · sesiones
+                - generic [ref=e214]:
+                  - generic [ref=e215]: CatalogService
+                  - generic [ref=e216]: productos · stock
+                - generic [ref=e217]:
+                  - generic [ref=e218]: OrderService
+                  - generic [ref=e219]: ciclo del pedido
+                - generic [ref=e220]:
+                  - generic [ref=e221]: GeoService
+                  - generic [ref=e222]: tracking · zonas
+                - generic [ref=e223]:
+                  - generic [ref=e224]: CommissionService
+                  - generic [ref=e225]: motor paramétrico
+                - generic [ref=e226]:
+                  - generic [ref=e227]: NotificationService
+                  - generic [ref=e228]: push · email · WS
+                - generic [ref=e229]:
+                  - generic [ref=e230]: PaymentService
+                  - generic [ref=e231]: pasarela · wallet
+                - generic [ref=e232]:
+                  - generic [ref=e233]: RatingService
+                  - generic [ref=e234]: calificaciones
+                - generic [ref=e235]:
+                  - generic [ref=e236]: AssignmentService
+                  - generic [ref=e237]: asignación repartidor
+                - generic [ref=e238]:
+                  - generic [ref=e239]: AuditService
+                  - generic [ref=e240]: logs inmutables
+              - generic [ref=e241]:
+                - generic [ref=e242]: Palabras simples
+                - generic [ref=e243]:
+                  - text: "Aquí se “cocina” cada operación. Por ejemplo, confirmar un pedido implica una coreografía: comprobar stock → cobrar comisión al comercio → avisar al repartidor → registrar todo en el libro de contabilidad."
+                  - strong [ref=e244]: Cada servicio es un especialista
+                  - text: ": el de pedidos no sabe nada de pagos, solo pide ayuda al especialista en pagos."
+          - generic [ref=e245]:
+            - generic [ref=e246]: ↓
+            - text: Entidades de dominio · Objetos de valor — “los ingredientes crudos”
+          - generic [ref=e247]:
+            - generic [ref=e248]:
+              - generic [ref=e249]: "4"
+              - generic [ref=e250]:
+                - generic [ref=e251]: 📜 Capa de dominio · Entidades y reglas
+                - generic [ref=e252]: El corazón del negocio, puro e independiente de la tecnología
+              - generic [ref=e253]: Agnóstica a infra
+            - generic [ref=e254]:
+              - generic [ref=e255]:
+                - generic [ref=e256]:
+                  - generic [ref=e257]: User
+                  - generic [ref=e258]: cualquier persona
+                - generic [ref=e259]:
+                  - generic [ref=e260]: Merchant
+                  - generic [ref=e261]: comercio
+                - generic [ref=e262]:
+                  - generic [ref=e263]: Courier
+                  - generic [ref=e264]: repartidor
+                - generic [ref=e265]:
+                  - generic [ref=e266]: Product
+                  - generic [ref=e267]: artículo en venta
+                - generic [ref=e268]:
+                  - generic [ref=e269]: Order
+                  - generic [ref=e270]: el pedido y su estado
+                - generic [ref=e271]:
+                  - generic [ref=e272]: Contract
+                  - generic [ref=e273]: acuerdos y comisiones
+              - generic [ref=e274]:
+                - generic [ref=e275]: Palabras simples
+                - generic [ref=e276]:
+                  - text: "Son las “cosas” y las “leyes” del negocio: un"
+                  - strong [ref=e277]: Pedido
+                  - text: "es un pedido, con sus estados posibles (pendiente → aceptado → entregado) y sus reglas (no se puede entregar dos veces). Esta capa no sabe si usamos PostgreSQL o cualquier otra herramienta: por eso, si mañana cambia la tecnología,"
+                  - strong [ref=e278]: las reglas del negocio no se tocan
+                  - text: .
+          - generic [ref=e279]:
+            - generic [ref=e280]: ↓
+            - text: Interfaces de repositorio (Protocol) — “el menú de encargos al almacén”
+          - generic [ref=e281]:
+            - generic [ref=e282]:
+              - generic [ref=e283]: "5"
+              - generic [ref=e284]:
+                - generic [ref=e285]: 🔌 Capa de infraestructura · Adaptadores
+                - generic [ref=e286]: Las manos que hablan con el mundo exterior (bases de datos, servicios cloud)
+              - generic [ref=e287]: SQLAlchemy · AsyncPG · Socket.io
+            - generic [ref=e288]:
+              - generic [ref=e289]:
+                - generic [ref=e290]:
+                  - generic [ref=e291]: PostgreSQL Repo
+                  - generic [ref=e292]: SQLAlchemy 2.0 async
+                - generic [ref=e293]:
+                  - generic [ref=e294]: PostGIS Repo
+                  - generic [ref=e295]: GeoAlchemy2
+                - generic [ref=e296]:
+                  - generic [ref=e297]: Redis Cache
+                  - generic [ref=e298]: redis-py (futuro)
+                - generic [ref=e299]:
+                  - generic [ref=e300]: Socket.io Emitter
+                  - generic [ref=e301]: socket.io-emitter
+                - generic [ref=e302]:
+                  - generic [ref=e303]: FCM Client
+                  - generic [ref=e304]: firebase-admin
+                - generic [ref=e305]:
+                  - generic [ref=e306]: S3 Storage
+                  - generic [ref=e307]: MinIO compatible
+                - generic [ref=e308]:
+                  - generic [ref=e309]: Email SMTP
+                  - generic [ref=e310]: aiosmtplib
+                - generic [ref=e311]:
+                  - generic [ref=e312]: Payment Gateway
+                  - generic [ref=e313]: Adapter por proveedor
+                - generic [ref=e314]:
+                  - generic [ref=e315]: Cron Worker
+                  - generic [ref=e316]: APScheduler
+                - generic [ref=e317]:
+                  - generic [ref=e318]: Logger
+                  - generic [ref=e319]: structlog · JSON
+              - generic [ref=e320]:
+                - generic [ref=e321]: Palabras simples
+                - generic [ref=e322]:
+                  - text: "Todos los “enchufes” hacia fuera: guardar datos (PostgreSQL), calcular distancias reales en un mapa (PostGIS), enviar notificaciones al móvil (Firebase), guardar fotos de productos (S3), cobrar con tarjeta (pasarela de pagos) o mandar emails. Si mañana cambiamos de proveedor de pagos,"
+                  - strong [ref=e323]: solo se cambia este enchufe
+                  - text: — el resto del sistema ni se entera.
+        - generic [ref=e324]:
+          - generic [ref=e325]:
+            - generic [ref=e326]: ⬇️
+            - generic [ref=e327]: Solo hacia abajo
+            - paragraph [ref=e328]: "Una capa solo puede llamar a la que tiene justo debajo, nunca al revés. La base de datos jamás llama a la app: siempre es la app quien pregunta. Esto hace el sistema predecible."
+          - generic [ref=e329]:
+            - generic [ref=e330]: 🔒
+            - generic [ref=e331]: El negocio aislado
+            - paragraph [ref=e332]: Las reglas importantes (capa 4) no dependen de ninguna herramienta externa. Eso es lo que permite cambiar de proveedor, de base de datos o de nube sin reescribir el negocio.
+          - generic [ref=e333]:
+            - generic [ref=e334]: 🧪
+            - generic [ref=e335]: Todo testeable
+            - paragraph [ref=e336]: Cada capa se puede probar por separado con piezas “falsas” (una base de datos de mentira, un cobro simulado). Los errores se detectan antes de llegar al cliente.
+      - generic [ref=e337]:
+        - heading "El viaje de un pedido, paso a paso" [level=2] [ref=e338]
+        - paragraph [ref=e339]:
+          - text: La teoría anterior cobra sentido siguiendo algo tan cotidiano como pedir la cena. Esto es exactamente lo que ocurre por dentro cuando pulsas
+          - strong [ref=e340]: “Confirmar pedido”
+          - text: ":"
+        - generic [ref=e341]:
+          - generic [ref=e342]:
+            - generic [ref=e343]: "1"
+            - generic [ref=e344]: 🙋 El cliente pide · Capa 1 → 2
+            - paragraph [ref=e345]:
+              - text: Elige productos, la dirección y pulsa confirmar. La app empaqueta el pedido en una
+              - strong [ref=e346]: solicitud cifrada
+              - text: (HTTPS) hacia el backend con su identificador digital (token de sesión).
+          - generic [ref=e347]:
+            - generic [ref=e348]: "2"
+            - generic [ref=e349]: 🚪 La ventanilla verifica · Capa 2
+            - paragraph [ref=e350]:
+              - text: "FastAPI comprueba: ¿estás registrado?, ¿el pedido tiene un formato válido?, ¿los datos existen? Si algo falla, responde un mensaje de error claro"
+              - emphasis [ref=e351]: sin llegar a tocar nunca
+              - text: la base de datos.
+          - generic [ref=e352]:
+            - generic [ref=e353]: "3"
+            - generic [ref=e354]: 👨‍🍳 El cerebro coordina · Capa 3 + 4
+            - paragraph [ref=e355]:
+              - text: "OrderService organiza la coreografía: valida stock, GeoService confirma que la dirección cae"
+              - strong [ref=e356]: dentro de la zona de reparto
+              - text: del comercio, CommissionService calcula cuánto se lleva la plataforma y cuánto el comercio.
+          - generic [ref=e357]:
+            - generic [ref=e358]: "4"
+            - generic [ref=e359]: 🧊 Todo queda registrado · Capa 5
+            - paragraph [ref=e360]:
+              - text: Se graba en PostgreSQL en una
+              - strong [ref=e361]: transacción
+              - text: ": o se guarda absolutamente todo, o nada (imposible un pedido a medias). El histórico de cambios queda sellado con fecha y autor (auditoría inmutable)."
+          - generic [ref=e362]:
+            - generic [ref=e363]: "5"
+            - generic [ref=e364]: 🔔 El comercio se entera al instante · WebSockets + Push
+            - paragraph [ref=e365]:
+              - text: "Sin que nadie pregunte “¿hay algo nuevo?”, el panel del comercio suena: WebSocket avisa a quien tenga el navegador abierto y Firebase envía una notificación al móvil aunque la app esté cerrada. El comercio pulsa"
+              - strong [ref=e366]: “Aceptar”
+              - text: .
+          - generic [ref=e367]:
+            - generic [ref=e368]: "6"
+            - generic [ref=e369]: 🛵 Se busca repartidor · Capa 3 (Geo + Assignment)
+            - paragraph [ref=e370]:
+              - text: Cuando el comercio marca “Listo”, el sistema localiza con PostGIS a los repartidores
+              - strong [ref=e371]: disponibles más cercanos
+              - text: y les ofrece el viaje. El primero en aceptar se lo queda y pasa a la fase de recogida.
+          - generic [ref=e372]:
+            - generic [ref=e373]: "7"
+            - generic [ref=e374]: 🗺️ Tracking en vivo hasta la puerta · Todo el sistema
+            - paragraph [ref=e375]: El repartidor envía su posición cada pocos segundos; el cliente la ve moverse por el mapa casi en tiempo real. Al confirmar la entrega, el pedido se cierra, se reparten los cobros y llega la invitación a valorar el servicio. 🎉
+        - generic [ref=e376]:
+          - generic [ref=e377]: El dato
+          - generic [ref=e378]:
+            - text: Todo este recorrido ocurre en
+            - strong [ref=e379]: menos de un segundo
+            - text: hasta el paso 4. Lo único que “espera” es la decisión humana del comercio y del repartidor — el sistema no bloquea a nadie mientras tanto.
+      - generic [ref=e380]:
+        - heading "Principios de diseño aplicados" [level=2] [ref=e381]
+        - paragraph [ref=e382]: "Cuatro reglas internas que el equipo respeta en cada línea de código escrita. Con su traducción para humanos:"
+        - generic [ref=e383]:
+          - generic [ref=e384]:
+            - heading "🧩 Principios técnicos" [level=3] [ref=e385]
+            - list [ref=e386]:
+              - listitem [ref=e387]:
+                - generic [ref=e388]: D
+                - generic [ref=e389]:
+                  - strong [ref=e390]: Dependency Inversion.
+                  - text: Los servicios dependen de interfaces (Python
+                  - code [ref=e391]: Protocol
+                  - text: ), no de implementaciones concretas. Facilita testeo y reemplazo de infraestructura.
+              - listitem [ref=e392]:
+                - generic [ref=e393]: S
+                - generic [ref=e394]:
+                  - strong [ref=e395]: Single Responsibility por módulo.
+                  - text: Cada paquete de dominio (catalog, orders, geo...) es autocontenido con sus propios routers, services, repositories, schemas y tests.
+              - listitem [ref=e396]:
+                - generic [ref=e397]: I
+                - generic [ref=e398]:
+                  - strong [ref=e399]: Inyección de dependencias.
+                  - text: FastAPI
+                  - code [ref=e400]: Depends()
+                  - text: para inyectar DB sessions, current_user y servicios. Cero instanciación manual.
+              - listitem [ref=e401]:
+                - generic [ref=e402]: C
+                - generic [ref=e403]:
+                  - strong [ref=e404]: Comunicación entre módulos.
+                  - text: Sincrónica (llamadas directas) en MVP. Preparamos un
+                  - code [ref=e405]: EventBus
+                  - text: (patrón Observer) para migrar a eventos async cuando sea necesario.
+          - generic [ref=e406]:
+            - heading "🗣️ Lo que significan para el negocio" [level=3] [ref=e407]
+            - list [ref=e408]:
+              - listitem [ref=e409]:
+                - generic [ref=e410]: 🔁
+                - generic [ref=e411]:
+                  - strong [ref=e412]: “Poder cambiar de proveedor sin drama.”
+                  - text: ¿Mañana el servicio de mapas o de pagos sube de precio o desaparece? Se cambia el enchufe en una tarde, no en un trimestre. Eso es
+                  - emphasis [ref=e413]: dependency inversion
+                  - text: en términos de riesgo económico.
+              - listitem [ref=e414]:
+                - generic [ref=e415]: 📦
+                - generic [ref=e416]:
+                  - strong [ref=e417]: “Cada equipo toca su cajón.”
+                  - text: Los pedidos viven en un cajón; el catálogo en otro. Arreglar algo del carrito no puede romper los mapas, porque físicamente no se mezclan. Menos regresiones, despliegues más seguros.
+              - listitem [ref=e418]:
+                - generic [ref=e419]: 🤖
+                - generic [ref=e420]:
+                  - strong [ref=e421]: “El framework hace el trabajo sucio.”
+                  - text: El framework reparte automáticamente las herramientas que cada función necesita (conexión a la base de datos, quién eres…). Menos código a medida = menos fallos humanos.
+              - listitem [ref=e422]:
+                - generic [ref=e423]: 📡
+                - generic [ref=e424]:
+                  - strong [ref=e425]: “Preparados para el crecimiento.”
+                  - text: Hoy las piezas se hablan por teléfono fijo; dejamos instalado el interfono inalámbrico (EventBus) para cuando haya que comunicarse en paralelo. Sin reescribir nada cuando lleguen los picos de demanda.
+      - generic [ref=e426]:
+        - 'heading "Estrategia de evolución: del monolito a microservicios" [level=2] [ref=e427]'
+        - paragraph [ref=e428]:
+          - text: Empezamos con
+          - strong [ref=e429]: un solo programa
+          - text: que contiene todo (monolito modular) — es la opción más barata y simple para validar el negocio. Pero el plano ya prevé cómo dividirlo en piezas independientes si el éxito lo exige.
+        - generic [ref=e430]:
+          - generic [ref=e431]:
+            - generic [ref=e432]:
+              - generic [ref=e433]: ①
+              - generic [ref=e434]: Detectar el punto caliente
+            - paragraph [ref=e435]: "Las métricas avisan: por ejemplo, el módulo de geo (mapas y tracking) consume mucha más CPU que el resto. Se identifica con datos, no con intuiciones."
+            - paragraph [ref=e436]: "🍕 «La parrilla se queda corta: hay que darle su propia cocina.»"
+          - generic [ref=e437]:
+            - generic [ref=e438]:
+              - generic [ref=e439]: ②
+              - generic [ref=e440]: Extraer el módulo
+            - paragraph [ref=e441]: El paquete se copia a un servicio independiente con su propio servidor FastAPI y su base de datos dedicada, aprovechando que ya estaba aislado.
+            - paragraph [ref=e442]: 🍕 «La parrilla se muda a un local propio junto al restaurante.»
+          - generic [ref=e443]:
+            - generic [ref=e444]:
+              - generic [ref=e445]: ③
+              - generic [ref=e446]: Gateway invisible
+            - paragraph [ref=e447]: "El monolito pasa a consultar al nuevo servicio por red. Las apps móviles no notan el cambio: por fuera todo sigue siendo la misma API."
+            - paragraph [ref=e448]: 🍕 «El cliente sigue pidiendo al camarero de siempre; no sabe que hay una cocina nueva.»
+          - generic [ref=e449]:
+            - generic [ref=e450]:
+              - generic [ref=e451]: ④
+              - generic [ref=e452]: Bus de eventos
+            - paragraph [ref=e453]: "Para mantener la coherencia entre servicios (RabbitMQ/NATS), las piezas se avisan unas a otras con mensajes asíncronos: “te aviso cuando esté listo”. Consistencia eventual."
+            - paragraph [ref=e454]: 🍕 «Cocinas distintas coordinándose por walkie-talkie.»
+        - generic [ref=e455]:
+          - generic [ref=e456]: Moraleja
+          - generic [ref=e457]:
+            - text: "Este camino evita el error clásico de las startups: montar 20 microservicios el primer día (coste, complejidad y riesgo altísimos para un equipo de una persona)"
+            - strong [ref=e458]: o
+            - text: un monolito imposible de partir después. Aquí el monolito ya está construido “en piezas compatibles con separarse”.
+      - generic [ref=e459]:
+        - heading "Estructura del proyecto (monorepo)" [level=2] [ref=e460]
+        - paragraph [ref=e461]:
+          - text: Un
+          - strong [ref=e462]: monorepo
+          - text: "es un único contenedor con todo: backend, las 4 apps, pruebas y empaquetado. En la práctica: un solo lugar donde buscar, una sola versión de la verdad y despliegues coordinados. Así se reparte por dentro:"
+        - generic [ref=e463]:
+          - generic [ref=e464]:
+            - generic [ref=e465]: 🏛️ app/core — Los cimientos
+            - paragraph [ref=e466]: Configuración, conexiones, seguridad y errores. Lo que comparten todos los departamentos y no debe duplicarse nunca.
+          - generic [ref=e467]:
+            - generic [ref=e468]: 🗄️ app/modules — Los departamentos
+            - paragraph [ref=e469]: 12 paquetes de negocio (pedidos, catálogo, geo, pagos…). Cada uno autocontenido, con sus archivos, como una mini-empresa dentro del sistema.
+          - generic [ref=e470]:
+            - generic [ref=e471]: 📱 apps — Los escaparates
+            - paragraph [ref=e472]: Las 4 interfaces. Las dos móviles comparten una sola base de código iOS + Android (React Native); las dos webs usan Angular.
+          - generic [ref=e473]:
+            - generic [ref=e474]: 🧪 tests — Control de calidad
+            - paragraph [ref=e475]: Pruebas automáticas que verifican cada regla del negocio. Antes de publicar cualquier cambio, se ejecutan solas y “aprueban o suspenden”.
+          - generic [ref=e476]:
+            - generic [ref=e477]: 🐳 docker — Los contenedores de mudanza
+            - paragraph [ref=e478]: Empaquetan cada pieza con todo lo que necesita dentro. El mismo paquete idéntico funciona en el portátil del desarrollador y en el servidor.
+          - generic [ref=e479]:
+            - generic [ref=e480]: 🔔 app/workers — El turno de noche
+            - paragraph [ref=e481]: "Tareas programadas que se solas: limpiar pedidos abandonados, expirar comisiones, enviar resúmenes. Trabajan sin que nadie las pida."
+        - group [ref=e482]:
+          - generic "👀 Ver el árbol de archivos completo (para técnicos) ▸" [ref=e483] [cursor=pointer]:
+            - generic [ref=e484]: 👀 Ver el árbol de archivos completo (para técnicos)
+            - generic [ref=e485]: ▸
+      - generic [ref=e486]:
+        - 'heading "Glosario exprés: la jerga, traducida" [level=2] [ref=e487]'
+        - paragraph [ref=e488]: Términos que aparecen en esta y otras secciones del documento. Haz clic en cada uno para desplegar su traducción al idioma humano.
+        - generic [ref=e489]:
+          - group [ref=e490]:
+            - generic "▸ Backend / Frontend" [ref=e491] [cursor=pointer]:
+              - generic [ref=e492]: ▸
+              - generic [ref=e493]: Backend / Frontend
+          - group [ref=e494]:
+            - generic "▸ API" [ref=e495] [cursor=pointer]:
+              - generic [ref=e496]: ▸
+              - generic [ref=e497]: API
+          - group [ref=e498]:
+            - generic "▸ JSON" [ref=e499] [cursor=pointer]:
+              - generic [ref=e500]: ▸
+              - generic [ref=e501]: JSON
+          - group [ref=e502]:
+            - generic "▸ WebSocket" [ref=e503] [cursor=pointer]:
+              - generic [ref=e504]: ▸
+              - generic [ref=e505]: WebSocket
+          - group [ref=e506]:
+            - generic "▸ Notificación Push (FCM)" [ref=e507] [cursor=pointer]:
+              - generic [ref=e508]: ▸
+              - generic [ref=e509]: Notificación Push (FCM)
+          - group [ref=e510]:
+            - generic "▸ Base de datos relacional (PostgreSQL)" [ref=e511] [cursor=pointer]:
+              - generic [ref=e512]: ▸
+              - generic [ref=e513]: Base de datos relacional (PostgreSQL)
+          - group [ref=e514]:
+            - generic "▸ PostGIS" [ref=e515] [cursor=pointer]:
+              - generic [ref=e516]: ▸
+              - generic [ref=e517]: PostGIS
+          - group [ref=e518]:
+            - generic "▸ JWT / Token" [ref=e519] [cursor=pointer]:
+              - generic [ref=e520]: ▸
+              - generic [ref=e521]: JWT / Token
+          - group [ref=e522]:
+            - generic "▸ Docker" [ref=e523] [cursor=pointer]:
+              - generic [ref=e524]: ▸
+              - generic [ref=e525]: Docker
+          - group [ref=e526]:
+            - generic "▸ Monolito modular" [ref=e527] [cursor=pointer]:
+              - generic [ref=e528]: ▸
+              - generic [ref=e529]: Monolito modular
+          - group [ref=e530]:
+            - generic "▸ Microservicios" [ref=e531] [cursor=pointer]:
+              - generic [ref=e532]: ▸
+              - generic [ref=e533]: Microservicios
+          - group [ref=e534]:
+            - generic "▸ SPA (Angular 22)" [ref=e535] [cursor=pointer]:
+              - generic [ref=e536]: ▸
+              - generic [ref=e537]: SPA (Angular 22)
+          - group [ref=e538]:
+            - generic "▸ Migraciones (Alembic)" [ref=e539] [cursor=pointer]:
+              - generic [ref=e540]: ▸
+              - generic [ref=e541]: Migraciones (Alembic)
+          - group [ref=e542]:
+            - generic "▸ Caché (Redis)" [ref=e543] [cursor=pointer]:
+              - generic [ref=e544]: ▸
+              - generic [ref=e545]: Caché (Redis)
+          - group [ref=e546]:
+            - generic "▸ Motor de comisiones paramétrico" [ref=e547] [cursor=pointer]:
+              - generic [ref=e548]: ▸
+              - generic [ref=e549]: Motor de comisiones paramétrico
+          - group [ref=e550]:
+            - generic "▸ Registro de auditoría inmutable" [ref=e551] [cursor=pointer]:
+              - generic [ref=e552]: ▸
+              - generic [ref=e553]: Registro de auditoría inmutable
+  - contentinfo [ref=e554]:
+    - generic [ref=e555]: Propuesta técnica Alpha Version · Septiembre 2026 · Documento de trabajo para equipo de desarrollo y stakeholders técnicos.

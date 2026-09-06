@@ -5,6 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>Arquitectura — App Logística Local</title>
 <script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
 <style>
   body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; background: #0a0f1c; color: #e5e7eb; }
   .tab-btn.active { background: #4f46e5; color: #fff; box-shadow: 0 4px 12px rgba(79,70,229,.4);}
@@ -39,7 +41,8 @@
   .flow-container { display: flex; gap: 8px; flex-wrap: nowrap; align-items: stretch; padding: 8px 0;}
   .flow-container .arrow { display: flex; align-items: center; color: #64748b; font-size: 18px; font-weight: 700;}
   .layer-box { border: 2px solid #334155; border-radius: 12px; padding: 16px; background: #0f172a;}
-  .module-box { border: 1px solid #334155; border-radius: 8px; padding: 10px; background: #1e293b;}
+  .module-box { border: 1px solid #334155; border-radius: 8px; padding: 10px; background: #1e293b; transition: transform .15s ease, border-color .15s ease;}
+  .module-box:hover { transform: translateY(-2px); border-color: #64748b;}
   .endpoint-row { display: grid; grid-template-columns: 70px 1fr 2fr auto; gap: 10px; padding: 8px 0; border-bottom: 1px solid #1f2937; align-items: start;}
   .method { font-family: monospace; font-weight: 700; font-size: 11px; padding: 2px 6px; border-radius: 4px; text-align: center;}
   .m-get { background: #064e3b; color: #6ee7b7;}
@@ -51,6 +54,60 @@
   details > summary::-webkit-details-marker { display: none;}
   details[open] .summary-icon { transform: rotate(90deg);}
   .summary-icon { display: inline-block; transition: transform .2s;}
+
+  /* ── Estilos propios de la página de arquitectura ── */
+  .grad-text { background: linear-gradient(90deg,#818cf8,#c084fc,#f472b6); -webkit-background-clip: text; background-clip: text; color: transparent;}
+  .sec-title { display:flex; align-items:center; gap:10px; font-size:1.25rem; font-weight:700; color:#fff; margin-bottom:6px;}
+  .sec-title::before { content:""; width:6px; height:26px; border-radius:3px; background: linear-gradient(180deg,#6366f1,#a855f7);}
+  .num-badge { display:inline-flex; align-items:center; justify-content:center; width:30px; height:30px; border-radius:9px; font-weight:800; font-size:14px; flex-shrink:0;}
+  .layer-card { border-radius:14px; border:1px solid #1f2937; background:#111827; overflow:hidden; transition: box-shadow .2s ease, transform .2s ease;}
+  .layer-card:hover { transform: translateY(-2px);}
+  .layer-head { display:flex; align-items:center; gap:12px; padding:14px 16px; border-bottom:1px solid #1f2937;}
+  .simple-note { display:flex; gap:10px; align-items:flex-start; margin-top:14px; padding:12px 14px; border-radius:10px; background: linear-gradient(135deg, rgba(99,102,241,.10), rgba(168,85,247,.07)); border:1px dashed rgba(129,140,248,.45);}
+  .simple-note .sn-label { font-size:10px; font-weight:800; letter-spacing:.08em; text-transform:uppercase; color:#a5b4fc; white-space:nowrap; padding-top:2px;}
+  .analogy-card { background:#111827; border:1px solid #1f2937; border-radius:12px; padding:16px; transition: transform .2s ease, border-color .2s ease;}
+  .analogy-card:hover { transform: translateY(-4px); border-color:#6366f1;}
+  .value-card { background: linear-gradient(160deg,#111827,#0f172a); border:1px solid #1f2937; border-radius:12px; padding:18px; transition: transform .2s ease, border-color .2s ease;}
+  .value-card:hover { transform: translateY(-3px); border-color:#8b5cf6;}
+  .j-step { position:relative; padding-left:52px; padding-bottom:26px;}
+  .j-step:last-child { padding-bottom:0;}
+  .j-step::before { content:""; position:absolute; left:17px; top:38px; bottom:-2px; width:2px; background:linear-gradient(180deg,#334155,#1f2937);}
+  .j-step:last-child::before { display:none;}
+  .j-num { position:absolute; left:0; top:0; width:36px; height:36px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:14px; color:#fff; box-shadow:0 0 0 4px #0a0f1c, 0 0 14px rgba(99,102,241,.5);}
+  .gloss-item { background:#111827; border:1px solid #1f2937; border-radius:10px; transition:border-color .2s;}
+  .gloss-item:hover { border-color:#475569;}
+  .gloss-item[open] { border-color:#6366f1;}
+  .gloss-item summary { display:flex; align-items:center; gap:10px; padding:12px 14px;}
+  .toc-pill { display:inline-flex; align-items:center; gap:6px; background:#1e293b; border:1px solid #334155; color:#cbd5e1; padding:5px 12px; border-radius:999px; font-size:12px; font-weight:500; transition:all .15s;}
+  .toc-pill:hover { border-color:#6366f1; color:#fff; background:#273549;}
+  @keyframes driftY { 0%,100%{transform:translateY(0);} 50%{transform:translateY(3px);} }
+  .flow-arrow { text-align:center; color:#64748b; font-size:12px; padding:10px 0; animation: driftY 2.2s ease-in-out infinite;}
+  .flow-arrow b { display:block; font-size:16px; color:#818cf8;}
+  .hero-stat { background: rgba(15,23,42,.6); border:1px solid #1f2937; border-radius:12px; padding:12px 14px; transition: border-color .2s;}
+  .hero-stat:hover { border-color:#6366f1;}
+
+  /* ── Robustez anti-desbordes ── */
+  html { -webkit-text-size-adjust: 100%; }
+  body { overflow-x: hidden; }
+  .module-box, .gloss-item p, .simple-note span, code, .flow-arrow { overflow-wrap: anywhere; }
+
+  /* ── Ajustes responsive: pantallas pequeñas ── */
+  @media (max-width: 639px) {
+    header > .max-w-7xl, main.max-w-7xl, footer > .max-w-7xl { padding-left: 16px; padding-right: 16px; }
+    header > .max-w-7xl { padding-top: 34px; padding-bottom: 34px; }
+    .simple-note { flex-direction: column; gap: 6px; }
+    .simple-note .sn-label { padding-top: 0; white-space: normal; }
+    .layer-head { padding: 12px 12px; }
+    .module-box { padding: 8px 9px; }
+    .toc-pill { padding: 8px 12px; }
+    .j-step { padding-left: 44px; }
+    .j-num { width: 32px; height: 32px; font-size: 13px; }
+    .j-step::before { left: 15px; top: 34px; }
+    .card > pre, details pre { font-size: 11px; padding: 12px; }
+    .sec-title { font-size: 1.1rem; gap: 8px; }
+    .sec-title::before { height: 22px; }
+    .value-card .num-badge { width: 26px; height: 26px; border-radius: 7px; font-size: 12px; }
+  }
 </style>
 </head>
 <body class="min-h-screen">
@@ -63,36 +120,41 @@
       <span class="chip">Septiembre 2026</span>
       <span class="badge-wip">MVP 1 · 100% completado</span>
     </div>
-    <h1 class="text-4xl md:text-5xl font-bold text-white tracking-tight">
-      App Logística Local
+    <h1 class="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight">
+      <span class="grad-text">App Logística Local</span>
     </h1>
     <p class="text-slate-400 mt-3 max-w-3xl">
       Propuesta integral de ingeniería. Documento para el equipo de desarrollo y stakeholders técnicos.
     </p>
+    <p class="text-slate-500 mt-2 text-sm max-w-3xl">
+      🧭 <strong class="text-slate-400">¿No vienes del mundo técnico?</strong> Esta página está escrita en dos niveles: cada bloque técnico
+      va acompañado de una nota azul <span class="text-indigo-400 font-semibold">“En palabras simples”</span> que explica lo mismo sin jerga.
+      Puedes leer solo esas notas y entenderás el 100% del diseño.
+    </p>
 
     <div class="mt-8 grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-3">
-      <div class="bg-slate-900/60 border border-slate-800 rounded-lg p-3">
-        <div class="text-xs text-slate-500">Móvil</div>
+      <div class="hero-stat">
+        <div class="text-xs text-slate-500">📱 Móvil</div>
         <div class="text-white font-semibold text-sm">React Native</div>
       </div>
-      <div class="bg-slate-900/60 border border-slate-800 rounded-lg p-3">
-        <div class="text-xs text-slate-500">Web</div>
+      <div class="hero-stat">
+        <div class="text-xs text-slate-500">🖥️ Web</div>
         <div class="text-white font-semibold text-sm">Angular 22</div>
       </div>
-      <div class="bg-slate-900/60 border border-slate-800 rounded-lg p-3">
-        <div class="text-xs text-slate-500">Backend</div>
+      <div class="hero-stat">
+        <div class="text-xs text-slate-500">⚙️ Backend</div>
         <div class="text-white font-semibold text-sm">FastAPI · Python</div>
       </div>
-      <div class="bg-slate-900/60 border border-slate-800 rounded-lg p-3">
-        <div class="text-xs text-slate-500">Datos</div>
+      <div class="hero-stat">
+        <div class="text-xs text-slate-500">🗄️ Datos</div>
         <div class="text-white font-semibold text-sm">PostgreSQL + PostGIS</div>
       </div>
-      <div class="bg-slate-900/60 border border-slate-800 rounded-lg p-3">
-        <div class="text-xs text-slate-500">Realtime</div>
+      <div class="hero-stat">
+        <div class="text-xs text-slate-500">⚡ Realtime</div>
         <div class="text-white font-semibold text-sm">Socket.io</div>
       </div>
-      <div class="bg-slate-900/60 border border-slate-800 rounded-lg p-3">
-        <div class="text-xs text-slate-500">Deploy</div>
+      <div class="hero-stat">
+        <div class="text-xs text-slate-500">🚀 Deploy</div>
         <div class="text-white font-semibold text-sm">Docker · Git local</div>
       </div>
     </div>
@@ -144,141 +206,428 @@
 
 <main class="max-w-7xl mx-auto px-6 py-8">
 <section class="tab-content active" id="arquitectura">
-    <h2 class="text-xl font-semibold text-white mb-2">Arquitectura del sistema</h2>
-    <p class="text-sm text-slate-400 mb-6">Diseño en capas siguiendo principios de Clean Architecture / Hexagonal, adaptado a un monolito modular Python.</p>
 
-    <!-- Diagrama de capas visual con CSS -->
-    <div class="card p-6 mb-5">
-      <h3 class="text-sm font-semibold text-white mb-4">Vista de alto nivel</h3>
+    <!-- Índice rápido de la página -->
+    <div class="flex flex-wrap gap-2 mb-8">
+      <a href="#que-es" class="toc-pill">❓ Qué es la arquitectura</a>
+      <a href="#analogia" class="toc-pill">🍕 La analogía del restaurante</a>
+      <a href="#diagrama" class="toc-pill">🏗️ Diagrama por capas</a>
+      <a href="#viaje" class="toc-pill">🛒 El viaje de un pedido</a>
+      <a href="#principios" class="toc-pill">📐 Principios de diseño</a>
+      <a href="#evolucion" class="toc-pill">📈 Evolución futura</a>
+      <a href="#estructura" class="toc-pill">📁 Estructura del proyecto</a>
+      <a href="#glosario" class="toc-pill">📖 Glosario para todos</a>
+    </div>
 
-      <!-- Capa 1: Clientes -->
-      <div class="layer-box mb-3" style="border-color:#3b82f6">
-        <div class="flex items-center justify-between mb-3">
-          <div class="text-xs font-semibold text-blue-400 uppercase tracking-wider">Capa de presentación · Clientes</div>
-          <span class="chip">HTTPS · WSS</span>
+    <!-- ─────────────────────────── 1. QUÉ ES ─────────────────────────── -->
+    <div id="que-es" class="card p-6 mb-8 scroll-mt-20">
+      <h2 class="sec-title">¿Qué es la “arquitectura” y por qué debería importarte?</h2>
+      <p class="text-sm text-slate-300 leading-relaxed mt-4">
+        La arquitectura de un sistema es <strong class="text-white">el plano del edificio</strong>: decide qué piezas existen,
+        cómo se organizan y cómo se comunican entre sí. No se ve desde fuera —el cliente solo ve una app bonita—,
+        pero determina si el proyecto crece sin dolores de cabeza o si se derrumba bajo su propio peso al añadir
+        la tercera funcionalidad nueva.
+      </p>
+      <div class="grid md:grid-cols-3 gap-3 mt-5">
+        <div class="bg-slate-900/60 border border-slate-800 rounded-lg p-4">
+          <div class="text-2xl mb-2">🧱</div>
+          <div class="text-white font-semibold text-sm">Cimientos sólidos</div>
+          <p class="text-xs text-slate-400 mt-1 leading-relaxed">Un buen plano permite añadir pisos (funcionalidades) sin demoler la planta baja. Nuestro diseño en capas está hecho exactamente para eso.</p>
         </div>
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
-          <div class="module-box"><div class="text-xs text-blue-300">App Cliente</div><div class="text-xs text-slate-400">React Native · iOS/Android</div></div>
-          <div class="module-box"><div class="text-xs text-blue-300">App Repartidor</div><div class="text-xs text-slate-400">React Native · iOS/Android</div></div>
-          <div class="module-box"><div class="text-xs text-blue-300">Panel Comercio</div><div class="text-xs text-slate-400">Angular 22 · SPA</div></div>
-          <div class="module-box"><div class="text-xs text-blue-300">Backoffice</div><div class="text-xs text-slate-400">Angular 22 · SPA</div></div>
+        <div class="bg-slate-900/60 border border-slate-800 rounded-lg p-4">
+          <div class="text-2xl mb-2">🔧</div>
+          <div class="text-white font-semibold text-sm">Reparable sin cerrar</div>
+          <p class="text-xs text-slate-400 mt-1 leading-relaxed">Si una “tubería” falla (por ejemplo, el servicio de notificaciones), se sustituye sin tocar el resto del edificio. Cada pieza tiene una única responsabilidad.</p>
         </div>
-      </div>
-
-      <div class="text-center text-slate-500 my-2 text-xs">↓ REST (HTTP/JSON) · WebSockets (Socket.io) · Push (FCM) ↓</div>
-
-      <!-- Capa 2: API Gateway / Routers -->
-      <div class="layer-box mb-3" style="border-color:#8b5cf6">
-        <div class="flex items-center justify-between mb-3">
-          <div class="text-xs font-semibold text-purple-400 uppercase tracking-wider">Capa de transporte · FastAPI Routers</div>
-          <span class="chip">Uvicorn · ASGI</span>
-        </div>
-        <div class="grid grid-cols-3 md:grid-cols-6 gap-2 text-xs">
-          <div class="module-box"><div class="text-purple-300">/auth</div></div>
-          <div class="module-box"><div class="text-purple-300">/users</div></div>
-          <div class="module-box"><div class="text-purple-300">/merchants</div></div>
-          <div class="module-box"><div class="text-purple-300">/couriers</div></div>
-          <div class="module-box"><div class="text-purple-300">/catalog</div></div>
-          <div class="module-box"><div class="text-purple-300">/orders</div></div>
-          <div class="module-box"><div class="text-purple-300">/geo</div></div>
-          <div class="module-box"><div class="text-purple-300">/tracking</div></div>
-          <div class="module-box"><div class="text-purple-300">/payments</div></div>
-          <div class="module-box"><div class="text-purple-300">/ratings</div></div>
-          <div class="module-box"><div class="text-purple-300">/admin</div></div>
-          <div class="module-box"><div class="text-purple-300">/webhooks</div></div>
+        <div class="bg-slate-900/60 border border-slate-800 rounded-lg p-4">
+          <div class="text-2xl mb-2">💰</div>
+          <div class="text-white font-semibold text-sm">Ahorro directo</div>
+          <p class="text-xs text-slate-400 mt-1 leading-relaxed">Cada decisión del plano busca minimizar costes de servidores y de horas de desarrollo, algo crítico en la fase temprana del negocio.</p>
         </div>
       </div>
-
-      <div class="text-center text-slate-500 my-2 text-xs">↓ DTOs (Pydantic Schemas) ↓</div>
-
-      <!-- Capa 3: Application Services -->
-      <div class="layer-box mb-3" style="border-color:#10b981">
-        <div class="flex items-center justify-between mb-3">
-          <div class="text-xs font-semibold text-emerald-400 uppercase tracking-wider">Capa de aplicación · Servicios de dominio</div>
-          <span class="chip">Orquestación · Casos de uso</span>
-        </div>
-        <div class="grid grid-cols-2 md:grid-cols-5 gap-2 text-xs">
-          <div class="module-box"><div class="text-emerald-300">AuthService</div><div class="text-slate-400">JWT · sesiones</div></div>
-          <div class="module-box"><div class="text-emerald-300">CatalogService</div><div class="text-slate-400">productos · stock</div></div>
-          <div class="module-box"><div class="text-emerald-300">OrderService</div><div class="text-slate-400">ciclo pedido</div></div>
-          <div class="module-box"><div class="text-emerald-300">GeoService</div><div class="text-slate-400">tracking · zonas</div></div>
-          <div class="module-box"><div class="text-emerald-300">CommissionService</div><div class="text-slate-400">motor paramétrico</div></div>
-          <div class="module-box"><div class="text-emerald-300">NotificationService</div><div class="text-slate-400">push · email · WS</div></div>
-          <div class="module-box"><div class="text-emerald-300">PaymentService</div><div class="text-slate-400">pasarela · wallet</div></div>
-          <div class="module-box"><div class="text-emerald-300">RatingService</div><div class="text-slate-400">calificaciones</div></div>
-          <div class="module-box"><div class="text-emerald-300">AssignmentService</div><div class="text-slate-400">asignación repartidor</div></div>
-          <div class="module-box"><div class="text-emerald-300">AuditService</div><div class="text-slate-400">logs inmutables</div></div>
-        </div>
+      <div class="simple-note">
+        <span class="sn-label">En resumen</span>
+        <span class="text-sm text-slate-300">Este documento describe <strong class="text-indigo-300">4 aplicaciones</strong> (cliente, repartidor, comercio, administración) que comparten <strong class="text-indigo-300">un único “cerebro” central</strong> (el backend). Ese cerebro está organizado en 5 capas, como un edificio: la planta de atención al público arriba y los almacenes y servicios técnicos en el sótano.</span>
       </div>
+    </div>
 
-      <div class="text-center text-slate-500 my-2 text-xs">↓ Domain Entities · Value Objects ↓</div>
-
-      <!-- Capa 4: Domain -->
-      <div class="layer-box mb-3" style="border-color:#f59e0b">
-        <div class="flex items-center justify-between mb-3">
-          <div class="text-xs font-semibold text-amber-400 uppercase tracking-wider">Capa de dominio · Entidades y reglas</div>
-          <span class="chip">Agnóstica a infra</span>
+    <!-- ─────────────────────────── 2. ANALOGÍA ─────────────────────────── -->
+    <div id="analogia" class="mb-8 scroll-mt-20">
+      <h2 class="sec-title">La analogía del restaurante</h2>
+      <p class="text-sm text-slate-400 mb-5">Si el sistema fuera un restaurante, cada parte de nuestra arquitectura sería una de sus áreas. Así de simple:</p>
+      <div class="grid md:grid-cols-2 xl:grid-cols-4 gap-4">
+        <div class="analogy-card" style="border-top:3px solid #3b82f6">
+          <div class="text-3xl mb-2">🪑</div>
+          <div class="text-white font-semibold text-sm">El comedor y la carta</div>
+          <p class="text-xs text-slate-400 mt-1 leading-relaxed"><strong class="text-blue-300">= Las apps (frontend).</strong> Es lo que ve el cliente: el menú de productos, el carrito, el botón de pedir. Debe ser atractivo y fácil de usar.</p>
         </div>
-        <div class="grid grid-cols-2 md:grid-cols-6 gap-2 text-xs">
-          <div class="module-box"><div class="text-amber-300">User</div></div>
-          <div class="module-box"><div class="text-amber-300">Merchant</div></div>
-          <div class="module-box"><div class="text-amber-300">Courier</div></div>
-          <div class="module-box"><div class="text-amber-300">Product</div></div>
-          <div class="module-box"><div class="text-amber-300">Order</div></div>
-          <div class="module-box"><div class="text-amber-300">Contract</div></div>
+        <div class="analogy-card" style="border-top:3px solid #8b5cf6">
+          <div class="text-3xl mb-2">🧾</div>
+          <div class="text-white font-semibold text-sm">El camarero que anota el pedido</div>
+          <p class="text-xs text-slate-400 mt-1 leading-relaxed"><strong class="text-purple-300">= La API (rutas FastAPI).</strong> Recibe lo que pides, comprueba que tenga sentido y lo transmite a la cocina en el formato correcto.</p>
         </div>
-      </div>
-
-      <div class="text-center text-slate-500 my-2 text-xs">↓ Repository Interfaces (Protocol) ↓</div>
-
-      <!-- Capa 5: Infrastructure -->
-      <div class="layer-box" style="border-color:#6b7280">
-        <div class="flex items-center justify-between mb-3">
-          <div class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Capa de infraestructura · Adaptadores</div>
-          <span class="chip">SQLAlchemy · AsyncPG · Socket.io client</span>
+        <div class="analogy-card" style="border-top:3px solid #10b981">
+          <div class="text-3xl mb-2">👨‍🍳</div>
+          <div class="text-white font-semibold text-sm">La cocina y sus jefes de partida</div>
+          <p class="text-xs text-slate-400 mt-1 leading-relaxed"><strong class="text-emerald-300">= Los servicios del backend.</strong> Donde ocurre la lógica: calcular comisiones, asignar repartidor, avisar por push. Cada “jefe” se ocupa de una cosa.</p>
         </div>
-        <div class="grid grid-cols-2 md:grid-cols-5 gap-2 text-xs">
-          <div class="module-box"><div class="text-slate-300">PostgreSQL Repo</div><div class="text-slate-400">SQLAlchemy 2.0 async</div></div>
-          <div class="module-box"><div class="text-slate-300">PostGIS Repo</div><div class="text-slate-400">GeoAlchemy2</div></div>
-          <div class="module-box"><div class="text-slate-300">Redis Cache</div><div class="text-slate-400">redis-py (futuro)</div></div>
-          <div class="module-box"><div class="text-slate-300">Socket.io Emitter</div><div class="text-slate-400">socket.io-emitter</div></div>
-          <div class="module-box"><div class="text-slate-300">FCM Client</div><div class="text-slate-400">firebase-admin</div></div>
-          <div class="module-box"><div class="text-slate-300">S3 Storage</div><div class="text-slate-400">MinIO compatible</div></div>
-          <div class="module-box"><div class="text-slate-300">Email SMTP</div><div class="text-slate-400">aiosmtplib</div></div>
-          <div class="module-box"><div class="text-slate-300">Payment Gateway</div><div class="text-slate-400">Adapter por proveedor</div></div>
-          <div class="module-box"><div class="text-slate-300">Cron Worker</div><div class="text-slate-400">APScheduler</div></div>
-          <div class="module-box"><div class="text-slate-300">Logger</div><div class="text-slate-400">structlog · JSON</div></div>
+        <div class="analogy-card" style="border-top:3px solid #f59e0b">
+          <div class="text-3xl mb-2">📜</div>
+          <div class="text-white font-semibold text-sm">Las recetas y normas de la casa</div>
+          <p class="text-xs text-slate-400 mt-1 leading-relaxed"><strong class="text-amber-300">= El dominio.</strong> Las reglas del negocio puras (“un pedido no puede cancelarse tras entregarse”). Viven aisladas del resto para no corromperse.</p>
+        </div>
+        <div class="analogy-card" style="border-top:3px solid #6b7280">
+          <div class="text-3xl mb-2">🧊</div>
+          <div class="text-white font-semibold text-sm">La cámara de conservación</div>
+          <p class="text-xs text-slate-400 mt-1 leading-relaxed"><strong class="text-slate-300">= La base de datos.</strong> Donde se guarda todo con orden y nada se pierde: pedidos, usuarios, posiciones GPS, histórico.</p>
+        </div>
+        <div class="analogy-card" style="border-top:3px solid #06b6d4">
+          <div class="text-3xl mb-2">📟</div>
+          <div class="text-white font-semibold text-sm">Los pinganillos del personal</div>
+          <p class="text-xs text-slate-400 mt-1 leading-relaxed"><strong class="text-cyan-300">= WebSockets.</strong> Comunicación instantánea en ambos sentidos: “¡mesa 4 lista!”, “tu pedido sale ya”. Sin tener que preguntar a cada rato.</p>
+        </div>
+        <div class="analogy-card" style="border-top:3px solid #ec4899">
+          <div class="text-3xl mb-2">🛵</div>
+          <div class="text-white font-semibold text-sm">Los repartidores</div>
+          <p class="text-xs text-slate-400 mt-1 leading-relaxed"><strong class="text-pink-300">= Las apps móviles externas.</strong> Clientes y repartidores reciben avisos en el móvil (push) aunque tengan la app cerrada.</p>
+        </div>
+        <div class="analogy-card" style="border-top:3px solid #ef4444">
+          <div class="text-3xl mb-2">🗄️</div>
+          <div class="text-white font-semibold text-sm">La oficina del gerente</div>
+          <p class="text-xs text-slate-400 mt-1 leading-relaxed"><strong class="text-red-300">= El backoffice.</strong> Auditoría, altas de comercios, ajustes de tarifas y resolución de incidencias desde un panel web.</p>
         </div>
       </div>
     </div>
 
-    <!-- Principios de diseño -->
-    <div class="grid md:grid-cols-2 gap-4 mb-5">
-      <div class="card p-5">
-        <h3 class="text-sm font-semibold text-white mb-3">Principios aplicados</h3>
-        <ul class="text-sm text-slate-300 space-y-2">
-          <li class="flex gap-2"><span class="text-indigo-400 font-bold">D</span><span><strong class="text-white">Dependency Inversion.</strong> Los servicios dependen de interfaces (Python <code>Protocol</code>), no de implementaciones concretas. Facilita testeo y reemplazo de infraestructura.</span></li>
-          <li class="flex gap-2"><span class="text-indigo-400 font-bold">S</span><span><strong class="text-white">Single Responsibility por módulo.</strong> Cada paquete de dominio (catalog, orders, geo...) es autocontenido con sus propios routers, services, repositories, schemas y tests.</span></li>
-          <li class="flex gap-2"><span class="text-indigo-400 font-bold">I</span><span><strong class="text-white">Inyección de dependencias.</strong> FastAPI <code>Depends()</code> para inyectar DB sessions, current_user y servicios. Cero instanciación manual.</span></li>
-          <li class="flex gap-2"><span class="text-indigo-400 font-bold">C</span><span><strong class="text-white">Comunicación entre módulos.</strong> Sincrónica (llamadas directas) en MVP. Preparamos un <code>EventBus</code> (patrón Observer) para migrar a eventos async cuando sea necesario.</span></li>
-        </ul>
+    <!-- ─────────────────────────── 3. DIAGRAMA ─────────────────────────── -->
+    <div id="diagrama" class="mb-8 scroll-mt-20">
+      <h2 class="sec-title">Arquitectura del sistema: vista por capas</h2>
+      <p class="text-sm text-slate-400 mb-3">Diseño en capas siguiendo principios de <em>Clean Architecture</em> / Hexagonal, adaptado a un monolito modular en Python.</p>
+      <p class="text-xs text-slate-500 mb-6">Cómo leer el diagrama: cada <strong class="text-slate-300">recuadro de color</strong> es una planta del edificio; las <span class="chip">etiquetas grises</span> indican la tecnología usada; las flechas ↓ muestran el camino de una petición desde el móvil del cliente hasta la base de datos y de vuelta.</p>
+
+      <div class="card p-6 mb-5">
+
+        <!-- Capa 1 -->
+        <div class="layer-card mb-1" style="border-top:3px solid #3b82f6; box-shadow: 0 0 0 0 transparent;">
+          <div class="layer-head" style="background: linear-gradient(90deg, rgba(59,130,246,.12), transparent);">
+            <span class="num-badge" style="background:#1e3a8a; color:#93c5fd;">1</span>
+            <div class="flex-1">
+              <div class="text-xs font-bold text-blue-400 uppercase tracking-wider">📱 Capa de presentación · Clientes</div>
+              <div class="text-xs text-slate-500">Las 4 puertas por las que la gente usa el producto</div>
+            </div>
+            <span class="chip hidden sm:inline-flex">HTTPS · WSS</span>
+          </div>
+          <div class="p-4">
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+              <div class="module-box"><div class="text-xs text-blue-300 font-semibold">App Cliente</div><div class="text-xs text-slate-400">React Native · iOS/Android</div></div>
+              <div class="module-box"><div class="text-xs text-blue-300 font-semibold">App Repartidor</div><div class="text-xs text-slate-400">React Native · iOS/Android</div></div>
+              <div class="module-box"><div class="text-xs text-blue-300 font-semibold">Panel Comercio</div><div class="text-xs text-slate-400">Angular 22 · SPA</div></div>
+              <div class="module-box"><div class="text-xs text-blue-300 font-semibold">Backoffice</div><div class="text-xs text-slate-400">Angular 22 · SPA</div></div>
+            </div>
+            <div class="simple-note">
+              <span class="sn-label">Palabras simples</span>
+              <span class="text-sm text-slate-300">Es la “fachada” del restaurante: lo que el cliente, el comercio y el repartidor ven y tocan. Aquí solo hay pantallas y botones — <strong class="text-indigo-300">ninguna regla de negocio vive aquí</strong>, por seguridad y para que cambie de diseño sin romper nada por dentro.</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="flow-arrow"><b>↓</b> La petición viaja cifrada por internet: REST (HTTP/JSON) · WebSockets (Socket.io) · Push (FCM)</div>
+
+        <!-- Capa 2 -->
+        <div class="layer-card mb-1" style="border-top:3px solid #8b5cf6;">
+          <div class="layer-head" style="background: linear-gradient(90deg, rgba(139,92,246,.12), transparent);">
+            <span class="num-badge" style="background:#4c1d95; color:#c4b5fd;">2</span>
+            <div class="flex-1">
+              <div class="text-xs font-bold text-purple-400 uppercase tracking-wider">🚪 Capa de transporte · FastAPI Routers</div>
+              <div class="text-xs text-slate-500">La recepcionista: recibe, identifica y encamina cada petición</div>
+            </div>
+            <span class="chip hidden sm:inline-flex">Uvicorn · ASGI</span>
+          </div>
+          <div class="p-4">
+            <div class="grid grid-cols-3 md:grid-cols-6 gap-2 text-xs">
+              <div class="module-box"><div class="text-purple-300 font-semibold">/auth</div><div class="text-slate-500">login y registro</div></div>
+              <div class="module-box"><div class="text-purple-300 font-semibold">/users</div><div class="text-slate-500">perfiles</div></div>
+              <div class="module-box"><div class="text-purple-300 font-semibold">/merchants</div><div class="text-slate-500">comercios</div></div>
+              <div class="module-box"><div class="text-purple-300 font-semibold">/couriers</div><div class="text-slate-500">repartidores</div></div>
+              <div class="module-box"><div class="text-purple-300 font-semibold">/catalog</div><div class="text-slate-500">productos</div></div>
+              <div class="module-box"><div class="text-purple-300 font-semibold">/orders</div><div class="text-slate-500">pedidos</div></div>
+              <div class="module-box"><div class="text-purple-300 font-semibold">/geo</div><div class="text-slate-500">zonas y distancias</div></div>
+              <div class="module-box"><div class="text-purple-300 font-semibold">/tracking</div><div class="text-slate-500">posición en vivo</div></div>
+              <div class="module-box"><div class="text-purple-300 font-semibold">/payments</div><div class="text-slate-500">pagos</div></div>
+              <div class="module-box"><div class="text-purple-300 font-semibold">/ratings</div><div class="text-slate-500">valoraciones</div></div>
+              <div class="module-box"><div class="text-purple-300 font-semibold">/admin</div><div class="text-slate-500">gestión interna</div></div>
+              <div class="module-box"><div class="text-purple-300 font-semibold">/webhooks</div><div class="text-slate-500">aviso de pasarelas</div></div>
+            </div>
+            <div class="simple-note">
+              <span class="sn-label">Palabras simples</span>
+              <span class="text-sm text-slate-300">Cada <code>/ruta</code> es una ventanilla de atención. Cuando tu app quiere “crear un pedido”, llama a la ventanilla <code>/orders</code>. Esta capa <strong class="text-indigo-300">no decide nada</strong>: comprueba que vienes identificado (token), que la solicitud está bien escrita, y la pasa a la cocina. Es el equivalentes al camarero que anota el pedido.</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="flow-arrow"><b>↓</b> Schemata validados (DTOs Pydantic) — “el comanda con el formato estándar”</div>
+
+        <!-- Capa 3 -->
+        <div class="layer-card mb-1" style="border-top:3px solid #10b981;">
+          <div class="layer-head" style="background: linear-gradient(90deg, rgba(16,185,129,.12), transparent);">
+            <span class="num-badge" style="background:#064e3b; color:#6ee7b7;">3</span>
+            <div class="flex-1">
+              <div class="text-xs font-bold text-emerald-400 uppercase tracking-wider">👨‍🍳 Capa de aplicación · Servicios de dominio</div>
+              <div class="text-xs text-slate-500">El “cerebro”: orquesta cada caso de uso de principio a fin</div>
+            </div>
+            <span class="chip hidden sm:inline-flex">Orquestación · Casos de uso</span>
+          </div>
+          <div class="p-4">
+            <div class="grid grid-cols-2 md:grid-cols-5 gap-2 text-xs">
+              <div class="module-box"><div class="text-emerald-300 font-semibold">AuthService</div><div class="text-slate-400">JWT · sesiones</div></div>
+              <div class="module-box"><div class="text-emerald-300 font-semibold">CatalogService</div><div class="text-slate-400">productos · stock</div></div>
+              <div class="module-box"><div class="text-emerald-300 font-semibold">OrderService</div><div class="text-slate-400">ciclo del pedido</div></div>
+              <div class="module-box"><div class="text-emerald-300 font-semibold">GeoService</div><div class="text-slate-400">tracking · zonas</div></div>
+              <div class="module-box"><div class="text-emerald-300 font-semibold">CommissionService</div><div class="text-slate-500">motor paramétrico</div></div>
+              <div class="module-box"><div class="text-emerald-300 font-semibold">NotificationService</div><div class="text-slate-400">push · email · WS</div></div>
+              <div class="module-box"><div class="text-emerald-300 font-semibold">PaymentService</div><div class="text-slate-400">pasarela · wallet</div></div>
+              <div class="module-box"><div class="text-emerald-300 font-semibold">RatingService</div><div class="text-slate-400">calificaciones</div></div>
+              <div class="module-box"><div class="text-emerald-300 font-semibold">AssignmentService</div><div class="text-slate-400">asignación repartidor</div></div>
+              <div class="module-box"><div class="text-emerald-300 font-semibold">AuditService</div><div class="text-slate-400">logs inmutables</div></div>
+            </div>
+            <div class="simple-note">
+              <span class="sn-label">Palabras simples</span>
+              <span class="text-sm text-slate-300">Aquí se “cocina” cada operación. Por ejemplo, confirmar un pedido implica una coreografía: comprobar stock → cobrar comisión al comercio → avisar al repartidor → registrar todo en el libro de contabilidad. <strong class="text-indigo-300">Cada servicio es un especialista</strong>: el de pedidos no sabe nada de pagos, solo pide ayuda al especialista en pagos.</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="flow-arrow"><b>↓</b> Entidades de dominio · Objetos de valor — “los ingredientes crudos”</div>
+
+        <!-- Capa 4 -->
+        <div class="layer-card mb-1" style="border-top:3px solid #f59e0b;">
+          <div class="layer-head" style="background: linear-gradient(90deg, rgba(245,158,11,.12), transparent);">
+            <span class="num-badge" style="background:#78350f; color:#fcd34d;">4</span>
+            <div class="flex-1">
+              <div class="text-xs font-bold text-amber-400 uppercase tracking-wider">📜 Capa de dominio · Entidades y reglas</div>
+              <div class="text-xs text-slate-500">El corazón del negocio, puro e independiente de la tecnología</div>
+            </div>
+            <span class="chip hidden sm:inline-flex">Agnóstica a infra</span>
+          </div>
+          <div class="p-4">
+            <div class="grid grid-cols-2 md:grid-cols-6 gap-2 text-xs">
+              <div class="module-box"><div class="text-amber-300 font-semibold">User</div><div class="text-slate-500">cualquier persona</div></div>
+              <div class="module-box"><div class="text-amber-300 font-semibold">Merchant</div><div class="text-slate-500">comercio</div></div>
+              <div class="module-box"><div class="text-amber-300 font-semibold">Courier</div><div class="text-slate-500">repartidor</div></div>
+              <div class="module-box"><div class="text-amber-300 font-semibold">Product</div><div class="text-slate-500">artículo en venta</div></div>
+              <div class="module-box"><div class="text-amber-300 font-semibold">Order</div><div class="text-slate-500">el pedido y su estado</div></div>
+              <div class="module-box"><div class="text-amber-300 font-semibold">Contract</div><div class="text-slate-500">acuerdos y comisiones</div></div>
+            </div>
+            <div class="simple-note">
+              <span class="sn-label">Palabras simples</span>
+              <span class="text-sm text-slate-300">Son las “cosas” y las “leyes” del negocio: un <strong class="text-amber-300">Pedido</strong> es un pedido, con sus estados posibles (pendiente → aceptado → entregado) y sus reglas (no se puede entregar dos veces). Esta capa no sabe si usamos PostgreSQL o cualquier otra herramienta: por eso, si mañana cambia la tecnología, <strong class="text-indigo-300">las reglas del negocio no se tocan</strong>.</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="flow-arrow"><b>↓</b> Interfaces de repositorio (Protocol) — “el menú de encargos al almacén”</div>
+
+        <!-- Capa 5 -->
+        <div class="layer-card" style="border-top:3px solid #6b7280;">
+          <div class="layer-head" style="background: linear-gradient(90deg, rgba(107,114,128,.14), transparent);">
+            <span class="num-badge" style="background:#1f2937; color:#d1d5db;">5</span>
+            <div class="flex-1">
+              <div class="text-xs font-bold text-slate-300 uppercase tracking-wider">🔌 Capa de infraestructura · Adaptadores</div>
+              <div class="text-xs text-slate-500">Las manos que hablan con el mundo exterior (bases de datos, servicios cloud)</div>
+            </div>
+            <span class="chip hidden sm:inline-flex">SQLAlchemy · AsyncPG · Socket.io</span>
+          </div>
+          <div class="p-4">
+            <div class="grid grid-cols-2 md:grid-cols-5 gap-2 text-xs">
+              <div class="module-box"><div class="text-slate-200 font-semibold">PostgreSQL Repo</div><div class="text-slate-400">SQLAlchemy 2.0 async</div></div>
+              <div class="module-box"><div class="text-slate-200 font-semibold">PostGIS Repo</div><div class="text-slate-400">GeoAlchemy2</div></div>
+              <div class="module-box"><div class="text-slate-200 font-semibold">Redis Cache</div><div class="text-slate-400">redis-py (futuro)</div></div>
+              <div class="module-box"><div class="text-slate-200 font-semibold">Socket.io Emitter</div><div class="text-slate-400">socket.io-emitter</div></div>
+              <div class="module-box"><div class="text-slate-200 font-semibold">FCM Client</div><div class="text-slate-400">firebase-admin</div></div>
+              <div class="module-box"><div class="text-slate-200 font-semibold">S3 Storage</div><div class="text-slate-400">MinIO compatible</div></div>
+              <div class="module-box"><div class="text-slate-200 font-semibold">Email SMTP</div><div class="text-slate-400">aiosmtplib</div></div>
+              <div class="module-box"><div class="text-slate-200 font-semibold">Payment Gateway</div><div class="text-slate-400">Adapter por proveedor</div></div>
+              <div class="module-box"><div class="text-slate-200 font-semibold">Cron Worker</div><div class="text-slate-400">APScheduler</div></div>
+              <div class="module-box"><div class="text-slate-200 font-semibold">Logger</div><div class="text-slate-400">structlog · JSON</div></div>
+            </div>
+            <div class="simple-note">
+              <span class="sn-label">Palabras simples</span>
+              <span class="text-sm text-slate-300">Todos los “enchufes” hacia fuera: guardar datos (PostgreSQL), calcular distancias reales en un mapa (PostGIS), enviar notificaciones al móvil (Firebase), guardar fotos de productos (S3), cobrar con tarjeta (pasarela de pagos) o mandar emails. Si mañana cambiamos de proveedor de pagos, <strong class="text-indigo-300">solo se cambia este enchufe</strong> — el resto del sistema ni se entera.</span>
+            </div>
+          </div>
+        </div>
       </div>
 
-      <div class="card p-5">
-        <h3 class="text-sm font-semibold text-white mb-3">Estrategia de evolución a microservicios</h3>
-        <ul class="text-sm text-slate-300 space-y-2">
-          <li class="flex gap-2"><span class="text-emerald-400">①</span><span><strong class="text-white">Módulo "caliente".</strong> Cuando un módulo (ej. <code>geo</code>) requiere escala independiente, se identifica por métricas de CPU/latencia.</span></li>
-          <li class="flex gap-2"><span class="text-emerald-400">②</span><span><strong class="text-white">Extracción.</strong> Se copia el paquete a un nuevo repositorio, se adapta a FastAPI standalone con su propia BD.</span></li>
-          <li class="flex gap-2"><span class="text-emerald-400">③</span><span><strong class="text-white">API Gateway.</strong> El monolito original pasa a consumir el nuevo servicio vía HTTP/gRPC. El resto del sistema no cambia.</span></li>
-          <li class="flex gap-2"><span class="text-emerald-400">④</span><span><strong class="text-white">Event Bus compartido.</strong> Para consistencia eventual, se introduce RabbitMQ/NATS entre servicios.</span></li>
-        </ul>
+      <!-- Reglas de oro del flujo -->
+      <div class="grid md:grid-cols-3 gap-4">
+        <div class="card p-5" style="border-top:3px solid #6366f1">
+          <div class="text-2xl mb-2">⬇️</div>
+          <div class="text-white font-semibold text-sm mb-1">Solo hacia abajo</div>
+          <p class="text-xs text-slate-400 leading-relaxed">Una capa solo puede llamar a la que tiene justo debajo, nunca al revés. La base de datos jamás llama a la app: siempre es la app quien pregunta. Esto hace el sistema predecible.</p>
+        </div>
+        <div class="card p-5" style="border-top:3px solid #a855f7">
+          <div class="text-2xl mb-2">🔒</div>
+          <div class="text-white font-semibold text-sm mb-1">El negocio aislado</div>
+          <p class="text-xs text-slate-400 leading-relaxed">Las reglas importantes (capa 4) no dependen de ninguna herramienta externa. Eso es lo que permite cambiar de proveedor, de base de datos o de nube sin reescribir el negocio.</p>
+        </div>
+        <div class="card p-5" style="border-top:3px solid #ec4899">
+          <div class="text-2xl mb-2">🧪</div>
+          <div class="text-white font-semibold text-sm mb-1">Todo testeable</div>
+          <p class="text-xs text-slate-400 leading-relaxed">Cada capa se puede probar por separado con piezas “falsas” (una base de datos de mentira, un cobro simulado). Los errores se detectan antes de llegar al cliente.</p>
+        </div>
       </div>
     </div>
 
-    <!-- Estructura de carpetas -->
-    <div class="card p-5">
-      <h3 class="text-sm font-semibold text-white mb-3">Estructura de proyecto (monorepo)</h3>
-      <pre class="text-xs text-slate-300 overflow-x-auto leading-relaxed bg-slate-950/60 p-4 rounded-lg border border-slate-800">
+    <!-- ─────────────────────────── 4. VIAJE DE UN PEDIDO ─────────────────────────── -->
+    <div id="viaje" class="mb-8 scroll-mt-20">
+      <h2 class="sec-title">El viaje de un pedido, paso a paso</h2>
+      <p class="text-sm text-slate-400 mb-6">La teoría anterior cobra sentido siguiendo algo tan cotidiano como pedir la cena. Esto es exactamente lo que ocurre por dentro cuando pulsas <strong class="text-white">“Confirmar pedido”</strong>:</p>
+
+      <div class="card p-6">
+        <div class="j-step">
+          <span class="j-num" style="background:linear-gradient(135deg,#2563eb,#4f46e5)">1</span>
+          <div class="text-white font-semibold text-sm">🙋 El cliente pide <span class="font-normal text-slate-500">· Capa 1 → 2</span></div>
+          <p class="text-sm text-slate-400 mt-1 leading-relaxed">Elige productos, la dirección y pulsa confirmar. La app empaqueta el pedido en una <strong class="text-slate-300">solicitud cifrada</strong> (HTTPS) hacia el backend con su identificador digital (token de sesión).</p>
+        </div>
+        <div class="j-step">
+          <span class="j-num" style="background:linear-gradient(135deg,#4f46e5,#7c3aed)">2</span>
+          <div class="text-white font-semibold text-sm">🚪 La ventanilla verifica <span class="font-normal text-slate-500">· Capa 2</span></div>
+          <p class="text-sm text-slate-400 mt-1 leading-relaxed">FastAPI comprueba: ¿estás registrado?, ¿el pedido tiene un formato válido?, ¿los datos existen? Si algo falla, responde un mensaje de error claro <em>sin llegar a tocar nunca</em> la base de datos.</p>
+        </div>
+        <div class="j-step">
+          <span class="j-num" style="background:linear-gradient(135deg,#7c3aed,#059669)">3</span>
+          <div class="text-white font-semibold text-sm">👨‍🍳 El cerebro coordina <span class="font-normal text-slate-500">· Capa 3 + 4</span></div>
+          <p class="text-sm text-slate-400 mt-1 leading-relaxed">OrderService organiza la coreografía: valida stock, GeoService confirma que la dirección cae <strong class="text-slate-300">dentro de la zona de reparto</strong> del comercio, CommissionService calcula cuánto se lleva la plataforma y cuánto el comercio.</p>
+        </div>
+        <div class="j-step">
+          <span class="j-num" style="background:linear-gradient(135deg,#059669,#0d9488)">4</span>
+          <div class="text-white font-semibold text-sm">🧊 Todo queda registrado <span class="font-normal text-slate-500">· Capa 5</span></div>
+          <p class="text-sm text-slate-400 mt-1 leading-relaxed">Se graba en PostgreSQL en una <strong class="text-slate-300">transacción</strong>: o se guarda absolutamente todo, o nada (imposible un pedido a medias). El histórico de cambios queda sellado con fecha y autor (auditoría inmutable).</p>
+        </div>
+        <div class="j-step">
+          <span class="j-num" style="background:linear-gradient(135deg,#0d9488,#d97706)">5</span>
+          <div class="text-white font-semibold text-sm">🔔 El comercio se entera al instante <span class="font-normal text-slate-500">· WebSockets + Push</span></div>
+          <p class="text-sm text-slate-400 mt-1 leading-relaxed">Sin que nadie pregunte “¿hay algo nuevo?”, el panel del comercio suena: WebSocket avisa a quien tenga el navegador abierto y Firebase envía una notificación al móvil aunque la app esté cerrada. El comercio pulsa <strong class="text-slate-300">“Aceptar”</strong>.</p>
+        </div>
+        <div class="j-step">
+          <span class="j-num" style="background:linear-gradient(135deg,#d97706,#7c3aed)">6</span>
+          <div class="text-white font-semibold text-sm">🛵 Se busca repartidor <span class="font-normal text-slate-500">· Capa 3 (Geo + Assignment)</span></div>
+          <p class="text-sm text-slate-400 mt-1 leading-relaxed">Cuando el comercio marca “Listo”, el sistema localiza con PostGIS a los repartidores <strong class="text-slate-300">disponibles más cercanos</strong> y les ofrece el viaje. El primero en aceptar se lo queda y pasa a la fase de recogida.</p>
+        </div>
+        <div class="j-step">
+          <span class="j-num" style="background:linear-gradient(135deg,#7c3aed,#db2777)">7</span>
+          <div class="text-white font-semibold text-sm">🗺️ Tracking en vivo hasta la puerta <span class="font-normal text-slate-500">· Todo el sistema</span></div>
+          <p class="text-sm text-slate-400 mt-1 leading-relaxed">El repartidor envía su posición cada pocos segundos; el cliente la ve moverse por el mapa casi en tiempo real. Al confirmar la entrega, el pedido se cierra, se reparten los cobros y llega la invitación a valorar el servicio. 🎉</p>
+        </div>
+      </div>
+
+      <div class="simple-note mt-4">
+        <span class="sn-label">El dato</span>
+        <span class="text-sm text-slate-300">Todo este recorrido ocurre en <strong class="text-indigo-300">menos de un segundo</strong> hasta el paso 4. Lo único que “espera” es la decisión humana del comercio y del repartidor — el sistema no bloquea a nadie mientras tanto.</span>
+      </div>
+    </div>
+
+    <!-- ─────────────────────────── 5. PRINCIPIOS ─────────────────────────── -->
+    <div id="principios" class="mb-8 scroll-mt-20">
+      <h2 class="sec-title">Principios de diseño aplicados</h2>
+      <p class="text-sm text-slate-400 mb-5">Cuatro reglas internas que el equipo respeta en cada línea de código escrita. Con su traducción para humanos:</p>
+
+      <div class="grid md:grid-cols-2 gap-4 mb-5">
+        <div class="card p-5">
+          <h3 class="text-sm font-semibold text-white mb-3">🧩 Principios técnicos</h3>
+          <ul class="text-sm text-slate-300 space-y-3">
+            <li class="flex gap-2"><span class="text-indigo-400 font-bold">D</span><span><strong class="text-white">Dependency Inversion.</strong> Los servicios dependen de interfaces (Python <code>Protocol</code>), no de implementaciones concretas. Facilita testeo y reemplazo de infraestructura.</span></li>
+            <li class="flex gap-2"><span class="text-indigo-400 font-bold">S</span><span><strong class="text-white">Single Responsibility por módulo.</strong> Cada paquete de dominio (catalog, orders, geo...) es autocontenido con sus propios routers, services, repositories, schemas y tests.</span></li>
+            <li class="flex gap-2"><span class="text-indigo-400 font-bold">I</span><span><strong class="text-white">Inyección de dependencias.</strong> FastAPI <code>Depends()</code> para inyectar DB sessions, current_user y servicios. Cero instanciación manual.</span></li>
+            <li class="flex gap-2"><span class="text-indigo-400 font-bold">C</span><span><strong class="text-white">Comunicación entre módulos.</strong> Sincrónica (llamadas directas) en MVP. Preparamos un <code>EventBus</code> (patrón Observer) para migrar a eventos async cuando sea necesario.</span></li>
+          </ul>
+        </div>
+
+        <div class="card p-5" style="border-top:3px solid #6366f1">
+          <h3 class="text-sm font-semibold text-white mb-3">🗣️ Lo que significan para el negocio</h3>
+          <ul class="text-sm text-slate-300 space-y-3">
+            <li class="flex gap-3"><span class="text-lg">🔁</span><span><strong class="text-white">“Poder cambiar de proveedor sin drama.”</strong> ¿Mañana el servicio de mapas o de pagos sube de precio o desaparece? Se cambia el enchufe en una tarde, no en un trimestre. Eso es <em>dependency inversion</em> en términos de riesgo económico.</span></li>
+            <li class="flex gap-3"><span class="text-lg">📦</span><span><strong class="text-white">“Cada equipo toca su cajón.”</strong> Los pedidos viven en un cajón; el catálogo en otro. Arreglar algo del carrito no puede romper los mapas, porque físicamente no se mezclan. Menos regresiones, despliegues más seguros.</span></li>
+            <li class="flex gap-3"><span class="text-lg">🤖</span><span><strong class="text-white">“El framework hace el trabajo sucio.”</strong> El framework reparte automáticamente las herramientas que cada función necesita (conexión a la base de datos, quién eres…). Menos código a medida = menos fallos humanos.</span></li>
+            <li class="flex gap-3"><span class="text-lg">📡</span><span><strong class="text-white">“Preparados para el crecimiento.”</strong> Hoy las piezas se hablan por teléfono fijo; dejamos instalado el interfono inalámbrico (EventBus) para cuando haya que comunicarse en paralelo. Sin reescribir nada cuando lleguen los picos de demanda.</span></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- ─────────────────────────── 6. EVOLUCIÓN ─────────────────────────── -->
+    <div id="evolucion" class="mb-8 scroll-mt-20">
+      <h2 class="sec-title">Estrategia de evolución: del monolito a microservicios</h2>
+      <p class="text-sm text-slate-400 mb-5">Empezamos con <strong class="text-white">un solo programa</strong> que contiene todo (monolito modular) — es la opción más barata y simple para validar el negocio. Pero el plano ya prevé cómo dividirlo en piezas independientes si el éxito lo exige.</p>
+
+      <div class="grid md:grid-cols-4 gap-4 mb-5">
+        <div class="value-card">
+          <div class="flex items-center gap-2 mb-2"><span class="num-badge" style="background:#4f46e5;color:#fff">①</span><div class="text-white font-semibold text-sm">Detectar el punto caliente</div></div>
+          <p class="text-xs text-slate-400 leading-relaxed">Las métricas avisan: por ejemplo, el módulo de geo (mapas y tracking) consume mucha más CPU que el resto. Se identifica con datos, no con intuiciones.</p>
+          <p class="text-xs text-indigo-300/80 mt-2 italic">🍕 «La parrilla se queda corta: hay que darle su propia cocina.»</p>
+        </div>
+        <div class="value-card">
+          <div class="flex items-center gap-2 mb-2"><span class="num-badge" style="background:#7c3aed;color:#fff">②</span><div class="text-white font-semibold text-sm">Extraer el módulo</div></div>
+          <p class="text-xs text-slate-400 leading-relaxed">El paquete se copia a un servicio independiente con su propio servidor FastAPI y su base de datos dedicada, aprovechando que ya estaba aislado.</p>
+          <p class="text-xs text-indigo-300/80 mt-2 italic">🍕 «La parrilla se muda a un local propio junto al restaurante.»</p>
+        </div>
+        <div class="value-card">
+          <div class="flex items-center gap-2 mb-2"><span class="num-badge" style="background:#a855f7;color:#fff">③</span><div class="text-white font-semibold text-sm">Gateway invisible</div></div>
+          <p class="text-xs text-slate-400 leading-relaxed">El monolito pasa a consultar al nuevo servicio por red. Las apps móviles no notan el cambio: por fuera todo sigue siendo la misma API.</p>
+          <p class="text-xs text-indigo-300/80 mt-2 italic">🍕 «El cliente sigue pidiendo al camarero de siempre; no sabe que hay una cocina nueva.»</p>
+        </div>
+        <div class="value-card">
+          <div class="flex items-center gap-2 mb-2"><span class="num-badge" style="background:#db2777;color:#fff">④</span><div class="text-white font-semibold text-sm">Bus de eventos</div></div>
+          <p class="text-xs text-slate-400 leading-relaxed">Para mantener la coherencia entre servicios (RabbitMQ/NATS), las piezas se avisan unas a otras con mensajes asíncronos: “te aviso cuando esté listo”. Consistencia eventual.</p>
+          <p class="text-xs text-indigo-300/80 mt-2 italic">🍕 «Cocinas distintas coordinándose por walkie-talkie.»</p>
+        </div>
+      </div>
+
+      <div class="simple-note">
+        <span class="sn-label">Moraleja</span>
+        <span class="text-sm text-slate-300">Este camino evita el error clásico de las startups: montar 20 microservicios el primer día (coste, complejidad y riesgo altísimos para un equipo de una persona) <strong class="text-indigo-300">o</strong> un monolito imposible de partir después. Aquí el monolito ya está construido “en piezas compatibles con separarse”.</span>
+      </div>
+    </div>
+
+    <!-- ─────────────────────────── 7. ESTRUCTURA ─────────────────────────── -->
+    <div id="estructura" class="mb-8 scroll-mt-20">
+      <h2 class="sec-title">Estructura del proyecto (monorepo)</h2>
+      <p class="text-sm text-slate-400 mb-5">Un <strong class="text-white">monorepo</strong> es un único contenedor con todo: backend, las 4 apps, pruebas y empaquetado. En la práctica: un solo lugar donde buscar, una sola versión de la verdad y despliegues coordinados. Así se reparte por dentro:</p>
+
+      <div class="grid md:grid-cols-3 gap-3 mb-5">
+        <div class="card p-4" style="border-top:3px solid #6366f1">
+          <div class="text-white font-semibold text-sm mb-1">🏛️ app/core — Los cimientos</div>
+          <p class="text-xs text-slate-400 leading-relaxed">Configuración, conexiones, seguridad y errores. Lo que comparten todos los departamentos y no debe duplicarse nunca.</p>
+        </div>
+        <div class="card p-4" style="border-top:3px solid #10b981">
+          <div class="text-white font-semibold text-sm mb-1">🗄️ app/modules — Los departamentos</div>
+          <p class="text-xs text-slate-400 leading-relaxed">12 paquetes de negocio (pedidos, catálogo, geo, pagos…). Cada uno autocontenido, con sus archivos, como una mini-empresa dentro del sistema.</p>
+        </div>
+        <div class="card p-4" style="border-top:3px solid #3b82f6">
+          <div class="text-white font-semibold text-sm mb-1">📱 apps — Los escaparates</div>
+          <p class="text-xs text-slate-400 leading-relaxed">Las 4 interfaces. Las dos móviles comparten una sola base de código iOS + Android (React Native); las dos webs usan Angular.</p>
+        </div>
+        <div class="card p-4" style="border-top:3px solid #f59e0b">
+          <div class="text-white font-semibold text-sm mb-1">🧪 tests — Control de calidad</div>
+          <p class="text-xs text-slate-400 leading-relaxed">Pruebas automáticas que verifican cada regla del negocio. Antes de publicar cualquier cambio, se ejecutan solas y “aprueban o suspenden”.</p>
+        </div>
+        <div class="card p-4" style="border-top:3px solid #ef4444">
+          <div class="text-white font-semibold text-sm mb-1">🐳 docker — Los contenedores de mudanza</div>
+          <p class="text-xs text-slate-400 leading-relaxed">Empaquetan cada pieza con todo lo que necesita dentro. El mismo paquete idéntico funciona en el portátil del desarrollador y en el servidor.</p>
+        </div>
+        <div class="card p-4" style="border-top:3px solid #6b7280">
+          <div class="text-white font-semibold text-sm mb-1">🔔 app/workers — El turno de noche</div>
+          <p class="text-xs text-slate-400 leading-relaxed">Tareas programadas que se solas: limpiar pedidos abandonados, expirar comisiones, enviar resúmenes. Trabajan sin que nadie las pida.</p>
+        </div>
+      </div>
+
+      <details class="card p-0 overflow-hidden">
+        <summary class="flex items-center justify-between gap-2 p-5 hover:bg-slate-800/40 transition-colors">
+          <span class="text-sm font-semibold text-white">👀 Ver el árbol de archivos completo <span class="text-xs font-normal text-slate-500">(para técnicos)</span></span>
+          <span class="summary-icon text-slate-500">▸</span>
+        </summary>
+        <div class="px-5 pb-5">
+          <pre class="text-xs text-slate-300 overflow-x-auto leading-relaxed bg-slate-950/60 p-4 rounded-lg border border-slate-800">
 App/
 ├── alembic/                    # Migraciones de BD
 │   ├── versions/
@@ -332,7 +681,84 @@ App/
 ├── docker-compose.yml
 ├── pyproject.toml
 └── README.md</pre>
+          <p class="text-xs text-slate-500 mt-3">📌 Nota: <code>alembic/</code> guarda las “actas notariales” de cada cambio en la estructura de la base de datos, para poder reproducirlos (o revertirlos) en cualquier servidor, exactamente en el mismo orden.</p>
+        </div>
+      </details>
     </div>
+
+    <!-- ─────────────────────────── 8. GLOSARIO ─────────────────────────── -->
+    <div id="glosario" class="scroll-mt-20">
+      <h2 class="sec-title">Glosario exprés: la jerga, traducida</h2>
+      <p class="text-sm text-slate-400 mb-5">Términos que aparecen en esta y otras secciones del documento. Haz clic en cada uno para desplegar su traducción al idioma humano.</p>
+
+      <div class="grid md:grid-cols-2 gap-3">
+        <details class="gloss-item">
+          <summary><span class="summary-icon text-indigo-400">▸</span><span class="text-sm font-semibold text-white">Backend / Frontend</span></summary>
+          <p class="px-4 pb-4 text-sm text-slate-400 leading-relaxed"><strong class="text-slate-200">Backend:</strong> la parte invisible del sistema — servidores, lógica y datos. <strong class="text-slate-200">Frontend:</strong> la parte visible — las pantallas de la app y el navegador. Como un restaurante: la cocina (backend) y el comedor (frontend).</p>
+        </details>
+        <details class="gloss-item">
+          <summary><span class="summary-icon text-indigo-400">▸</span><span class="text-sm font-semibold text-white">API</span></summary>
+          <p class="px-4 pb-4 text-sm text-slate-400 leading-relaxed">La “ventanilla de servicio” del backend: una lista de peticiones aceptables (“crear pedido”, “buscar repartidor”) con reglas estrictas de cómo solicitarlas. Las apps no tocan la base de datos directamente; siempre hablan a través de la API.</p>
+        </details>
+        <details class="gloss-item">
+          <summary><span class="summary-icon text-indigo-400">▸</span><span class="text-sm font-semibold text-white">JSON</span></summary>
+          <p class="px-4 pb-4 text-sm text-slate-400 leading-relaxed">El “idioma” con el que las piezas se pasan los datos: texto estructurado legible incluso por humanos. Ejemplo: <code>{"producto": "pizza", "precio": 9.5}</code>. Ligero, universal, sin ambigüedades.</p>
+        </details>
+        <details class="gloss-item">
+          <summary><span class="summary-icon text-indigo-400">▸</span><span class="text-sm font-semibold text-white">WebSocket</span></summary>
+          <p class="px-4 pb-4 text-sm text-slate-400 leading-relaxed">Una línea telefónica que queda abierta entre la app y el servidor: cualquiera de los dos puede hablar en cualquier momento. Es lo que permite ver el pedido y el repartidor moverse en vivo sin recargar la pantalla. (La web normal es un “sms”: solo responde cuando se le escribe.)</p>
+        </details>
+        <details class="gloss-item">
+          <summary><span class="summary-icon text-indigo-400">▸</span><span class="text-sm font-semibold text-white">Notificación Push (FCM)</span></summary>
+          <p class="px-4 pb-4 text-sm text-slate-400 leading-relaxed">El aviso que aparece en el móvil aunque la app esté cerrada. FCM (Firebase Cloud Messaging) es el servicio de Google que lo entrega; equivalente al “email” pero para iconos de app.</p>
+        </details>
+        <details class="gloss-item">
+          <summary><span class="summary-icon text-indigo-400">▸</span><span class="text-sm font-semibold text-white">Base de datos relacional (PostgreSQL)</span></summary>
+          <p class="px-4 pb-4 text-sm text-slate-400 leading-relaxed">El libro mayor del sistema: tablas interconectadas (usuarios, pedidos, productos) con garantías matemáticas de que ningún dato se corrompe o se guarda a medias. PostgreSQL es la opción gratuita más fiable del mercado.</p>
+        </details>
+        <details class="gloss-item">
+          <summary><span class="summary-icon text-indigo-400">▸</span><span class="text-sm font-semibold text-white">PostGIS</span></summary>
+          <p class="px-4 pb-4 text-sm text-slate-400 leading-relaxed">Un “superpoder” geográfico para la base de datos: le permite entender mapas, calcular distancias entre calles, y responder preguntas como “¿qué repartidor está a menos de 1 km de este restaurante?”. Sin PostGIS habría que pagar servicios externos para cada consulta.</p>
+        </details>
+        <details class="gloss-item">
+          <summary><span class="summary-icon text-indigo-400">▸</span><span class="text-sm font-semibold text-white">JWT / Token</span></summary>
+          <p class="px-4 pb-4 text-sm text-slate-400 leading-relaxed">La “pulsera de acceso” digital: al iniciar sesión recibes un pase cifrado que la app adjunta a cada petición. El servidor lo verifica sin necesidad de preguntarte tu contraseña otra vez. Si caduca, se pide login de nuevo.</p>
+        </details>
+        <details class="gloss-item">
+          <summary><span class="summary-icon text-indigo-400">▸</span><span class="text-sm font-semibold text-white">Docker</span></summary>
+          <p class="px-4 pb-4 text-sm text-slate-400 leading-relaxed">“Contenedores de mudanza” estándar: empaquetan el programa con todo lo que necesita para funcionar. El mismo contenedor que prueba el desarrollador corre en el servidor, eliminando el clásico “en mi ordenador sí funciona”.</p>
+        </details>
+        <details class="gloss-item">
+          <summary><span class="summary-icon text-indigo-400">▸</span><span class="text-sm font-semibold text-white">Monolito modular</span></summary>
+          <p class="px-4 pb-4 text-sm text-slate-400 leading-relaxed">Un solo programa, pero con divisiones internas claras (los “departamentos”). Es el punto intermedio ideal: simple y barato de operar como monolito, preparado para trocearse en microservicios cuando el crecimiento lo justifique.</p>
+        </details>
+        <details class="gloss-item">
+          <summary><span class="summary-icon text-indigo-400">▸</span><span class="text-sm font-semibold text-white">Microservicios</span></summary>
+          <p class="px-4 pb-4 text-sm text-slate-400 leading-relaxed">Dividir el sistema en programas independientes que se hablan por red: cada pieza escala y se actualiza sola. Potente, pero caro de operar — por eso está planificado para el futuro, no para el día 1.</p>
+        </details>
+        <details class="gloss-item">
+          <summary><span class="summary-icon text-indigo-400">▸</span><span class="text-sm font-semibold text-white">SPA (Angular 22)</span></summary>
+          <p class="px-4 pb-4 text-sm text-slate-400 leading-relaxed">“Single Page Application”: la web se carga una vez y luego solo actualiza lo que cambia, como una app nativa. Sensación ultrarrápida en el panel del comercio y el backoffice sin recargar la pantalla cada vez.</p>
+        </details>
+        <details class="gloss-item">
+          <summary><span class="summary-icon text-indigo-400">▸</span><span class="text-sm font-semibold text-white">Migraciones (Alembic)</span></summary>
+          <p class="px-4 pb-4 text-sm text-slate-400 leading-relaxed">Cambios en la estructura de la base de datos aplicados como una cadena de actos notariales numerados: trazables, reproducibles en cualquier servidor y reversibles. Nunca se “retoca a mano” un servidor real.</p>
+        </details>
+        <details class="gloss-item">
+          <summary><span class="summary-icon text-indigo-400">▸</span><span class="text-sm font-semibold text-white">Caché (Redis)</span></summary>
+          <p class="px-4 pb-4 text-sm text-slate-400 leading-relaxed">Memoria ultrarrápida temporal para las consultas más repetidas (“¿sigue abierto este comercio?”), evitando interrogar a la base de datos cada vez. Está planificada para cuando el volumen la haga rentable.</p>
+        </details>
+        <details class="gloss-item">
+          <summary><span class="summary-icon text-indigo-400">▸</span><span class="text-sm font-semibold text-white">Motor de comisiones paramétrico</span></summary>
+          <p class="px-4 pb-4 text-sm text-slate-400 leading-relaxed">El modo en que el sistema calcula “cuánto se lleva la plataforma y cuánto el comercio”. Las reglas (%, mínimo, fijo) viven <strong class="text-slate-200">en la base de datos, no en el código</strong>: cambiar una tarifa es editar un registro desde el backoffice, sin reprogramar ni reiniciar nada.</p>
+        </details>
+        <details class="gloss-item">
+          <summary><span class="summary-icon text-indigo-400">▸</span><span class="text-sm font-semibold text-white">Registro de auditoría inmutable</span></summary>
+          <p class="px-4 pb-4 text-sm text-slate-400 leading-relaxed">Un “libro contable” paralelo que anota quién hizo qué y cuándo, sin poder borrarse ni editarse. En una disputa (“yo marqué listo a las 21:04”) el sistema tiene la prueba con marca de tiempo exacta.</p>
+        </details>
+      </div>
+    </div>
+
   </section>
 </main>
 
